@@ -151,14 +151,22 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
               })}
             </div>
 
-            <Link
-              href={props.registrationLink}
-              target="__blank"
-              className={classes.registerButton}>
-              <Button size="large" color="primary" variant="contained">
-                Register Now
-              </Button>
-            </Link>
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
+              className={classes.registerButton}
+              onClick={() => {
+                dispatch(
+                  push(
+                    AppRoutes.getPath("AttendeeSiteFormPage", {
+                      retreatName: props.retreatName,
+                    })
+                  )
+                )
+              }}>
+              Register Now
+            </Button>
           </Drawer>
         </>
       )}
