@@ -113,4 +113,5 @@ export const Constants = {
   localStorageRetreatIdxKey: "activeRetreatIdx",
   retreatBaseUrlVar: "%%RETREAT_BASE_URL%%",
   demoRetreatGuid: "a42ca459-3e72-4b3b-9a91-d11bf2763378",
+  attendeeSitePathPrefix: "/sites",
 }

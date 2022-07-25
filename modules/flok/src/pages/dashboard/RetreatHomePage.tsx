@@ -10,6 +10,7 @@ import {
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import AppTypography from "../../components/base/AppTypography"
+import EditRetreatButtonModal from "../../components/forms/EditRetreatButtonModal"
 import AppOverviewCard, {
   AppOverviewCardList,
 } from "../../components/overview/AppOverviewCard"
@@ -25,7 +26,7 @@ import {
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
 import {putRetreatTask} from "../../store/actions/retreat"
-import {useRetreatAttendees} from "../../utils/retreatUtils"
+import {getRetreatName, useRetreatAttendees} from "../../utils/retreatUtils"
 import {useRetreat} from "../misc/RetreatProvider"
 
 let useStyles = makeStyles((theme) => ({
@@ -59,6 +60,7 @@ let useStyles = makeStyles((theme) => ({
     textDecoration: "underline",
     cursor: "pointer",
   },
+  retreatNameLine: {display: "flex", alignItems: "center"},
 }))
 
 export default function RetreatHomePage() {
@@ -222,9 +224,11 @@ export default function RetreatHomePage() {
       <div className={classes.section}>
         <div className={classes.overviewHeader}>
           <Typography variant="h1">Overview</Typography>
-          <Typography variant="body1">
-            {retreat.company_name}'s Retreat
-          </Typography>
+          <div className={classes.retreatNameLine}>
+            <Typography variant="body1">{getRetreatName(retreat)}</Typography>
+            &nbsp;
+            <EditRetreatButtonModal retreat={retreat} />
+          </div>
           <Typography variant="body1">{datesOverview}</Typography>
         </div>
         <AppOverviewCardList>

@@ -12,7 +12,7 @@ export const POST_USER_SIGNIN_REQUEST = "POST_USER_SIGNIN_REQUEST"
 export const POST_USER_SIGNIN_SUCCESS = "POST_USER_SIGNIN_SUCCESS"
 export const POST_USER_SIGNIN_FAILURE = "POST_USER_SIGNIN_FAILURE"
 
-export function postUserSignin(email: string, password: string) {
+export function postUserSignin(email: string, password: string, next?: string) {
   let endpoint = "/v1.0/auth/signin"
   return createApiAction(
     {
@@ -29,7 +29,11 @@ export function postUserSignin(email: string, password: string) {
       errorMessage: "Failed to login",
       onSuccess: (dispatch) => {
         dispatch(setUserLoggedIn())
-        dispatch(push(AppRoutes.getPath("HomeRoutingPage")))
+        if (next) {
+          dispatch(push(decodeURIComponent(next)))
+        } else {
+          dispatch(push(AppRoutes.getPath("HomeRoutingPage")))
+        }
       },
     }
   )
@@ -168,5 +172,24 @@ export function postForgotPassword(email: string) {
       POST_FORGOT_PASSWORD_FAILURE,
     ],
     body: JSON.stringify({email}),
+  })
+}
+
+// Send Password Reset Email
+export const POST_ATTENDEE_PW_RESET_REQUEST = "POST_ATTENDEE_PW_RESET_REQUEST"
+export const POST_ATTENDEE_PW_RESET_SUCCESS = "POST_ATTENDEE_PW_RESET_SUCCESS"
+export const POST_ATTENDEE_PW_RESET_FAILURE = "POST_ATTENDEE_PW_RESET_FAILURE"
+
+export function postAttendeePasswordReset(email: string, retreat_id: number) {
+  let endpoint = `/v1.0/attendees/sign-up-attendee`
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    types: [
+      POST_ATTENDEE_PW_RESET_REQUEST,
+      POST_ATTENDEE_PW_RESET_SUCCESS,
+      POST_ATTENDEE_PW_RESET_FAILURE,
+    ],
+    body: JSON.stringify({email: email, retreat_id: retreat_id}),
   })
 }

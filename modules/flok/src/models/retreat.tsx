@@ -1,4 +1,4 @@
-import {ImageModel} from "."
+import { ImageModel } from "."
 
 export type RetreatSelectedHotelProposalState =
   | "SELECTED"
@@ -47,6 +47,12 @@ export type RetreatSelectedHotelProposal = {
   hotel_id: number
   state: RetreatSelectedHotelProposalState
   hotel_proposals?: HotelLodgingProposal[]
+}
+
+export type PresetImageModel = {
+  type: PresetImageType
+  id: number
+  image: ImageModel
 }
 
 export type RetreatProgressState = // Deprecated
@@ -115,6 +121,7 @@ export type RetreatModel = {
   id: number
   guid: string
   company_name: string
+  retreat_name?: string
   state: RetreatProgressState
 
   // Retreat data related to the intake form
@@ -141,7 +148,9 @@ export type RetreatModel = {
   // Retreat data related to attendees
   attendees_state?: RetreatAttendeesState
   attendees_website_id?: number
-  attendees_registration_form_link?: string
+  attendees_registration_form_id?: number
+  registration_live: boolean
+  attendees_v2_released?: boolean
 
   // Retreat data related to flights
   flights_state?: RetreatFlightsState
@@ -192,6 +201,7 @@ export type AttendeeLandingWebsiteModel = {
   page_ids: number[]
 }
 
+export type PresetImageType = "BANNER"
 // aka flight
 export type RetreatTripLeg = {
   trip_id: number
@@ -228,11 +238,14 @@ export type RetreatAttendeeModel = {
   flight_status: "PENDING" | "OPT_OUT" | "BOOKED"
   hotel_check_in?: string | null // iso date string
   hotel_check_out?: string | null // iso date string
+  retreat_id: number
+  registration_form_response_id?: number
 }
 
 export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   {
     dietary_prefs: "Vegan",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Eli",
     last_name: "Manning",
@@ -280,6 +293,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegan",
+    retreat_id: 1,
     info_status: "CREATED",
     first_name: "Tiki",
     last_name: "Barber",
@@ -294,6 +308,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Paleo",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Jeremy",
     last_name: "Shockey",
@@ -341,6 +356,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegan",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Kevin",
     last_name: "Boss",
@@ -386,6 +402,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Kosher",
+    retreat_id: 1,
     info_status: "CREATED",
     first_name: "Plaxico",
     last_name: "Burress",
@@ -398,6 +415,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Paleo",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Amani",
     last_name: "Toomer",
@@ -410,6 +428,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegan",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Ahmad",
     last_name: "Bradshaw",
@@ -422,6 +441,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegetarian",
+    retreat_id: 1,
     info_status: "CREATED",
     first_name: "Brandon",
     last_name: "Jacobs",
@@ -434,6 +454,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Paleo",
+    retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Mario",
     last_name: "Manning",

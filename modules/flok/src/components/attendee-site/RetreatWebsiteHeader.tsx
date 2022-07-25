@@ -7,7 +7,9 @@ import {
   useMediaQuery,
 } from "@material-ui/core"
 import {Menu} from "@material-ui/icons"
+import {push} from "connected-react-router"
 import {useState} from "react"
+import {useDispatch} from "react-redux"
 import {AppRoutes} from "../../Stack"
 import {FlokTheme} from "../../theme"
 import {titleToNavigation} from "../../utils"
@@ -26,7 +28,7 @@ let useStyles = makeStyles((theme) => ({
     justifyContent: "center",
     padding: "20px",
     alignItems: "normal",
-    width: "90%",
+    width: "100%",
     [theme.breakpoints.down("sm")]: {
       alignItems: "center",
       justifyContent: "space-between",
@@ -79,6 +81,7 @@ type RetreatWebsiteHeaderProps = {
 }
 
 function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
+  let dispatch = useDispatch()
   let classes = useStyles()
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
@@ -106,15 +109,22 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
             })}
           </div>
           <div className={classes.registerWrapper}>
-            <Link
-              href={props.registrationLink}
-              target="__blank"
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
               className={classes.registerButton}
-              underline="none">
-              <Button size="large" color="primary" variant="contained">
-                Register Now
-              </Button>
-            </Link>
+              onClick={() => {
+                dispatch(
+                  push(
+                    AppRoutes.getPath("AttendeeSiteFormPage", {
+                      retreatName: props.retreatName,
+                    })
+                  )
+                )
+              }}>
+              Register Now
+            </Button>
           </div>
         </>
       ) : (
@@ -141,14 +151,22 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
               })}
             </div>
 
-            <Link
-              href={props.registrationLink}
-              target="__blank"
-              className={classes.registerButton}>
-              <Button size="large" color="primary" variant="contained">
-                Register Now
-              </Button>
-            </Link>
+            <Button
+              color="primary"
+              variant="contained"
+              size="small"
+              className={classes.registerButton}
+              onClick={() => {
+                dispatch(
+                  push(
+                    AppRoutes.getPath("AttendeeSiteFormPage", {
+                      retreatName: props.retreatName,
+                    })
+                  )
+                )
+              }}>
+              Register Now
+            </Button>
           </Drawer>
         </>
       )}
@@ -186,7 +204,7 @@ function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
           ? "always"
           : "none"
       }
-      href={AppRoutes.getPath("RetreatWebsitePage", {
+      href={AppRoutes.getPath("AttendeeSitePage", {
         retreatName: props.retreatName,
         pageName: titleToNavigation(page?.title ?? "home"),
       })}

@@ -13,6 +13,7 @@ import {RetreatModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getRetreat} from "../../store/actions/retreat"
+import WrongSignInPage from "../auth/WrongSignInPage"
 import LoadingPage from "./LoadingPage"
 
 const RetreatContext = createContext<
@@ -66,7 +67,7 @@ export default function RetreatProvider(props: PropsWithChildren<{}>) {
   }, [retreatIdx, dispatch, retreat, retreatId])
 
   return retreatId === undefined ? (
-    <div>No retreats for the user</div>
+    <WrongSignInPage attendeeIds={user.attendee_ids} />
   ) : retreat === ResourceNotFound ? (
     <div>Retreat not found</div>
   ) : retreat === undefined ? (

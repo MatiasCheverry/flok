@@ -16,7 +16,9 @@ import BeforeUnload from "../base/BeforeUnload"
 
 let useStyles = makeStyles((theme) => ({
   wrapper: {
-    margin: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     display: "flex",
     justifyContent: "center",
   },
@@ -41,7 +43,6 @@ let useStyles = makeStyles((theme) => ({
     width: "90%",
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
-    marginTop: 30,
     [theme.breakpoints.down("sm")]: {
       width: "100%",
     },
@@ -121,6 +122,7 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
           wrapperClassName={classes.wrapper}
           editorClassName={classes.editor}
           toolbarClassName={classes.toolbar}
+          stripPastedStyles={true}
           toolbarOnFocus
           placeholder="Start typing here to create your page"
           toolbar={{

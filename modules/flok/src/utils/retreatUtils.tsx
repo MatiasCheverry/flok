@@ -2,10 +2,12 @@ import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {Constants} from "../config"
 import {ResourceNotFound} from "../models"
-import {RetreatToTask} from "../models/retreat"
+import {RetreatModel, RetreatToTask} from "../models/retreat"
 import {RootState} from "../store"
 import {
+  getAttendee,
   getBlock,
+  getMyAttendee,
   getPage,
   getPageByName,
   getRetreat,
@@ -171,6 +173,30 @@ export function useAttendeeLandingWebsiteName(websiteName: string) {
 
   return [website, loading] as const
 }
+
+export function useMyAttendee(retreatId: number) {
+  let dispatch = useDispatch()
+  let attendeeId = useSelector((state: RootState) => {
+    return state.user.myAttendeeByRetreat[retreatId]
+  })
+  useEffect(() => {
+    if (attendeeId == null) {
+      dispatch(getMyAttendee(retreatId))
+    }
+  }, [retreatId, dispatch, attendeeId])
+
+  let attendee = useSelector((state: RootState) => {
+    if (attendeeId != null) return state.retreat.attendees[attendeeId]
+  })
+  useEffect(() => {
+    if (attendeeId != null && attendee == null) {
+      dispatch(getAttendee(attendeeId))
+    }
+  }, [attendeeId, attendee, dispatch])
+
+  return [attendee]
+}
+
 export function useRetreat(retreatId: number) {
   let [loading, setLoading] = useState(true)
   let retreat = useSelector((state: RootState) => {
@@ -193,4 +219,10 @@ export function useRetreat(retreatId: number) {
   }, [retreat, dispatch, retreatId])
 
   return [retreat, loading] as const
+}
+
+export function getRetreatName(retreat: RetreatModel) {
+  if (retreat.retreat_name != null) {
+    return retreat.retreat_name
+  } else return `${retreat.company_name}'s Retreat`
 }

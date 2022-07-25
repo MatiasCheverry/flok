@@ -47,14 +47,14 @@ let useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default function BudgetPage() {
+function ItineraryPage() {
   let [retreat, retreatIdx] = useRetreat()
   let dispatch = useDispatch()
-  let classes = useStyles()
   const [loading, setLoading] = useState(false)
+  let classes = useStyles()
   let formik = useFormik({
     initialValues: {
-      budget_link: retreat.budget_link ?? "",
+      itinerary_final_draft_link: retreat.itinerary_final_draft_link ?? "",
     },
     onSubmit: async (values) => {
       setLoading(true)
@@ -63,7 +63,10 @@ export default function BudgetPage() {
       )) as unknown as ApiAction
       setLoading(false)
       if (!response.error) {
-        window.open(response.payload.retreat.budget_link, "_blank")
+        window.open(
+          response.payload.retreat.itinerary_final_draft_link,
+          "_blank"
+        )
         dispatch(
           push(
             AppRoutes.getPath("RetreatHomePage", {
@@ -74,7 +77,7 @@ export default function BudgetPage() {
       }
     },
     validationSchema: yup.object().shape({
-      budget_link: yup.string().url("Enter a valid url"),
+      itinerary_final_draft_link: yup.string().url("Enter a valid url"),
     }),
   })
   let [confirmationModalOpen, setConfirmationModalOpen] = useState(false)
@@ -83,18 +86,18 @@ export default function BudgetPage() {
     <PageBody appBar>
       <div className={classes.section}>
         <div className={classes.overviewHeader}>
-          <AppTypography variant="h1">Budget</AppTypography>
+          <AppTypography variant="h1">Itinerary</AppTypography>
         </div>
         <List className={classes.list}>
           <AppListItemStep
-            title="Create Google Sheet"
-            subtext="Please create your own Google Spreadsheet and add the link below. Make sure that your Flok event planners have edit access."
+            title="Create Google Document"
+            subtext="Please create your own Google Document and add the link below. Make sure that your Flok event planners have edit access. This itinerary will become available to your retreat attendees on the Attendee Landing Page once it is finalized."
           />
           <AppListItemStep
             title=""
-            subtext="Your Flok event planners will use this spreadsheet to keep a running budget of the event."
+            subtext="This itinerary will become available to your retreat attendees on the Retreat Landing Page once it is finalized."
           />
-          <AppListItemStep title="Upload Budget Link" subtext="">
+          <AppListItemStep title="Upload Itinerary Link" subtext="">
             <form
               className={classes.form}
               onSubmit={(e) => {
@@ -103,13 +106,16 @@ export default function BudgetPage() {
               }}>
               <TextField
                 variant="outlined"
-                label="Final Budget Link"
+                label="Itinerary Final Draft Link"
                 fullWidth
                 className={classes.textField}
-                value={formik.values.budget_link}
+                value={formik.values.itinerary_final_draft_link}
                 onChange={formik.handleChange}
-                id="budget_link"
-                {...getTextFieldErrorProps(formik, "budget_link")}
+                id="itinerary_final_draft_link"
+                {...getTextFieldErrorProps(
+                  formik,
+                  "itinerary_final_draft_link"
+                )}
               />
               {loading && <AppLoadingScreen />}
               <Button
@@ -126,7 +132,7 @@ export default function BudgetPage() {
 
         <AppConfirmationModal
           title="Confirm Submission"
-          text={`Are you sure you wish to submit ${formik.values.budget_link} as your budget link?  This cannot be changed without Flok support.`}
+          text={`Are you sure you wish to submit ${formik.values.itinerary_final_draft_link} as your itinerary final draft link?  This cannot be changed without Flok support.`}
           onClose={() => setConfirmationModalOpen(false)}
           onSubmit={() => {
             formik.handleSubmit()
@@ -138,3 +144,4 @@ export default function BudgetPage() {
     </PageBody>
   )
 }
+export default ItineraryPage

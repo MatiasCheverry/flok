@@ -198,3 +198,13 @@ export function titleToNavigation(str: string) {
   })
   return letters.join("").toLowerCase()
 }
+
+export function replaceDashes(str: string) {
+  let strArray = str.split("")
+  strArray.forEach((char, i) => {
+    if (char === "-") {
+      strArray[i] = " "
+    }
+  })
+  return strArray.join("")
+}

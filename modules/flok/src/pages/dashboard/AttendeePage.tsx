@@ -10,7 +10,12 @@ import {
   TextFieldProps,
   useMediaQuery,
 } from "@material-ui/core"
-import {AccountBox, ArrowBackIos, FlightTakeoff} from "@material-ui/icons"
+import {
+  AccountBox,
+  ArrowBackIos,
+  FlightTakeoff,
+  FormatListBulleted,
+} from "@material-ui/icons"
 import {Autocomplete} from "@material-ui/lab"
 import {push} from "connected-react-router"
 import {useFormik} from "formik"
@@ -24,6 +29,7 @@ import {
   useRouteMatch,
 } from "react-router-dom"
 import * as yup from "yup"
+import AttendeeRegResponseTab from "../../components/attendee/AttendeeRegResponseTab"
 import BeforeUnload from "../../components/base/BeforeUnload"
 import AttendeeFlightTab from "../../components/flights/AttendeeFlightTab"
 import PageBody from "../../components/page/PageBody"
@@ -208,6 +214,17 @@ function AttendeePage() {
               attendeeId: attendeeId.toString(),
             })}
           />
+          {attendee?.registration_form_response_id && (
+            <Tab
+              className={classes.tab}
+              icon={<FormatListBulleted />}
+              label={isSmallScreen ? "" : "Registration Response"}
+              value={AppRoutes.getPath("RetreatAttendeeRegResponsePage", {
+                retreatIdx: retreatIdx.toString(),
+                attendeeId: attendeeId.toString(),
+              })}
+            />
+          )}
         </Tabs>
         <Switch>
           <Route
@@ -395,6 +412,15 @@ function AttendeePage() {
             render={() => (
               <div className={classes.fullPageTab}>
                 {attendee && <AttendeeFlightTab attendee={attendee} />}
+              </div>
+            )}
+            exact
+          />
+          <Route
+            path={AppRoutes.getPath("RetreatAttendeeRegResponsePage")}
+            render={() => (
+              <div className={classes.fullPageTab}>
+                {attendee && <AttendeeRegResponseTab attendee={attendee} />}
               </div>
             )}
             exact

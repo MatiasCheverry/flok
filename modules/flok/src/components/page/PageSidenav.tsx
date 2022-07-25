@@ -21,12 +21,7 @@ import {
   PeopleAlt,
   SvgIconComponent,
 } from "@material-ui/icons"
-import React, {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useState,
-} from "react"
+import {createContext, PropsWithChildren, useContext, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {
   Link as ReactRouterLink,
@@ -124,7 +119,7 @@ let navItems: NavItem[] = [
             ? {url: retreat.lodging_site_inspection_url, external: true}
             : undefined,
         hidden: (retreat) => {
-          return !!retreat.lodging_site_inspection_url
+          return !retreat.lodging_site_inspection_url
         },
       },
     ],
@@ -134,6 +129,45 @@ let navItems: NavItem[] = [
     icon: PeopleAlt,
     activeRoutes: ["RetreatAttendeesPage", "RetreatAttendeePage"],
     redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !!retreat.attendees_v2_released,
+  },
+  {
+    title: "Attendees",
+    icon: PeopleAlt,
+    activeRoutes: [],
+    redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !retreat.attendees_v2_released,
+    navSubItems: [
+      {
+        title: "Attendees",
+        activeRoutes: [
+          "RetreatAttendeePage",
+          "RetreatAttendeesPage",
+          "RetreatAttendeeRegResponsePage",
+        ],
+        redirect: redirectFlok("RetreatAttendeesPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+      {
+        title: "Registration",
+        activeRoutes: ["RetreatAttendeesRegFormBuilderPage"],
+        redirect: redirectFlok("RetreatAttendeesRegFormBuilderPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+      {
+        title: "Website",
+        activeRoutes: [
+          "LandingPageGeneratorConfig",
+          "LandingPageGeneratorConfigAddPage",
+          "LandingPageGeneratorConfigWebsiteSettings",
+          "LandingPageGeneratorConfigPageSettings",
+          "LandingPageGeneratorHome",
+          "LandingPageGeneratorPage",
+        ],
+        redirect: redirectFlok("LandingPageGeneratorHome"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+    ],
   },
   {
     title: "Flights",
@@ -145,16 +179,20 @@ let navItems: NavItem[] = [
     title: "Itinerary",
     icon: MapRounded,
     activeRoutes: [],
-    redirect: (retreat) =>
+    redirect: (retreat, retreatIdx) =>
       retreat.itinerary_final_draft_link
         ? {url: retreat.itinerary_final_draft_link, external: true}
-        : undefined,
+        : {
+            url: AppRoutes.getPath("RetreatItineraryPage", {
+              retreatIdx: retreatIdx.toString(),
+            }),
+          },
   },
   {
     title: "Budget",
     icon: LocalAtm,
-    activeRoutes: ["RetreatBudgetPage"],
-    redirect: redirectFlok("RetreatBudgetPage"),
+    activeRoutes: [],
+    redirect: redirectFlok("RetreatBudgetEstimatePage"),
     navSubItems: [
       {
         title: "Estimate",
@@ -163,11 +201,15 @@ let navItems: NavItem[] = [
       },
       {
         title: "Actual",
-        activeRoutes: [],
-        redirect: (retreat) =>
+        activeRoutes: ["RetreatBudgetPage"],
+        redirect: (retreat, retreatIdx) =>
           retreat.budget_link
             ? {url: retreat.budget_link, external: true}
-            : undefined,
+            : {
+                url: AppRoutes.getPath("RetreatBudgetPage", {
+                  retreatIdx: retreatIdx.toString(),
+                }),
+              },
       },
     ],
   },
@@ -264,7 +306,7 @@ export default function PageSidenav() {
               subItems = navItem.navSubItems
                 .filter((subItem) => {
                   if (subItem.hidden !== undefined) {
-                    return subItem.hidden(retreat)
+                    return !subItem.hidden(retreat)
                   } else {
                     return true
                   }
