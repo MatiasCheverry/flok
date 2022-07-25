@@ -16,10 +16,10 @@ import * as yup from "yup"
 import config, {IMAGE_SERVER_BASE_URL_KEY} from "../../config"
 import {ImageModel} from "../../models"
 import {enqueueSnackbar} from "../../notistack-lib/actions"
+import {useRetreat} from "../../pages/misc/RetreatProvider"
 import {AppRoutes} from "../../Stack"
 import {ApiAction} from "../../store/actions/api"
 import {patchWebsite} from "../../store/actions/retreat"
-import {getTextFieldErrorProps} from "../../utils"
 import {useAttendeeLandingWebsite} from "../../utils/retreatUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import UploadImageWithTemplate from "./UploadImageWithTemplate"
@@ -48,6 +48,7 @@ type EditWebsiteFormProps = {
 }
 function EditWebsiteForm(props: EditWebsiteFormProps) {
   let dispatch = useDispatch()
+  let [retreat] = useRetreat()
   let website = useAttendeeLandingWebsite(props.websiteId)
   let imageHolder: {[key: number]: ImageModel} = {}
   if (website?.banner_image) {
@@ -115,10 +116,18 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
           value={formik.values.name}
           id={`name`}
           onChange={formik.handleChange}
+          disabled={retreat.registration_live}
           variant="outlined"
           label="Website Name"
           className={classes.textField}
-          {...getTextFieldErrorProps(formik, "name")}
+          error={formik.errors && !!formik.errors["name"]}
+          helperText={
+            formik.errors && formik.errors["name"]
+              ? formik.errors["name"]
+              : retreat.registration_live
+              ? "Website name cannot be changed once registration is live"
+              : ""
+          }
         />
         <UploadImageWithTemplate
           value={images[formik.values.banner_image_id]}
