@@ -39,6 +39,7 @@ export type FormQuestionModel = {
   required?: boolean
   select_allow_user_input?: boolean
   select_options: number[]
+  non_editable?: boolean
 }
 
 export type FormQuestionSelectOptionModel = {

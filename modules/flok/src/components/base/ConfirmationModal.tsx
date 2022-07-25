@@ -16,7 +16,7 @@ type AppConfirmationModalProps = {
 }
 function AppConfirmationModal(props: AppConfirmationModalProps) {
   return (
-    <Dialog open={props.open} onClose={props.onClose} style={{zIndex: 10}}>
+    <Dialog open={props.open} onClose={props.onClose}>
       <DialogTitle>{props.title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{props.text}</DialogContentText>

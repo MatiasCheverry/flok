@@ -22,6 +22,7 @@ let useStyles = makeStyles((theme) => ({
   header: {
     display: "flex",
     justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: theme.spacing(2),
   },
 }))

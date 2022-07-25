@@ -15,12 +15,13 @@ import {
   Radio,
   Switch,
   TextField,
+  Tooltip,
 } from "@material-ui/core"
 import {Add, CalendarToday, Delete} from "@material-ui/icons"
 import clsx from "clsx"
 import {useFormik} from "formik"
 import React, {useEffect, useState} from "react"
-import {useDispatch, useSelector} from "react-redux"
+import {useDispatch} from "react-redux"
 import {
   FormQuestionModel,
   FormQuestionSnapshotModel,
@@ -29,16 +30,15 @@ import {
   FormQuestionTypeName,
   FormQuestionTypeValues,
 } from "../../models/form"
-import {RootState} from "../../store"
 import {
   deleteFormQuestion,
   deleteFormQuestionOption,
-  getFormQuestionOption,
   patchFormQuestion,
   patchFormQuestionOption,
   postFormQuestion,
   postFormQuestionOption,
 } from "../../store/actions/form"
+import {useFormQuestionOption} from "../../utils/formUtils"
 import AppLoadingScreen from "../base/AppLoadingScreen"
 import AppTypography from "../base/AppTypography"
 import {useFormQuestion} from "./FormQuestionProvider"
@@ -52,6 +52,9 @@ let useQuestionStyles = makeStyles((theme) => ({
     flexDirection: "column",
     "&.noclickthrough > *": {
       pointerEvents: "none",
+    },
+    "&.noneditable": {
+      cursor: "not-allowed",
     },
   },
   questionHeaderContainer: {
@@ -104,107 +107,117 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
       }
     },
   })
-  let questionBody = (
-    <div
-      className={clsx(classes.root, editActive ? undefined : "noclickthrough")}
-      onClick={() => setEditActive(true)}
-      onFocus={() => setEditActive(true)}
-      onBlur={(e) => {
-        if (
-          e.relatedTarget == null ||
-          e.currentTarget == null ||
-          !e.currentTarget.contains(e.relatedTarget as Node)
-        ) {
-          setEditActive(false)
-        }
-      }}
-      tabIndex={0}>
-      <div className={classes.questionHeaderContainer}>
-        <div className={classes.questionTitleSubtitle}>
-          <FormQuestionHeader
-            required={requiredFormik.values.required}
-            title={question.title}
-            description={question.description ?? ""}
-            questionId={question.id}
-            editable={true}
-            editActive={editActive}
-          />
-        </div>
-      </div>
-      <RegFormBuilderQuestionSwitch question={question} />
-      {editActive && (
-        <div className={classes.formQuestionActions}>
-          <FormControl>
-            <FormControlLabel
-              checked={requiredFormik.values.required}
-              onChange={async (e, checked) => {
-                await requiredFormik.setFieldValue("required", checked)
-                requiredFormik.submitForm()
-              }}
-              control={<Switch color="primary" />}
-              label="Required?"
-            />
-          </FormControl>
-          <TextField
-            variant="outlined"
-            select
-            size="small"
-            onChange={async (e) => {
-              let type = e.target.value as FormQuestionType
-              if (type !== question.type) {
-                setPatchTypeLoading(true)
-                await dispatch(patchFormQuestion(question.id, {type}))
-                setPatchTypeLoading(false)
-              }
-            }}
-            value={
-              patchTypeLoading ? "loading" : question.type || "SHORT_ANSWER"
-            }
-            SelectProps={{
-              MenuProps: {disablePortal: true},
-              native: false,
-            }}>
-            {patchTypeLoading ? (
-              <MenuItem value="loading">
-                &nbsp;&nbsp;&nbsp;
-                <CircularProgress size="15px" />
-                &nbsp;&nbsp;&nbsp;
-              </MenuItem>
-            ) : (
-              FormQuestionTypeValues.map((type) => (
-                <MenuItem value={type} key={type}>
-                  {FormQuestionTypeName[type] ?? type}
-                </MenuItem>
-              ))
-            )}
-          </TextField>
-          <div style={{display: "flex", alignItems: "center"}}>
-            <IconButton
-              size="small"
-              disabled={deleteLoading}
-              onClick={async () => {
-                setDeleteLoading(true)
-                await dispatch(deleteFormQuestion(question.id))
-                setDeleteLoading(false)
-              }}>
-              {deleteLoading ? <CircularProgress size={25} /> : <Delete />}
-            </IconButton>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-  return editActive ? (
+  function updateEditActive(newVal: boolean) {
+    if (newVal && question.non_editable) {
+      return
+    }
+    setEditActive(newVal)
+  }
+  return (
     <ClickAwayListener
       touchEvent="onTouchStart"
       mouseEvent="onMouseDown"
       onClickAway={() => {
-        setEditActive(false)
+        updateEditActive(false)
       }}>
-      {questionBody}
+      <Tooltip
+        open={question.non_editable ? undefined : false}
+        title="This question isn't editable"
+        placement="top-start">
+        <div
+          className={clsx(
+            classes.root,
+            editActive ? undefined : "noclickthrough",
+            question.non_editable ? "noneditable" : undefined
+          )}
+          onClick={() => updateEditActive(true)}
+          onFocus={() => updateEditActive(true)}
+          onBlur={(e) => {
+            if (
+              e.relatedTarget == null ||
+              e.currentTarget == null ||
+              !e.currentTarget.contains(e.relatedTarget as Node)
+            ) {
+              updateEditActive(false)
+            }
+          }}
+          tabIndex={0}>
+          <div className={classes.questionHeaderContainer}>
+            <div className={classes.questionTitleSubtitle}>
+              <FormQuestionHeader
+                required={requiredFormik.values.required}
+                title={question.title}
+                description={question.description ?? ""}
+                questionId={question.id}
+                editable={true}
+                editActive={editActive}
+              />
+            </div>
+          </div>
+          <RegFormBuilderQuestionSwitch question={question} />
+          {editActive && (
+            <div className={classes.formQuestionActions}>
+              <FormControl>
+                <FormControlLabel
+                  checked={requiredFormik.values.required}
+                  onChange={async (e, checked) => {
+                    await requiredFormik.setFieldValue("required", checked)
+                    requiredFormik.submitForm()
+                  }}
+                  control={<Switch color="primary" />}
+                  label="Required?"
+                />
+              </FormControl>
+              <TextField
+                variant="outlined"
+                select
+                size="small"
+                onChange={async (e) => {
+                  let type = e.target.value as FormQuestionType
+                  if (type !== question.type) {
+                    setPatchTypeLoading(true)
+                    await dispatch(patchFormQuestion(question.id, {type}))
+                    setPatchTypeLoading(false)
+                  }
+                }}
+                value={
+                  patchTypeLoading ? "loading" : question.type || "SHORT_ANSWER"
+                }
+                SelectProps={{
+                  MenuProps: {disablePortal: true},
+                  native: false,
+                }}>
+                {patchTypeLoading ? (
+                  <MenuItem value="loading">
+                    &nbsp;&nbsp;&nbsp;
+                    <CircularProgress size="15px" />
+                    &nbsp;&nbsp;&nbsp;
+                  </MenuItem>
+                ) : (
+                  FormQuestionTypeValues.map((type) => (
+                    <MenuItem value={type} key={type}>
+                      {FormQuestionTypeName[type] ?? type}
+                    </MenuItem>
+                  ))
+                )}
+              </TextField>
+              <div style={{display: "flex", alignItems: "center"}}>
+                <IconButton
+                  size="small"
+                  disabled={deleteLoading}
+                  onClick={async () => {
+                    setDeleteLoading(true)
+                    await dispatch(deleteFormQuestion(question.id))
+                    setDeleteLoading(false)
+                  }}>
+                  {deleteLoading ? <CircularProgress size={25} /> : <Delete />}
+                </IconButton>
+              </div>
+            </div>
+          )}
+        </div>
+      </Tooltip>
     </ClickAwayListener>
-  ) : (
-    questionBody
   )
 }
 
@@ -569,10 +582,8 @@ function SelectQuestionLabel(props: {
 }) {
   let classes = useSelectOptionStyles()
   let dispatch = useDispatch()
-  let [loadingOption, setLoadingOption] = useState(false)
-  let option = useSelector(
-    (state: RootState) => state.form.questionOptions[props.optionId]
-  )
+
+  let [option, loadingOption] = useFormQuestionOption(props.optionId)
   let formik = useFormik({
     initialValues: {
       option: option?.option || "",
@@ -584,16 +595,6 @@ function SelectQuestionLabel(props: {
     },
     enableReinitialize: true,
   })
-  useEffect(() => {
-    async function loadOption() {
-      setLoadingOption(true)
-      await dispatch(getFormQuestionOption(props.optionId))
-      setLoadingOption(false)
-    }
-    if (!option) {
-      loadOption()
-    }
-  }, [option, props.optionId, dispatch])
   let [deleteLoading, setDeleteLoading] = useState(false)
   let control =
     props.type === FormQuestionTypeEnum.MULTI_SELECT ? (
@@ -655,21 +656,7 @@ function SelectQuestionViewerLabel(props: {
     | typeof FormQuestionTypeEnum.SINGLE_SELECT
 }) {
   let classes = useSelectOptionStyles()
-  let dispatch = useDispatch()
-  let [loadingOption, setLoadingOption] = useState(false)
-  let option = useSelector(
-    (state: RootState) => state.form.questionOptions[props.optionId]
-  )
-  useEffect(() => {
-    async function loadOption() {
-      setLoadingOption(true)
-      await dispatch(getFormQuestionOption(props.optionId))
-      setLoadingOption(false)
-    }
-    if (!option) {
-      loadOption()
-    }
-  }, [option, props.optionId, dispatch])
+  let [option, loadingOption] = useFormQuestionOption(props.optionId)
 
   return option ? (
     <FormControlLabel

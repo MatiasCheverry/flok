@@ -58,7 +58,7 @@ let useStyles = makeStyles((theme) => ({
   header: {
     display: "flex",
     justifyContent: "space-between",
-    alignItems: "center",
+    alignItems: "flex-start",
   },
 
   pageNav: {

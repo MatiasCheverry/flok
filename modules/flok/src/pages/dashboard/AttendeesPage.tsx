@@ -1,5 +1,4 @@
 import {
-  Box,
   Button,
   Chip,
   Dialog,
@@ -33,6 +32,7 @@ import {push} from "connected-react-router"
 import {useEffect, useState} from "react"
 import {useDispatch} from "react-redux"
 import {withRouter} from "react-router-dom"
+import SiteGoLiveButton from "../../components/attendee-site/SiteGoLiveButton"
 import AppCsvXlsxUpload from "../../components/base/AppCsvXlsxUpload"
 import AttendeeDeleteDropDown from "../../components/lodging/AttendeeDeleteDropdown"
 import PageBody from "../../components/page/PageBody"
@@ -68,23 +68,18 @@ let useStyles = makeStyles((theme) => ({
     },
     flex: 1,
   },
-  headerIcon: {
-    marginRight: theme.spacing(1),
-    verticalAlign: "top",
-    "&.todo": {
-      color: theme.palette.error.main,
-    },
-    "&.next": {
-      color: theme.palette.warning.main,
-    },
-    "&.completed": {
-      color: theme.palette.success.main,
-    },
-  },
-  addBtn: {
-    width: "100%",
+  header: {
     display: "flex",
-    justifyContent: "flex-end",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  pageTitle: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+    "& > *:nth-child(2)": {
+      marginTop: theme.spacing(1),
+    },
   },
   notAttendingButton: {
     cursor: "pointer",
@@ -343,29 +338,34 @@ function AttendeesPage() {
   return (
     <PageBody appBar>
       <div className={classes.section}>
-        <Box
-          display="flex"
-          justifyContent="space-between"
-          alignItems="flex-end">
+        <div className={classes.header}>
           <Typography variant="h1">Attendees</Typography>
-          <Link
-            variant="body1"
-            underline="always"
-            className={classes.notAttendingButton}
-            onClick={() => {
-              setOpenNotAttendingModal(true)
-            }}>
-            View invitees not coming (
-            {attendeeTravelInfo &&
-              attendeeTravelInfo.filter((attendee) => {
-                return (
-                  attendee.info_status === "NOT_ATTENDING" ||
-                  attendee.info_status === "CANCELLED"
-                )
-              }).length}
-            )
-          </Link>
-        </Box>
+          <div className={classes.pageTitle}>
+            {retreat.attendees_v2_released ? (
+              <SiteGoLiveButton
+                isLive={retreat.registration_live}
+                retreatId={retreat.id}
+              />
+            ) : undefined}
+            <Link
+              variant="body1"
+              underline="always"
+              className={classes.notAttendingButton}
+              onClick={() => {
+                setOpenNotAttendingModal(true)
+              }}>
+              View invitees not coming (
+              {attendeeTravelInfo &&
+                attendeeTravelInfo.filter((attendee) => {
+                  return (
+                    attendee.info_status === "NOT_ATTENDING" ||
+                    attendee.info_status === "CANCELLED"
+                  )
+                }).length}
+              )
+            </Link>
+          </div>
+        </div>
         <div className={classes.dataGridWrapper}>
           <DataGrid
             pageSize={50}
@@ -561,7 +561,9 @@ function AttendeesPage() {
           ) : (
             <>
               <DialogContentText>
-                {retreat.registration_live
+                {!retreat.attendees_v2_released
+                  ? "To add a new attendee to your retreat please enter their full name and email address below. We'll reach out to them to confirm and fill in some of their information and when they have confirmed their name will be added here."
+                  : retreat.registration_live
                   ? "To add a new attendee to your retreat please enter their full name and email address below.  They will be automatically emailed to access their attendee registration form."
                   : "To add a new attendee to your retreat please enter their full name and email address below.  They will be emailed to access their attendee registration form once registration is live."}
               </DialogContentText>
@@ -752,6 +754,7 @@ function AttendeesPage() {
     </PageBody>
   )
 }
+export default withRouter(AttendeesPage)
 
 let useToolbarStyles = makeStyles((theme) => ({
   toolbarButton: {
@@ -782,7 +785,6 @@ type CustomToolbarAttendeePageProps = {
   searchTerm: string
   setSearchTerm: (newValue: string) => void
 }
-export default withRouter(AttendeesPage)
 function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   let classes = useToolbarStyles()
   return (

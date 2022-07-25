@@ -1,7 +1,11 @@
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RootState} from "../store"
-import {getFormQuestion, getFormResponse} from "../store/actions/form"
+import {
+  getFormQuestion,
+  getFormQuestionOption,
+  getFormResponse,
+} from "../store/actions/form"
 
 export function useForm(formId: number) {}
 
@@ -22,6 +26,25 @@ export function useFormQuestion(questionId: number) {
     }
   }, [formQuestion, dispatch, questionId])
   return [formQuestion, loading] as const
+}
+
+export function useFormQuestionOption(optionId: number) {
+  let dispatch = useDispatch()
+  let [loadingOption, setLoadingOption] = useState(false)
+  let option = useSelector(
+    (state: RootState) => state.form.questionOptions[optionId]
+  )
+  useEffect(() => {
+    async function loadOption() {
+      setLoadingOption(true)
+      await dispatch(getFormQuestionOption(optionId))
+      setLoadingOption(false)
+    }
+    if (!option) {
+      loadOption()
+    }
+  }, [option, optionId, dispatch])
+  return [option, loadingOption] as const
 }
 
 export function useFormResponse(formResponseId: number) {

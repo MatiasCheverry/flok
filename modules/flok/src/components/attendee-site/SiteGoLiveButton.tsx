@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   Fab,
+  Tooltip,
 } from "@material-ui/core"
 import {useState} from "react"
 import {useDispatch} from "react-redux"
@@ -13,12 +14,13 @@ import {ApiAction} from "../../store/actions/api"
 import {postRegistrationLive} from "../../store/actions/retreat"
 
 import {makeStyles} from "@material-ui/core"
-import {Explore} from "@material-ui/icons"
+import {LiveTv} from "@material-ui/icons"
 import AppTypography from "../base/AppTypography"
 
 let useStyles = makeStyles((theme) => ({
   goLiveIcon: {
     marginRight: theme.spacing(1),
+    marginBottom: 4, // to better center with text in FAB
   },
   successChip: {
     backgroundColor: theme.palette.success.main,
@@ -47,18 +49,22 @@ export default function SiteGoLiveButton(props: SiteGoLiveButtonProps) {
           classes={{label: classes.successChipLabel}}
         />
       ) : (
-        <Fab
-          variant="extended"
-          size="small"
-          color="primary"
-          onClick={() => {
-            setGoLiveModalOpen(true)
-          }}>
-          <Explore className={classes.goLiveIcon} />
-          <AppTypography variant="body2" fontWeight="bold" uppercase>
-            Go Live
-          </AppTypography>
-        </Fab>
+        <Tooltip
+          title="Go live with your attendee website and registration."
+          placement="left">
+          <Fab
+            variant="extended"
+            size="small"
+            color="primary"
+            onClick={() => {
+              setGoLiveModalOpen(true)
+            }}>
+            <LiveTv fontSize="small" className={classes.goLiveIcon} />
+            <AppTypography variant="body2" fontWeight="bold" uppercase>
+              Go Live
+            </AppTypography>
+          </Fab>
+        </Tooltip>
       )}
       <Dialog
         open={goLiveModalOpen}

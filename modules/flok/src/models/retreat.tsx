@@ -1,4 +1,4 @@
-import {ImageModel} from "."
+import { ImageModel } from "."
 
 export type RetreatSelectedHotelProposalState =
   | "SELECTED"
@@ -150,6 +150,7 @@ export type RetreatModel = {
   attendees_website_id?: number
   attendees_registration_form_id?: number
   registration_live: boolean
+  attendees_v2_released?: boolean
 
   // Retreat data related to flights
   flights_state?: RetreatFlightsState

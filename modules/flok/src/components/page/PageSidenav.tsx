@@ -119,7 +119,7 @@ let navItems: NavItem[] = [
             ? {url: retreat.lodging_site_inspection_url, external: true}
             : undefined,
         hidden: (retreat) => {
-          return !!retreat.lodging_site_inspection_url
+          return !retreat.lodging_site_inspection_url
         },
       },
     ],
@@ -127,8 +127,16 @@ let navItems: NavItem[] = [
   {
     title: "Attendees",
     icon: PeopleAlt,
+    activeRoutes: ["RetreatAttendeesPage", "RetreatAttendeePage"],
+    redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !!retreat.attendees_v2_released,
+  },
+  {
+    title: "Attendees",
+    icon: PeopleAlt,
     activeRoutes: [],
     redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !retreat.attendees_v2_released,
     navSubItems: [
       {
         title: "Attendees",
@@ -138,11 +146,13 @@ let navItems: NavItem[] = [
           "RetreatAttendeeRegResponsePage",
         ],
         redirect: redirectFlok("RetreatAttendeesPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
       },
       {
         title: "Registration",
         activeRoutes: ["RetreatAttendeesRegFormBuilderPage"],
         redirect: redirectFlok("RetreatAttendeesRegFormBuilderPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
       },
       {
         title: "Website",
@@ -155,6 +165,7 @@ let navItems: NavItem[] = [
           "LandingPageGeneratorPage",
         ],
         redirect: redirectFlok("LandingPageGeneratorHome"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
       },
     ],
   },
@@ -295,7 +306,7 @@ export default function PageSidenav() {
               subItems = navItem.navSubItems
                 .filter((subItem) => {
                   if (subItem.hidden !== undefined) {
-                    return subItem.hidden(retreat)
+                    return !subItem.hidden(retreat)
                   } else {
                     return true
                   }

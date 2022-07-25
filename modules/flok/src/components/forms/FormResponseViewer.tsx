@@ -16,6 +16,7 @@ let useStyles = makeStyles((theme) => ({
     "&.error": {
       border: "solid thin red",
     },
+    pointerEvents: "none",
   },
   formQuestionTitleInput: {
     ...theme.typography.body1,
