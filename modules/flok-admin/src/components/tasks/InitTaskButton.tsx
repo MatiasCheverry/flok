@@ -5,7 +5,7 @@ import {addRetreatTasks} from "../../store/actions/admin"
 
 export default function InitTaskButton(props: {retreatId: number}) {
   let [modalOpen, setModalOpen] = useState(false)
-  let [version, setVersion] = useState(0)
+  let [version, setVersion] = useState(1)
   let [overwrite, setOverwrite] = useState(false)
 
   let dispatch = useDispatch()
