@@ -318,6 +318,7 @@ function RegFormBuilderQuestionSwitch(props: {question: FormQuestionModel}) {
             type={FormQuestionTypeEnum.SINGLE_SELECT}
             optionIds={props.question.select_options}
             questionId={props.question.id}
+            non_editable={props.question.non_editable}
           />
         )
       case FormQuestionTypeEnum.MULTI_SELECT:
@@ -326,6 +327,7 @@ function RegFormBuilderQuestionSwitch(props: {question: FormQuestionModel}) {
             type={FormQuestionTypeEnum.MULTI_SELECT}
             optionIds={props.question.select_options}
             questionId={props.question.id}
+            non_editable={props.question.non_editable}
           />
         )
       case FormQuestionTypeEnum.DATE:
@@ -481,6 +483,7 @@ type RegFormBuilderSelectQuestionProps = {
   type: FormQuestionTypeEnum.MULTI_SELECT | FormQuestionTypeEnum.SINGLE_SELECT
   optionIds: number[]
   questionId: number
+  non_editable?: boolean
 }
 export function RegFormBuilderSelectQuestion(
   props: RegFormBuilderSelectQuestionProps
@@ -492,11 +495,17 @@ export function RegFormBuilderSelectQuestion(
     <FormControl>
       <FormGroup>
         {props.optionIds.map((optionId, i) => {
-          return <SelectQuestionLabel optionId={optionId} type={props.type} />
+          return (
+            <SelectQuestionLabel
+              optionId={optionId}
+              type={props.type}
+              non_editable={props.non_editable}
+            />
+          )
         })}
         <div className={classes.addOptionButton}>
           <Button
-            disabled={loadingPost}
+            disabled={loadingPost || props.non_editable}
             size="small"
             onClick={async () => {
               setLoadingPost(true)
@@ -579,6 +588,7 @@ function SelectQuestionLabel(props: {
   type:
     | typeof FormQuestionTypeEnum.MULTI_SELECT
     | typeof FormQuestionTypeEnum.SINGLE_SELECT
+  non_editable?: boolean
 }) {
   let classes = useSelectOptionStyles()
   let dispatch = useDispatch()
@@ -613,6 +623,7 @@ function SelectQuestionLabel(props: {
           <TextField
             fullWidth
             id="option"
+            disabled={props.non_editable}
             value={formik.values.option}
             onBlur={() => formik.handleSubmit()}
             onChange={formik.handleChange}
