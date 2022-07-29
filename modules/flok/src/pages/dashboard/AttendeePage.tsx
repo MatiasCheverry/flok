@@ -38,6 +38,7 @@ import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getAttendee, patchAttendee} from "../../store/actions/retreat"
 import {FlokTheme} from "../../theme"
+import {getTextFieldErrorProps} from "../../utils"
 
 let useStyles = makeStyles((theme) => ({
   section: {
@@ -152,7 +153,10 @@ function AttendeePage() {
     },
     validate: (values) => {
       try {
-        yup.string().required().email().validateSync(values.email_address)
+        // If the attendee was created without an email, allow saving still
+        if (attendee?.email_address || values.email_address) {
+          yup.string().required().email().validateSync(values.email_address)
+        }
       } catch (err) {
         return {email_address: "Please enter a valid email."}
       }
@@ -284,6 +288,7 @@ function AttendeePage() {
                       label="Email"
                       value={formik.values.email_address ?? ""}
                       id="email_address"
+                      {...getTextFieldErrorProps(formik, "email_address")}
                     />
                     <TextField
                       {...textFieldProps}
