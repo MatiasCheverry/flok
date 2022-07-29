@@ -50,12 +50,6 @@ let useQuestionStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     display: "flex",
     flexDirection: "column",
-    "&.noclickthrough > *": {
-      pointerEvents: "none",
-    },
-    "&.noneditable": {
-      cursor: "not-allowed",
-    },
   },
   questionHeaderContainer: {
     display: "flex",
@@ -107,38 +101,28 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
       }
     },
   })
-  function updateEditActive(newVal: boolean) {
-    if (newVal && question.non_editable) {
-      return
-    }
-    setEditActive(newVal)
-  }
   return (
     <ClickAwayListener
       touchEvent="onTouchStart"
       mouseEvent="onMouseDown"
       onClickAway={() => {
-        updateEditActive(false)
+        setEditActive(false)
       }}>
       <Tooltip
         open={question.non_editable ? undefined : false}
-        title="This question isn't editable"
+        title="Some fields of Flok's required questions are not editable"
         placement="top-start">
         <div
-          className={clsx(
-            classes.root,
-            editActive ? undefined : "noclickthrough",
-            question.non_editable ? "noneditable" : undefined
-          )}
-          onClick={() => updateEditActive(true)}
-          onFocus={() => updateEditActive(true)}
+          className={classes.root}
+          onClick={() => setEditActive(true)}
+          onFocus={() => setEditActive(true)}
           onBlur={(e) => {
             if (
               e.relatedTarget == null ||
               e.currentTarget == null ||
               !e.currentTarget.contains(e.relatedTarget as Node)
             ) {
-              updateEditActive(false)
+              setEditActive(false)
             }
           }}
           tabIndex={0}>
@@ -149,16 +133,21 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
                 title={question.title}
                 description={question.description ?? ""}
                 questionId={question.id}
-                editable={true}
+                editable={question.non_editable ? "descriptionOnly" : "both"}
                 editActive={editActive}
               />
             </div>
           </div>
           <RegFormBuilderQuestionSwitch question={question} />
+          {editActive &&
+            (question.type === "DATE" || question.type === "DATETIME") && (
+              <RegFormBuilderDateMinMax question={question} />
+            )}
           {editActive && (
             <div className={classes.formQuestionActions}>
               <FormControl>
                 <FormControlLabel
+                  disabled={question.non_editable}
                   checked={requiredFormik.values.required}
                   onChange={async (e, checked) => {
                     await requiredFormik.setFieldValue("required", checked)
@@ -171,6 +160,7 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
               <TextField
                 variant="outlined"
                 select
+                disabled={question.non_editable}
                 size="small"
                 onChange={async (e) => {
                   let type = e.target.value as FormQuestionType
@@ -204,7 +194,7 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
               <div style={{display: "flex", alignItems: "center"}}>
                 <IconButton
                   size="small"
-                  disabled={deleteLoading}
+                  disabled={deleteLoading || question.non_editable}
                   onClick={async () => {
                     setDeleteLoading(true)
                     await dispatch(deleteFormQuestion(question.id))
@@ -252,6 +242,8 @@ export function RegFormViewerQuestion(props: RegFormViewerQuestionProps) {
         </div>
       </div>
       <RegFormViewerQuestionSwitch
+        minDate={question.min_date}
+        maxDate={question.max_date}
         question={question}
         value={props.value}
         onChange={props.onChange}
@@ -315,6 +307,7 @@ function RegFormBuilderQuestionSwitch(props: {question: FormQuestionModel}) {
       case FormQuestionTypeEnum.SINGLE_SELECT:
         return (
           <RegFormBuilderSelectQuestion
+            nonEditable={props.question.non_editable}
             type={FormQuestionTypeEnum.SINGLE_SELECT}
             optionIds={props.question.select_options}
             questionId={props.question.id}
@@ -323,6 +316,7 @@ function RegFormBuilderQuestionSwitch(props: {question: FormQuestionModel}) {
       case FormQuestionTypeEnum.MULTI_SELECT:
         return (
           <RegFormBuilderSelectQuestion
+            nonEditable={props.question.non_editable}
             type={FormQuestionTypeEnum.MULTI_SELECT}
             optionIds={props.question.select_options}
             questionId={props.question.id}
@@ -345,6 +339,8 @@ type RegFormViewerQuestionSwitchProps = {
   value: string
   onChange: (newVal: string) => void
   readOnly?: boolean
+  minDate?: string
+  maxDate?: string
 }
 
 function RegFormViewerQuestionSwitch(props: RegFormViewerQuestionSwitchProps) {
@@ -393,6 +389,8 @@ function RegFormViewerQuestionSwitch(props: RegFormViewerQuestionSwitchProps) {
       case FormQuestionTypeEnum.DATE:
         return (
           <RegFormViewerDateQuestion
+            minDate={props.minDate}
+            maxDate={props.maxDate}
             value={props.value}
             onChange={props.onChange}
             type={FormQuestionTypeEnum.DATE}
@@ -402,6 +400,8 @@ function RegFormViewerQuestionSwitch(props: RegFormViewerQuestionSwitchProps) {
       case FormQuestionTypeEnum.DATETIME:
         return (
           <RegFormViewerDateQuestion
+            minDate={props.question.min_date}
+            maxDate={props.question.max_date}
             value={props.value}
             onChange={props.onChange}
             type={FormQuestionTypeEnum.DATETIME}
@@ -481,6 +481,7 @@ type RegFormBuilderSelectQuestionProps = {
   type: FormQuestionTypeEnum.MULTI_SELECT | FormQuestionTypeEnum.SINGLE_SELECT
   optionIds: number[]
   questionId: number
+  nonEditable?: boolean
 }
 export function RegFormBuilderSelectQuestion(
   props: RegFormBuilderSelectQuestionProps
@@ -492,11 +493,17 @@ export function RegFormBuilderSelectQuestion(
     <FormControl>
       <FormGroup>
         {props.optionIds.map((optionId, i) => {
-          return <SelectQuestionLabel optionId={optionId} type={props.type} />
+          return (
+            <SelectQuestionLabel
+              optionId={optionId}
+              type={props.type}
+              nonEditable={props.nonEditable}
+            />
+          )
         })}
         <div className={classes.addOptionButton}>
           <Button
-            disabled={loadingPost}
+            disabled={loadingPost || props.nonEditable}
             size="small"
             onClick={async () => {
               setLoadingPost(true)
@@ -579,6 +586,7 @@ function SelectQuestionLabel(props: {
   type:
     | typeof FormQuestionTypeEnum.MULTI_SELECT
     | typeof FormQuestionTypeEnum.SINGLE_SELECT
+  nonEditable?: boolean
 }) {
   let classes = useSelectOptionStyles()
   let dispatch = useDispatch()
@@ -611,6 +619,7 @@ function SelectQuestionLabel(props: {
       label={
         <div className={classes.labelInput}>
           <TextField
+            disabled={props.nonEditable}
             fullWidth
             id="option"
             value={formik.values.option}
@@ -620,7 +629,7 @@ function SelectQuestionLabel(props: {
           <IconButton
             className={clsx(deleteLoading ? "loading" : undefined)}
             size="small"
-            disabled={deleteLoading}
+            disabled={deleteLoading || props.nonEditable}
             onClick={async () => {
               setDeleteLoading(true)
               await dispatch(deleteFormQuestionOption(props.optionId))
@@ -732,6 +741,8 @@ type RegFormViewerDateQuestionProps = {
   value: string
   onChange: (newVal: string) => void
   readOnly?: boolean
+  minDate?: string
+  maxDate?: string
 }
 function RegFormViewerDateQuestion(props: RegFormViewerDateQuestionProps) {
   return (
@@ -740,6 +751,7 @@ function RegFormViewerDateQuestion(props: RegFormViewerDateQuestionProps) {
       onChange={(e) => props.onChange(e.target.value)}
       variant="outlined"
       InputProps={{
+        inputProps: {min: props.minDate, max: props.maxDate},
         readOnly: props.readOnly,
       }}
       type={
@@ -815,5 +827,68 @@ export function AddNewQuestionButton(props: AddNewQuestionButtonProps) {
         </div>
       </Popover>
     </>
+  )
+}
+type RegFormBuilderQuestionRestrictionsSwitchProps = {
+  question: FormQuestionModel
+}
+let useStyles = makeStyles((theme) => ({
+  datesWrapper: {
+    display: "flex",
+    gap: theme.spacing(2),
+    marginTop: theme.spacing(2),
+  },
+}))
+function RegFormBuilderDateMinMax(
+  props: RegFormBuilderQuestionRestrictionsSwitchProps
+) {
+  let dispatch = useDispatch()
+  let classes = useStyles()
+  let [minDate, setMinDate] = useState(props.question.min_date)
+  let [maxDate, setMaxDate] = useState(props.question.max_date)
+
+  return (
+    <div className={classes.datesWrapper}>
+      <TextField
+        variant="outlined"
+        type={
+          props.question.type === FormQuestionTypeEnum.DATETIME
+            ? "datetime-local"
+            : "date"
+        }
+        InputLabelProps={{shrink: true}}
+        label="Earliest Date (optional)"
+        fullWidth
+        value={minDate}
+        onChange={(e) => {
+          dispatch(
+            patchFormQuestion(props.question.id, {
+              min_date: e.target.value,
+            })
+          )
+          setMinDate(e.target.value)
+        }}
+      />
+      <TextField
+        value={maxDate}
+        variant="outlined"
+        fullWidth
+        type={
+          props.question.type === FormQuestionTypeEnum.DATETIME
+            ? "datetime-local"
+            : "date"
+        }
+        InputLabelProps={{shrink: true}}
+        label="Latest Date (optional)"
+        onChange={(e) => {
+          dispatch(
+            patchFormQuestion(props.question.id, {
+              max_date: e.target.value,
+            })
+          )
+          setMaxDate(e.target.value)
+        }}
+      />
+    </div>
   )
 }

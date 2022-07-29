@@ -40,6 +40,8 @@ export type FormQuestionModel = {
   select_allow_user_input?: boolean
   select_options: number[]
   non_editable?: boolean
+  min_date?: string
+  max_date?: string
 }
 
 export type FormQuestionSelectOptionModel = {

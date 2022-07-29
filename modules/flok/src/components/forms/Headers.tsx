@@ -7,7 +7,7 @@ import {
 } from "@material-ui/core"
 import clsx from "clsx"
 import {useFormik} from "formik"
-import React, {useState} from "react"
+import {useState} from "react"
 import {useDispatch} from "react-redux"
 import {patchForm, patchFormQuestion} from "../../store/actions/form"
 
@@ -190,7 +190,7 @@ type FormQuestionHeaderProps = {
   questionId: number
   title: string
   description: string
-  editable?: boolean
+  editable?: "both" | "descriptionOnly"
   editActive?: boolean
   required?: boolean
 }
@@ -235,7 +235,7 @@ export function FormQuestionHeader(props: FormQuestionHeaderProps) {
     size: "small",
   }
 
-  return props.editable && props.editActive ? (
+  return props.editable === "both" && props.editActive ? (
     <form className={classes.root}>
       <TextField
         {...commonTextFieldProps}
@@ -249,6 +249,43 @@ export function FormQuestionHeader(props: FormQuestionHeaderProps) {
           className: classes.questionTitle,
         }}
       />
+      <TextField
+        {...commonTextFieldProps}
+        id="description"
+        value={descriptionFormik.values.description ?? ""}
+        onChange={descriptionFormik.handleChange}
+        onBlur={() => descriptionFormik.handleSubmit()}
+        placeholder={"(Optional) question description"}
+        InputProps={{
+          className: classes.questionDescription,
+        }}
+        multiline
+        rows={2}
+        rowsMax={10}
+      />
+    </form>
+  ) : props.editable === "descriptionOnly" && props.editActive ? (
+    <form className={classes.root}>
+      <Typography
+        variant="inherit"
+        component="h1"
+        className={clsx(
+          classes.questionTitle,
+          props.editable ? classes.editableText : undefined
+        )}>
+        {titleFormik.values.title || !props.editable ? (
+          titleFormik.values.title
+        ) : (
+          <Typography variant="inherit" component="span" color="textSecondary">
+            Question title
+          </Typography>
+        )}
+        {props.required ? (
+          <>
+            &nbsp;<sup style={{color: "red"}}>*</sup>
+          </>
+        ) : undefined}
+      </Typography>
       <TextField
         {...commonTextFieldProps}
         id="description"

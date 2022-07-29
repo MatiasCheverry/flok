@@ -128,7 +128,10 @@ export const PATCH_FORM_QUESTION_FAILURE = "PATCH_FORM_QUESTION_FAILURE"
 export function patchFormQuestion(
   questionId: number,
   formQuestion: Partial<
-    Pick<FormQuestionModel, "description" | "title" | "type" | "required">
+    Pick<
+      FormQuestionModel,
+      "description" | "title" | "type" | "required" | "min_date" | "max_date"
+    >
   >
 ) {
   let endpoint = `/v1.0/questions/${questionId}`
@@ -286,7 +289,7 @@ export function postFormResponse(
   })
 }
 
-export const GET_FORM_RESPONSE_REQUEST = "POST_FORM_RESPONSE_REQUEST"
+export const GET_FORM_RESPONSE_REQUEST = "GET_FORM_RESPONSE_REQUEST"
 export const GET_FORM_RESPONSE_SUCCESS = "GET_FORM_RESPONSE_SUCCESS"
 export const GET_FORM_RESPONSE_FAILURE = "GET_FORM_RESPONSE_FAILURE"
 
