@@ -13,6 +13,7 @@ import {
   AttendeeLandingWebsiteBlockModel,
   AttendeeLandingWebsiteModel,
   AttendeeLandingWebsitePageModel,
+  HotelGroup,
   PresetImageModel,
   PresetImageType,
   RetreatAttendeeModel,
@@ -25,6 +26,7 @@ import {
   DELETE_RETREAT_ATTENDEES_SUCCESS,
   GET_ATTENDEE_SUCCESS,
   GET_BLOCK_SUCCESS,
+  GET_HOTEL_GROUP_SUCCESS,
   GET_MY_ATTENDEE_SUCCESS,
   GET_PAGE_SUCCESS,
   GET_PRESET_IMAGES_SUCCESS,
@@ -78,6 +80,9 @@ export type RetreatState = {
   blocks: {
     [id: number]: AttendeeLandingWebsiteBlockModel | undefined
   }
+  hotelGroups: {
+    [id: number]: HotelGroup
+  }
   presetImages: {
     BANNER: PresetImageModel[]
   }
@@ -92,6 +97,7 @@ const initialState: RetreatState = {
   websites: {},
   pages: {},
   blocks: {},
+  hotelGroups: {},
   presetImages: {
     BANNER: [],
   },
@@ -331,6 +337,18 @@ export default function retreatReducer(
         }
       }
       return newState
+    case GET_HOTEL_GROUP_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        group: HotelGroup
+      }
+      return {
+        ...state,
+        hotelGroups: {
+          ...state.hotelGroups,
+          [payload.group.id]: payload.group,
+        },
+      }
     case GET_PRESET_IMAGES_SUCCESS:
       let type = (action as unknown as {meta: {type: PresetImageType}}).meta
         .type

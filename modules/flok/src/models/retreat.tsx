@@ -47,6 +47,7 @@ export type RetreatSelectedHotelProposal = {
   hotel_id: number
   state: RetreatSelectedHotelProposalState
   hotel_proposals?: HotelLodgingProposal[]
+  group_id?: number
 }
 
 export type PresetImageModel = {
@@ -168,6 +169,9 @@ export type RetreatModel = {
   //Retreat itinerary links
   itinerary_first_draft_link?: string
   itinerary_final_draft_link?: string
+
+  // hotel groups
+  group_ids: number[]
 }
 
 export type RetreatTripModel = {
@@ -466,3 +470,9 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
     email_address: "tp@123.com",
   },
 ]
+
+export type HotelGroup = {
+  id: number
+  title: string
+  retreat_id: number
+}

@@ -13,6 +13,7 @@ import {RetreatSelectedHotelProposal} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
+import {getHotelGroup} from "../../store/actions/retreat"
 import {convertGuid} from "../../utils"
 import {DestinationUtils, useDestinations} from "../../utils/lodgingUtils"
 import {useRetreatByGuid} from "../../utils/retreatUtils"
@@ -67,7 +68,41 @@ function ProposalsListPage(props: ProposalsListPageProps) {
   useEffect(() => {
     document.title = "Lodging Proposals"
   }, [])
+  useEffect(() => {
+    if (retreat && retreat !== ResourceNotFound) {
+      for (let groupId of retreat.group_ids) {
+        if (!hotelGroups.find((group) => group.id === groupId)) {
+          dispatch(getHotelGroup(groupId))
+        }
+      }
+    }
+  }, [dispatch, retreat])
+  let [groupedSelectedHotels, setGroupedSelectedHotels] = useState<
+    {destinationId: number; selectedHotels: RetreatSelectedHotelProposal[]}[]
+  >([])
+  let [showOld, setShowOld] = useState(true)
+  useEffect(() => {
+    for (let hotel of selectedHotels) {
+      if (
+        hotel.group_id &&
+        hotel.state !== "NOT_AVAILABLE" &&
+        hotel.state !== "PENDING"
+      ) {
+        setShowOld(false)
+        console.log(hotel)
+        break
+      }
+    }
+  }, [selectedHotels])
 
+  let hotelGroups = useSelector((state: RootState) => {
+    return Object.values(state.retreat.hotelGroups).filter((group) => {
+      if (retreat && retreat !== ResourceNotFound) {
+        return group?.retreat_id === retreat.id
+      }
+      return false
+    })
+  })
   // Probably not the best way to set loading state, but will do for now
   let [loadingHotels, setLoadingHotels] = useState(false)
   useEffect(() => {
@@ -89,9 +124,6 @@ function ProposalsListPage(props: ProposalsListPageProps) {
 
   let [destinations, loadingDestinations] = useDestinations()
 
-  let [groupedSelectedHotels, setGroupedSelectedHotels] = useState<
-    {destinationId: number; selectedHotels: RetreatSelectedHotelProposal[]}[]
-  >([])
   useEffect(() => {
     let byDestinationId: {[key: number]: RetreatSelectedHotelProposal[]} = {}
     let reviewableHotels = hotelsById
@@ -106,7 +138,6 @@ function ProposalsListPage(props: ProposalsListPageProps) {
       }
       byDestinationId[destinationId].push(selectedHotel)
     })
-
     setGroupedSelectedHotels(
       Object.keys(byDestinationId)
         .sort()
@@ -118,8 +149,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
           }
         })
     )
-  }, [selectedHotels, setGroupedSelectedHotels, hotelsById, retreat])
-
+  }, [selectedHotels, hotelsById, retreat, setGroupedSelectedHotels])
   // Set unavailable hotels bucket
   let [unavailableSelectedHotels, setUnavailableSelectedHotels] = useState<
     RetreatSelectedHotelProposal[]
@@ -156,8 +186,8 @@ function ProposalsListPage(props: ProposalsListPageProps) {
               subheader="Review proposals from hotels with negotiated prices from our team."
               retreat={retreat ? retreat : undefined}
             />
-            {groupedSelectedHotels.length + unavailableSelectedHotels.length ===
-            0 ? (
+            {selectedHotels.filter((hotel) => hotel.state !== "PENDING")
+              .length === 0 ? (
               loadingRetreat || loadingHotels || loadingDestinations ? (
                 <AppTypography variant="body1">Loading...</AppTypography>
               ) : (
@@ -168,18 +198,78 @@ function ProposalsListPage(props: ProposalsListPageProps) {
               )
             ) : undefined}
             {/* Available hotels render */}
-            {groupedSelectedHotels.map((destList) => {
-              let destination = destinations[destList.destinationId]
-              if (destination && destList.selectedHotels.length) {
-                return (
-                  <div className={classes.proposalsList}>
-                    <AppTypography variant="h2">
-                      {DestinationUtils.getLocationName(destination)}
-                    </AppTypography>
-                    {destList.selectedHotels.map((selectedHotel) => {
-                      let hotel = hotelsById[selectedHotel.hotel_id]
-                      let proposals = selectedHotel.hotel_proposals || []
-                      return (
+            {!showOld &&
+              selectedHotels.filter((hotel) => hotel.state !== "PENDING")
+                .length !== 0 &&
+              hotelGroups
+                .sort((a, b) => a.id - b.id)
+                .map((group) => {
+                  return (
+                    <div className={classes.proposalsList}>
+                      {!loadingRetreat &&
+                        !loadingHotels &&
+                        !loadingDestinations && (
+                          <AppTypography variant="h2">
+                            {group.title}
+                          </AppTypography>
+                        )}
+                      {selectedHotels
+                        .filter(
+                          (hotel) =>
+                            hotel.group_id === group.id &&
+                            hotelsById[hotel.hotel_id] &&
+                            hotel.state !== "NOT_AVAILABLE" &&
+                            hotel.state !== "PENDING"
+                        )
+                        .map((selectedHotel) => {
+                          let hotel = hotelsById[selectedHotel.hotel_id]
+                          let destination = destinations[hotel.destination_id]
+                          let proposals = selectedHotel.hotel_proposals || []
+                          return (
+                            destination && (
+                              <ProposalListRow
+                                hotel={hotel}
+                                destination={destination}
+                                proposals={proposals}
+                                openInTab
+                                proposalUrl={AppRoutes.getPath(
+                                  "DeprecatedProposalPage",
+                                  {
+                                    retreatGuid: retreatGuid,
+                                    hotelGuid: hotel.guid,
+                                  }
+                                )}
+                              />
+                            )
+                          )
+                        })}
+                    </div>
+                  )
+                })}
+            {!showOld &&
+            selectedHotels.filter(
+              (hotel) =>
+                !hotel.group_id &&
+                hotelsById[hotel.hotel_id] &&
+                hotel.state !== "NOT_AVAILABLE" &&
+                hotel.state !== "PENDING"
+            ).length ? (
+              <div className={classes.proposalsList}>
+                <AppTypography variant="h2">Other</AppTypography>
+                {selectedHotels
+                  .filter(
+                    (hotel) =>
+                      !hotel.group_id &&
+                      hotelsById[hotel.hotel_id] &&
+                      hotel.state !== "NOT_AVAILABLE" &&
+                      hotel.state !== "PENDING"
+                  )
+                  .map((selectedHotel) => {
+                    let hotel = hotelsById[selectedHotel.hotel_id]
+                    let destination = destinations[hotel.destination_id]
+                    let proposals = selectedHotel.hotel_proposals || []
+                    return (
+                      destination && (
                         <ProposalListRow
                           hotel={hotel}
                           destination={destination}
@@ -194,13 +284,47 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                           )}
                         />
                       )
-                    })}
-                  </div>
-                )
-              } else {
-                return undefined
-              }
-            })}
+                    )
+                  })}
+              </div>
+            ) : (
+              ""
+            )}
+            {/* Old way hotels render */}
+            {showOld &&
+              groupedSelectedHotels.map((destList) => {
+                let destination = destinations[destList.destinationId]
+                if (destination && destList.selectedHotels.length) {
+                  return (
+                    <div className={classes.proposalsList}>
+                      <AppTypography variant="h2">
+                        {DestinationUtils.getLocationName(destination)}
+                      </AppTypography>
+                      {destList.selectedHotels.map((selectedHotel) => {
+                        let hotel = hotelsById[selectedHotel.hotel_id]
+                        let proposals = selectedHotel.hotel_proposals || []
+                        return (
+                          <ProposalListRow
+                            hotel={hotel}
+                            destination={destination}
+                            proposals={proposals}
+                            openInTab
+                            proposalUrl={AppRoutes.getPath(
+                              "DeprecatedProposalPage",
+                              {
+                                retreatGuid: retreatGuid,
+                                hotelGuid: hotel.guid,
+                              }
+                            )}
+                          />
+                        )
+                      })}
+                    </div>
+                  )
+                } else {
+                  return undefined
+                }
+              })}
             {/* Unavailable hotels render */}
             {unavailableSelectedHotels.length ? (
               <AppTypography variant="h2">

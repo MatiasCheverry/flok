@@ -41,6 +41,7 @@ export type AdminRetreatModel = {
   lodging_final_contract_notes?: string
   lodging_final_contract_url?: string
   lodging_site_inspection_url?: string
+  group_ids: number[]
 
   // Retreat data related to flights
   attendees_state?: RetreatAttendeesState
@@ -115,6 +116,7 @@ export type AdminSelectedHotelProposalModel = {
   hotel_id: number
   state: AdminSelectedHotelStateTypes
   hotel_proposals?: AdminLodgingProposalModel[]
+  group_id?: number
 }
 
 export type AdminLodgingProposalModel = {
@@ -344,3 +346,9 @@ export const OrderedRetreatItineraryState = [
 ] as const
 export type RetreatItineraryState = typeof OrderedRetreatFlightsState[number]
 /****************** End retreat states types ******************/
+
+export type HotelGroup = {
+  id: number
+  title: string
+  retreat_id: number
+}
