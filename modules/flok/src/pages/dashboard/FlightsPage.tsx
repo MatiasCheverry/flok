@@ -63,6 +63,9 @@ let useStyles = makeStyles((theme) => ({
   },
   dataGrid: {
     backgroundColor: theme.palette.common.white,
+    "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
+      outline: "none",
+    },
   },
   dataGridRow: {
     cursor: "pointer",
