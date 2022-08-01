@@ -16,7 +16,6 @@ import * as yup from "yup"
 import config, {IMAGE_SERVER_BASE_URL_KEY} from "../../config"
 import {ImageModel} from "../../models"
 import {enqueueSnackbar} from "../../notistack-lib/actions"
-import {useRetreat} from "../../pages/misc/RetreatProvider"
 import {AppRoutes} from "../../Stack"
 import {ApiAction} from "../../store/actions/api"
 import {patchWebsite} from "../../store/actions/retreat"
@@ -45,10 +44,10 @@ type EditWebsiteFormProps = {
   websiteId: number
   retreatIdx: number
   currentPageId: string
+  isLive: boolean
 }
 function EditWebsiteForm(props: EditWebsiteFormProps) {
   let dispatch = useDispatch()
-  let [retreat] = useRetreat()
   let website = useAttendeeLandingWebsite(props.websiteId)
   let imageHolder: {[key: number]: ImageModel} = {}
   if (website?.banner_image) {
@@ -116,7 +115,7 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
           value={formik.values.name}
           id={`name`}
           onChange={formik.handleChange}
-          disabled={retreat.registration_live}
+          disabled={props.isLive}
           variant="outlined"
           label="Website Name"
           className={classes.textField}
@@ -124,7 +123,7 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
           helperText={
             formik.errors && formik.errors["name"]
               ? formik.errors["name"]
-              : retreat.registration_live
+              : props.isLive
               ? "Website name cannot be changed once registration is live"
               : ""
           }

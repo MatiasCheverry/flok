@@ -227,6 +227,7 @@ export default function LandingPageGenerator() {
 
               <div className={classes.editWebsiteFormWrapper}>
                 <EditWebsiteForm
+                  isLive={retreat.registration_live}
                   websiteId={website.id}
                   retreatIdx={retreatIdx}
                   currentPageId={currentPageId}
