@@ -114,9 +114,7 @@ export default function RetreatHomePage() {
   }, [retreat.lodging_final_destination])
 
   let numBookedFlights = attendees
-    .filter((attendee) =>
-      ["INFO_ENTERED", "CREATED"].includes(attendee.info_status)
-    )
+    .filter((attendee) => ["INFO_ENTERED"].includes(attendee.info_status))
     .filter(
       (attendee) =>
         attendee.flight_status &&
