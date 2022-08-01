@@ -17,12 +17,7 @@ import AppOverviewCard, {
 import AppTodoList from "../../components/overview/AppTaskList"
 import PageBody from "../../components/page/PageBody"
 import config, {MAX_TASKS} from "../../config"
-import {
-  OrderedRetreatAttendeesState,
-  OrderedRetreatFlightsState,
-  RetreatAttendeeModel,
-  RetreatToTask,
-} from "../../models/retreat"
+import {RetreatAttendeeModel, RetreatToTask} from "../../models/retreat"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
 import {putRetreatTask} from "../../store/actions/retreat"
@@ -80,6 +75,9 @@ export default function RetreatHomePage() {
       (attendee) => attendee.info_status === "INFO_ENTERED"
     )
   }
+  function getAttendeesToRegister(attendees: RetreatAttendeeModel[]) {
+    return attendees.filter((attendee) => attendee.info_status === "CREATED")
+  }
 
   useEffect(() => {
     if (
@@ -115,48 +113,15 @@ export default function RetreatHomePage() {
     setDestinationOverview(retreat.lodging_final_destination)
   }, [retreat.lodging_final_destination])
 
-  let [attendeesOverview, setAttendeesOverview] = useState<string | undefined>(
-    undefined
-  )
-  useEffect(() => {
-    if (
-      attendees &&
-      retreat.attendees_state &&
-      OrderedRetreatAttendeesState.indexOf(retreat.attendees_state) >=
-        OrderedRetreatAttendeesState.indexOf("REGISTRATION_OPEN")
-    ) {
-      setAttendeesOverview(getRegisteredAttendees(attendees).length.toString())
-    } else {
-      setAttendeesOverview(undefined)
-    }
-  }, [attendees, retreat.attendees_state])
-
-  let [flightsOverview, setFlightsOverview] = useState<string | undefined>(
-    undefined
-  )
-  useEffect(() => {
-    if (
-      attendees &&
-      retreat.flights_state &&
-      OrderedRetreatFlightsState.indexOf(retreat.flights_state) >=
-        OrderedRetreatFlightsState.indexOf("POLICY_REVIEW")
-    ) {
-      let numBookedFlights = attendees
-        .filter((attendee) =>
-          ["INFO_ENTERED", "CREATED"].includes(attendee.info_status)
-        )
-        .filter(
-          (attendee) =>
-            attendee.flight_status &&
-            ["OPT_OUT", "BOOKED"].includes(attendee.flight_status)
-        ).length
-      setFlightsOverview(
-        `${numBookedFlights} / ${getRegisteredAttendees(attendees).length}`
-      )
-    } else {
-      setFlightsOverview(undefined)
-    }
-  }, [setFlightsOverview, attendees, retreat.flights_state])
+  let numBookedFlights = attendees
+    .filter((attendee) =>
+      ["INFO_ENTERED", "CREATED"].includes(attendee.info_status)
+    )
+    .filter(
+      (attendee) =>
+        attendee.flight_status &&
+        ["OPT_OUT", "BOOKED"].includes(attendee.flight_status)
+    ).length
 
   let [lodgingOverview, setLodgingOverview] = useState<string | undefined>(
     undefined
@@ -245,13 +210,28 @@ export default function RetreatHomePage() {
           <AppOverviewCard
             label="Attendees"
             Icon={People}
-            value={attendeesOverview}
+            value={
+              getRegisteredAttendees(attendees).length +
+                getAttendeesToRegister(attendees).length >
+              0
+                ? `${getRegisteredAttendees(attendees).length.toString()} / ${
+                    getRegisteredAttendees(attendees).length +
+                    getAttendeesToRegister(attendees).length
+                  }`
+                : "-- / --"
+            }
             moreInfo={"# of attendees successfully registered for your retreat"}
           />
           <AppOverviewCard
             label="Flights"
             Icon={Flight}
-            value={flightsOverview ?? "-- / --"}
+            value={
+              getRegisteredAttendees(attendees).length
+                ? `${numBookedFlights} / ${getRegisteredAttendees(
+                    attendees
+                  ).length.toString()}`
+                : "-- / --"
+            }
             moreInfo={
               "# of attendees who've confirmed their flights for your retreat"
             }
