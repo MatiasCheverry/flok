@@ -22,6 +22,7 @@ export function useRetreatAttendees(retreatId: number) {
   let attendeesList = useSelector(
     (state: RootState) => state.retreat.retreatAttendees[retreatId]
   )
+  let attendeesListLoaded = !!attendeesList?.length
   let attendeesObject = useSelector((state: RootState) => {
     return state.retreat.attendees
   })
@@ -33,13 +34,13 @@ export function useRetreatAttendees(retreatId: number) {
   useEffect(() => {
     async function loadAttendees() {
       setLoading(true)
-      dispatch(getRetreatAttendees(retreatId))
+      await dispatch(getRetreatAttendees(retreatId))
       setLoading(false)
     }
-    if (!attendeesList) {
+    if (!attendeesListLoaded) {
       loadAttendees()
     }
-  }, [attendeesList, dispatch, retreatId])
+  }, [attendeesListLoaded, dispatch, retreatId])
   return [attendees, loading] as const
 }
 

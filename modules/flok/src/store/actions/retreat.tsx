@@ -178,6 +178,27 @@ export function getTrip(tripId: number) {
   })
 }
 
+export const GET_TRIPS_REQUEST = "GET_TRIPS_REQUEST"
+export const GET_TRIPS_SUCCESS = "GET_TRIPS_SUCCESS"
+export const GET_TRIPS_FAILURE = "GET_TRIPS_FAILURE"
+export function getTrips(tripIds: number[]) {
+  if (tripIds.length > 50) {
+    tripIds = tripIds.slice(0, 50)
+  }
+  let endpoint = `/v1.0/trips?${new URLSearchParams(
+    tripIds.map((id) => ["id", id.toString()])
+  )}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_TRIPS_REQUEST},
+      {type: GET_TRIPS_SUCCESS},
+      {type: GET_TRIPS_FAILURE},
+    ],
+  })
+}
+
 export const GET_ATTENDEE_REQUEST = "GET_ATTENDEE_REQUEST"
 export const GET_ATTENDEE_SUCCESS = "GET_ATTENDEE_SUCCESS"
 export const GET_ATTENDEE_FAILURE = "GET_ATTENDEE_FAILURE"

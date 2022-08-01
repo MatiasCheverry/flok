@@ -35,6 +35,7 @@ import {
   GET_RETREAT_BY_GUID_SUCCESS,
   GET_RETREAT_FAILURE,
   GET_RETREAT_SUCCESS,
+  GET_TRIPS_SUCCESS,
   GET_TRIP_SUCCESS,
   GET_WEBSITE_BY_ATTENDEE_SUCCESS,
   GET_WEBSITE_SUCCESS,
@@ -186,6 +187,18 @@ export default function retreatReducer(
         }
       }
       return state
+    case GET_TRIPS_SUCCESS:
+      payload = (action as ApiAction).payload as {trips: RetreatTripModel[]}
+      return {
+        ...state,
+        trips: {
+          ...state.trips,
+          ...payload.trips.reduce(
+            (prev, curr) => ({...prev, [curr.id]: curr}),
+            {}
+          ),
+        },
+      }
     case INSTANTIATE_ATTENDEE_TRIPS_SUCCESS:
       payload = (action as ApiAction).payload as AttendeeApiResponse
       if (payload) {

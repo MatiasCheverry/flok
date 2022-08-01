@@ -19,7 +19,7 @@ import {Link as RouterLink} from "react-router-dom"
 import PageBody from "../../components/page/PageBody"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
-import {getTrip} from "../../store/actions/retreat"
+import {getTrips} from "../../store/actions/retreat"
 import {useRetreatAttendees} from "../../utils/retreatUtils"
 import {useRetreat} from "../misc/RetreatProvider"
 
@@ -107,24 +107,44 @@ export default function FlightsPage() {
     ["CREATED", "INFO_ENTERED"].includes(attendee.info_status)
   )
 
-  let dispatch = useDispatch()
   let trips = useSelector((state: RootState) => {
     return state.retreat.trips
   })
+  let missingTrips = attendeeTravelInfo.reduce((prev, attendee) => {
+    let ret: {[key: number]: undefined} = {}
+    let depId =
+      attendee.travel && attendee.travel.dep_trip
+        ? attendee.travel.dep_trip.id
+        : undefined
+    let arrId =
+      attendee.travel && attendee.travel.arr_trip
+        ? attendee.travel.arr_trip.id
+        : undefined
+    if (depId && !trips[depId]) {
+      ret[depId] = undefined
+    }
+    if (arrId && !trips[arrId]) {
+      ret[arrId] = undefined
+    }
+    return {...prev, ...ret}
+  }, {})
+
+  let dispatch = useDispatch()
+
+  let [loading, setLoading] = useState(false)
+
   useEffect(() => {
-    attendeeTravelInfo.forEach((attendee) => {
-      if (
-        attendee.travel &&
-        attendee.travel.arr_trip?.id &&
-        attendee.travel.dep_trip?.id
-      ) {
-        !trips[attendee.travel.arr_trip?.id] &&
-          dispatch(getTrip(attendee.travel.arr_trip?.id))
-        !trips[attendee.travel.dep_trip?.id] &&
-          dispatch(getTrip(attendee.travel.dep_trip?.id))
-      }
-    })
-  }, [dispatch, attendeeTravelInfo, trips])
+    async function loadTrips() {
+      setLoading(true)
+      await dispatch(
+        getTrips(Object.keys(missingTrips).map((id) => parseInt(id)))
+      )
+      setLoading(false)
+    }
+    if (Object.keys(missingTrips).length && !loading) {
+      loadTrips()
+    }
+  }, [dispatch, missingTrips, loading])
 
   return (
     <PageBody appBar>
