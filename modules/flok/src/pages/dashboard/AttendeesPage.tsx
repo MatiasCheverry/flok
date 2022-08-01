@@ -25,7 +25,7 @@ import {
   GridToolbarContainer,
   GridToolbarExport,
 } from "@material-ui/data-grid"
-import {Add, CloudUpload, DoneAll, Person} from "@material-ui/icons"
+import {Add, CloudUpload, DoneAll, GetApp, Person} from "@material-ui/icons"
 import CloseIcon from "@material-ui/icons/Close"
 import {Alert} from "@material-ui/lab"
 import {push} from "connected-react-router"
@@ -610,6 +610,15 @@ function AttendeesPage() {
         </DialogContent>
         <DialogActions>
           <div className={classes.actionButtonsContainer}>
+            {batchUploadingPage && !batchUploadData[0] && !batchUploadResponse && (
+              <Button
+                href={
+                  "https://flok-b32d43c.s3.us-east-1.amazonaws.com/misc/sample-batch-upload.csv"
+                }>
+                <GetApp />
+                &nbsp; Download Sample CSV
+              </Button>
+            )}
             {batchUploadingPage && batchUploadData[0] && (
               <AppCsvXlsxUpload
                 text="Upload New File"
