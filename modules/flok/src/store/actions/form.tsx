@@ -305,3 +305,24 @@ export function getFormResponse(formResponseId: number) {
     ],
   })
 }
+export const POST_QUESTION_REORDER_REQUEST = "POST_QUESTION_REORDER_REQUEST"
+export const POST_QUESTION_REORDER_SUCCESS = "POST_QUESTION_REORDER_SUCCESS"
+export const POST_QUESTION_REORDER_FAILURE = "POST_QUESTION_REORDER_FAILURE"
+
+export function postReorderQuestion(
+  questionId: number,
+  formId: number,
+  prevQuestionId: number | undefined
+) {
+  let endpoint = `/v1.0/forms/${formId}/questions/${questionId}/move`
+  return createApiAction({
+    method: "POST",
+    endpoint,
+    body: JSON.stringify({previousId: prevQuestionId}),
+    types: [
+      {type: POST_QUESTION_REORDER_REQUEST},
+      {type: POST_QUESTION_REORDER_SUCCESS},
+      {type: POST_QUESTION_REORDER_FAILURE},
+    ],
+  })
+}

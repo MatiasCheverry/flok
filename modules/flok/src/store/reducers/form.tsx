@@ -24,6 +24,7 @@ import {
   POST_FORM_QUESTION_OPTION_SUCCESS,
   POST_FORM_QUESTION_SUCCESS,
   POST_FORM_RESPONSE_SUCCESS,
+  POST_QUESTION_REORDER_SUCCESS,
 } from "../actions/form"
 
 export type FormState = {
@@ -139,6 +140,22 @@ export default function formReducer(
           [formResponse.id]: formResponse,
         },
       }
+    case POST_QUESTION_REORDER_SUCCESS:
+      let questions = (
+        (action as ApiAction).payload as {questions: FormQuestionModel[]}
+      ).questions
+      let formId = questions[0].form_id
+      return {
+        ...state,
+        forms: {
+          ...state.forms,
+          [formId]: {
+            ...state.forms[formId],
+            questions: questions.map((question) => question.id),
+          } as FormModel,
+        },
+      }
+
     default:
       return state
   }

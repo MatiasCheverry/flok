@@ -17,10 +17,11 @@ import {
   TextField,
   Tooltip,
 } from "@material-ui/core"
-import {Add, CalendarToday, Delete} from "@material-ui/icons"
+import {Add, CalendarToday, Delete, DragIndicator} from "@material-ui/icons"
 import clsx from "clsx"
 import {useFormik} from "formik"
 import React, {useEffect, useState} from "react"
+import {DraggableProvidedDragHandleProps} from "react-beautiful-dnd"
 import {useDispatch} from "react-redux"
 import {
   FormQuestionModel,
@@ -50,6 +51,9 @@ let useQuestionStyles = makeStyles((theme) => ({
     borderRadius: theme.shape.borderRadius,
     display: "flex",
     flexDirection: "column",
+    "&:not(:hover) $dragIndicatorDiv:not(.draggable)": {
+      opacity: 0,
+    },
   },
   questionHeaderContainer: {
     display: "flex",
@@ -80,9 +84,22 @@ let useQuestionStyles = makeStyles((theme) => ({
       marginRight: "auto",
     },
   },
+  dragIndicator: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginTop: `-${theme.spacing(1.5)}px`,
+    transform: "rotate(90deg)",
+  },
+  dragIndicatorDiv: {},
+  dragIndicatorWrapper: {
+    display: "flex",
+  },
 }))
 
-type RegFormBuilderQuestionProps = {}
+type RegFormBuilderQuestionProps = {
+  dragHandleProps: DraggableProvidedDragHandleProps | undefined
+  isDragging: boolean
+}
 export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
   let classes = useQuestionStyles()
   let [editActive, setEditActive] = useState(false)
@@ -126,6 +143,20 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
             }
           }}
           tabIndex={0}>
+          <div
+            className={clsx(
+              classes.dragIndicatorDiv,
+              editActive || props.isDragging ? "draggable" : undefined
+            )}>
+            <div
+              {...props.dragHandleProps}
+              className={classes.dragIndicatorWrapper}>
+              <DragIndicator
+                fontSize="small"
+                className={classes.dragIndicator}
+              />
+            </div>
+          </div>
           <div className={classes.questionHeaderContainer}>
             <div className={classes.questionTitleSubtitle}>
               <FormQuestionHeader
@@ -495,6 +526,7 @@ export function RegFormBuilderSelectQuestion(
         {props.optionIds.map((optionId, i) => {
           return (
             <SelectQuestionLabel
+              key={optionId}
               optionId={optionId}
               type={props.type}
               nonEditable={props.nonEditable}
