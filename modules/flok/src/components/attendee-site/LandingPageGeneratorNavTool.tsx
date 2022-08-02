@@ -104,8 +104,7 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
         </IconButton>
       </div>
       <Link
-        // className={classes.viewPageLink}
-        href={AppRoutes.getPath("AttendeeSitePage", {
+        href={AppRoutes.getPath("AttendeeSiteHome", {
           retreatName: titleToNavigation(props.website.name),
           pageName: titleToNavigation(props.selectedPage.title ?? "home"),
         })}

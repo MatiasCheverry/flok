@@ -1,9 +1,14 @@
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {ResourceNotFound} from "../models"
-import {DestinationModel, HotelModel} from "../models/lodging"
+import {DestinationModel, GooglePlace, HotelModel} from "../models/lodging"
 import {RootState} from "../store"
-import {getDestinations, getHotelByGuid} from "../store/actions/lodging"
+import {
+  addGooglePlace,
+  getDestinations,
+  getHotelByGuid,
+} from "../store/actions/lodging"
+import {useScript} from "../utils"
 
 // HOOKS
 export function useDestinations() {
@@ -126,4 +131,63 @@ export class HotelUtils {
         : ""
     }${airportMins} mins`
   }
+}
+
+export function useGooglePlaceId(placeId: string) {
+  const API_KEY = "AIzaSyBNW3s0RPJx7CRFbYWhHJpIAHyN7GrGVgE"
+  let dispatch = useDispatch()
+  let [name, setName] = useState("")
+  let [googleMapScriptLoaded] = useScript(
+    `https://maps.googleapis.com/maps/api/js?libraries=places&key=${API_KEY}`
+  )
+  let place = useSelector(
+    (state: RootState) => state.lodging.googlePlaces[placeId]
+  )
+  useEffect(() => {
+    if (googleMapScriptLoaded && (!place || !place.lat || !place.lng)) {
+      fetchGooglePlace(placeId, (place) => {
+        setName(place.name)
+        dispatch(
+          addGooglePlace({
+            name: place.name,
+            place_id: placeId,
+            lat: place.lat,
+            lng: place.lng,
+          })
+        )
+      })
+    }
+  }, [setName, googleMapScriptLoaded, placeId, place, dispatch])
+
+  return place ? place.name : name
+}
+
+export function fetchGooglePlace(
+  placeId: string,
+  onFetch: (place: GooglePlace) => void
+) {
+  // can only call this if google script has been loaded
+  let map = new google.maps.Map(document.createElement("div"))
+  let service = new google.maps.places.PlacesService(map)
+  service.getDetails(
+    {
+      placeId: placeId,
+      fields: ["name", "geometry"],
+    },
+    (place, status) => {
+      console.log("got earlier", status)
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        if (place && place.name && place.geometry?.location) {
+          console.log("got here")
+          onFetch({
+            name: place.name,
+            place_id: placeId,
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+            type: "ADD_GOOGLE_PLACE",
+          })
+        }
+      }
+    }
+  )
 }

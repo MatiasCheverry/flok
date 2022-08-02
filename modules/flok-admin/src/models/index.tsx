@@ -41,6 +41,7 @@ export type AdminRetreatModel = {
   lodging_final_contract_notes?: string
   lodging_final_contract_url?: string
   lodging_site_inspection_url?: string
+  request_for_proposal_id?: number
   group_ids: number[]
 
   // Retreat data related to flights
@@ -60,6 +61,9 @@ export type AdminRetreatModel = {
   faq_link?: string
   budget_link?: string
   rmc_survey_link?: string
+
+  // Notifications
+  slack_channel?: string
 }
 
 export type AdminRetreatUpdateModel = Pick<
@@ -110,12 +114,14 @@ export type AdminSelectedHotelStateTypes =
   | "PENDING"
   | "NOT_AVAILABLE"
   | "REVIEW"
+  | "REQUESTED"
 
 export type AdminSelectedHotelProposalModel = {
   retreat_id: number
   hotel_id: number
   state: AdminSelectedHotelStateTypes
   hotel_proposals?: AdminLodgingProposalModel[]
+  rfp_id?: number
   group_id?: number
 }
 
@@ -190,6 +196,14 @@ export type AdminHotelDetailsModel = {
   spotlight_img?: AdminImageModel
   website_url: string
   sub_location: string
+  lodging_tags: LodgingTagModel[]
+  city: string
+  state?: string
+  country: string
+  num_rooms: number
+  google_place_id?: string
+  google_place_name?: string
+  address_coordinates?: [number, number]
 }
 
 export type AdminHotelModel = Pick<
@@ -346,6 +360,27 @@ export const OrderedRetreatItineraryState = [
 ] as const
 export type RetreatItineraryState = typeof OrderedRetreatFlightsState[number]
 /****************** End retreat states types ******************/
+
+// Hotel Tags
+export type LodgingTagModel = {
+  id: number
+  name: string
+}
+
+export type AgendaType = "ALL_WORK" | "ALL_PLAY" | "WORK_AND_PLAY"
+export type RFPModel = {
+  id: number
+  retreat_id: number
+  has_exact_dates: boolean
+  exact_dates_start?: string
+  exact_dates_end?: string
+  flexible_number_of_nights?: number
+  exact_dates_notes?: string
+  flexible_dates_notes?: string
+  agenda_type: AgendaType
+  agenda_notes?: string
+  number_of_rooms: number
+}
 
 export type HotelGroup = {
   id: number

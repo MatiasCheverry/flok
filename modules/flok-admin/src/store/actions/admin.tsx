@@ -746,6 +746,22 @@ export function postDestination(values: Partial<AdminDestinationModel>) {
   })
 }
 
+export const GET_LODGING_TAGS_REQUEST = "GET_LODGING_TAGS_REQUEST"
+export const GET_LODGING_TAGS_SUCCESS = "GET_LODGING_TAGS_SUCCESS"
+export const GET_LODGING_TAGS_FAILURE = "GET_LODGING_TAGS_FAILURE"
+
+export function getLodgingTags() {
+  let endpoint = `/v1.0/lodging-tags`
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_LODGING_TAGS_REQUEST,
+      GET_LODGING_TAGS_SUCCESS,
+      GET_LODGING_TAGS_FAILURE,
+    ],
+  })
+}
 export const GET_HOTEL_GROUP_REQUEST = "GET_HOTEL_GROUP_REQUEST"
 export const GET_HOTEL_GROUP_SUCCESS = "GET_HOTEL_GROUP_SUCCESS"
 export const GET_HOTEL_GROUP_FAILURE = "GET_HOTEL_GROUP_FAILURE"
@@ -763,6 +779,46 @@ export function getHotelGroup(groupId: number) {
   })
 }
 
+export const ADD_GOOGLE_PLACE = "ADD_GOOGLE_PLACE"
+
+export function addGooglePlace(place: {
+  name: string
+  place_id: string
+  lat?: number
+  lng?: number
+  address?: string
+}) {
+  let action = {...place, type: ADD_GOOGLE_PLACE}
+  return action
+}
+
+export const GET_HOTELS_FOR_DATAGRID_REQUEST = "GET_HOTELS_FOR_DATAGRID_REQUEST"
+export const GET_HOTELS_FOR_DATAGRID_SUCCESS = "GET_HOTELS_FOR_DATAGRID_SUCCESS"
+export const GET_HOTELS_FOR_DATAGRID_FAILURE = "GET_HOTELS_FOR_DATAGRID_FAILURE"
+
+export function getHotelsForDataGrid(
+  offset: number = 0,
+  filters?: {
+    column?: string
+    operator?: string
+    value?: string
+  }
+) {
+  let endpoint = `/v1.0/admin/hotels/datagrid?offset=${offset}${
+    filters?.column && filters?.operator && filters?.value
+      ? `&column=${filters.column}&operator=${filters.operator}&value=${filters.value}`
+      : ""
+  }`
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_HOTELS_FOR_DATAGRID_REQUEST,
+      GET_HOTELS_FOR_DATAGRID_SUCCESS,
+      GET_HOTELS_FOR_DATAGRID_FAILURE,
+    ],
+  })
+}
 export const POST_HOTEL_GROUP_REQUEST = "POST_HOTEL_GROUP_REQUEST"
 export const POST_HOTEL_GROUP_SUCCESS = "POST_HOTEL_GROUP_SUCCESS"
 export const POST_HOTEL_GROUP_FAILURE = "POST_HOTEL_GROUP_FAILURE"
@@ -811,6 +867,22 @@ export function deleteHotelGroup(groupId: number) {
       {type: DELETE_HOTEL_GROUP_REQUEST, meta: {groupId}},
       {type: DELETE_HOTEL_GROUP_SUCCESS, meta: {groupId}},
       {type: DELETE_HOTEL_GROUP_FAILURE, meta: {groupId}},
+    ],
+  })
+}
+
+export const GET_RFP_REQUEST = "GET_RFP_REQUEST"
+export const GET_RFP_SUCCESS = "GET_RFP_SUCCESS"
+export const GET_RFP_FAILURE = "GET_RFP_FAILURE"
+export function getRFP(rfpId: number) {
+  let endpoint = `/v1.0/rfps/${rfpId}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_RFP_REQUEST},
+      {type: GET_RFP_SUCCESS},
+      {type: GET_RFP_FAILURE},
     ],
   })
 }

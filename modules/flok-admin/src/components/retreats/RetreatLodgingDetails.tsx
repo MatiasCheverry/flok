@@ -17,7 +17,7 @@ import {
 import {Menu} from "@material-ui/icons"
 import {useFormik} from "formik"
 import querystring from "querystring"
-import React, {useEffect, useState} from "react"
+import {useEffect, useState} from "react"
 import {DragDropContext, Draggable, Droppable} from "react-beautiful-dnd"
 import {useDispatch, useSelector} from "react-redux"
 import {Link as ReactRouterLink} from "react-router-dom"
@@ -51,6 +51,17 @@ let useAccordionItemStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
   },
+  rfpModal: {
+    width: "100%",
+    display: "flex",
+    flexDirection: "column",
+  },
+  rfpModalTitle: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   menuIcon: {
     marginLeft: theme.spacing(2),
   },
@@ -59,6 +70,7 @@ let useAccordionItemStyles = makeStyles((theme) => ({
 function HotelAccordionItem(props: {
   selectedHotel: AdminSelectedHotelProposalModel
   hotel: {name: string; location: string}
+  retreatRFPId?: number
 }) {
   let classes = useAccordionItemStyles()
   let dispatch = useDispatch()
@@ -71,6 +83,7 @@ function HotelAccordionItem(props: {
   )
   let [removeSelectedHotelModalOpen, setRemoveSelectedHotelModalOpen] =
     useState(false)
+  let [rfpModalOpen, setRfpModalOpen] = useState(false)
   let [deleteProposalModalOpen, setDeleteProposalModalOpen] = useState(false)
   let proposalStateFormik = useFormik({
     enableReinitialize: true,
@@ -85,6 +98,7 @@ function HotelAccordionItem(props: {
       )
     },
   })
+  let [tabValue, setTabValue] = useState("current")
   return (
     <Accordion
       expanded={expanded}
@@ -98,7 +112,12 @@ function HotelAccordionItem(props: {
             {props.hotel.location ? `, ${props.hotel.location}` : ""}
           </AppTypography>
           <div>
-            {props.selectedHotel.state === "REVIEW" ? (
+            {props.selectedHotel.state === "REQUESTED" ? (
+              <Chip
+                label="Requested"
+                style={{color: "white", backgroundColor: "blue"}}
+              />
+            ) : props.selectedHotel.state === "REVIEW" ? (
               <Chip
                 label="Ready for review"
                 style={{color: "white", backgroundColor: "green"}}
@@ -573,6 +592,9 @@ export default function RetreatLodgingDetails(
                                   {...provided.draggableProps}
                                   {...provided.dragHandleProps}>
                                   <HotelAccordionItem
+                                    retreatRFPId={
+                                      props.retreat.request_for_proposal_id
+                                    }
                                     hotel={{
                                       name: hotels[selectedHotel.hotel_id]?.name
                                         ? hotels[selectedHotel.hotel_id]!.name
@@ -628,6 +650,7 @@ export default function RetreatLodgingDetails(
                           {...provided.draggableProps}
                           {...provided.dragHandleProps}>
                           <HotelAccordionItem
+                            retreatRFPId={props.retreat.request_for_proposal_id}
                             hotel={{
                               name: hotels[selectedHotel.hotel_id]?.name
                                 ? hotels[selectedHotel.hotel_id]!.name

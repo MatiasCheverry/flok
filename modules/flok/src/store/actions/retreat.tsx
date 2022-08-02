@@ -6,9 +6,11 @@ import {
   AttendeeLandingWebsitePageModel,
   RetreatAttendeeModel,
   RetreatModel,
+  RetreatSelectedHotelProposalState,
   RetreatToTaskState,
   RetreatTravelModel,
   RetreatTripModel,
+  RFPModel,
 } from "../../models/retreat"
 import {closeSnackbar, enqueueSnackbar} from "../../notistack-lib/actions"
 import {apiNotification} from "../../notistack-lib/utils"
@@ -692,6 +694,7 @@ export function patchRetreat(
       | "lodging_final_destination"
       | "lodging_final_contract_url"
       | "retreat_name"
+      | "request_for_proposal_id"
       | "attendees_registration_form_id"
     >
   >
@@ -749,6 +752,27 @@ export function getPresetImages(type: string) {
   })
 }
 
+export const POST_RFP_REQUEST = "POST_RFP_REQUEST"
+export const POST_RFP_SUCCESS = "POST_RFP_SUCCESS"
+export const POST_RFP_FAILURE = "POST_RFP_FAILURE"
+export function postRFP(values: Partial<RFPModel>) {
+  let endpoint = `/v1.0/rfps`
+  return createApiAction(
+    {
+      method: "POST",
+      endpoint,
+      body: JSON.stringify(values),
+      types: [
+        {type: POST_RFP_REQUEST},
+        {type: POST_RFP_SUCCESS},
+        {type: POST_RFP_FAILURE},
+      ],
+    },
+    {
+      errorMessage: "Something went wrong",
+    }
+  )
+}
 export const POST_REGISTRATION_LIVE_REQUEST = "POST_REGISTRATION_LIVE_REQUEST"
 export const POST_REGISTRATION_LIVE_SUCCESS = "POST_REGISTRATION_LIVE_SUCCESS"
 export const POST_REGISTRATION_LIVE_FAILURE = "POST_REGISTRATION_LIVE_FAILURE"
@@ -771,6 +795,53 @@ export function postRegistrationLive(retreatId: number) {
   )
 }
 
+export const POST_SELECTED_HOTEL_REQUEST = "POST_SELECTED_HOTEL_REQUEST"
+export const POST_SELECTED_HOTEL_SUCCESS = "POST_SELECTED_HOTEL_SUCCESS"
+export const POST_SELECTED_HOTEL_FAILURE = "POST_SELECTED_HOTEL_FAILURE"
+export function postSelectedHotel(
+  state: RetreatSelectedHotelProposalState,
+  retreatId: number,
+  hotelId: number,
+  rfpId: number
+) {
+  let endpoint = `/v1.0/retreats/${retreatId}/hotels/${hotelId}`
+  return createApiAction(
+    {
+      method: "POST",
+      endpoint,
+      body: JSON.stringify({state: state, rfp_id: rfpId}),
+      types: [
+        {type: POST_SELECTED_HOTEL_REQUEST},
+        {type: POST_SELECTED_HOTEL_SUCCESS},
+        {type: POST_SELECTED_HOTEL_FAILURE},
+      ],
+    },
+    {
+      errorMessage: "Something went wrong",
+    }
+  )
+}
+
+export const GET_RFP_REQUEST = "GET_RFP_REQUEST"
+export const GET_RFP_SUCCESS = "GET_RFP_SUCCESS"
+export const GET_RFP_FAILURE = "GET_RFP_FAILURE"
+export function getRFP(rfpId: number) {
+  let endpoint = `/v1.0/rfps/${rfpId}`
+  return createApiAction(
+    {
+      method: "GET",
+      endpoint,
+      types: [
+        {type: GET_RFP_REQUEST},
+        {type: GET_RFP_SUCCESS},
+        {type: GET_RFP_FAILURE},
+      ],
+    },
+    {
+      errorMessage: "Something went wrong",
+    }
+  )
+}
 export const GET_MY_ATTENDEE_REQUEST = "GET_MY_ATTENDEE_REQUEST"
 export const GET_MY_ATTENDEE_SUCCESS = "GET_MY_ATTENDEE_SUCCESS"
 export const GET_MY_ATTENDEE_FAILURE = "GET_MY_ATTENDEE_FAILURE"

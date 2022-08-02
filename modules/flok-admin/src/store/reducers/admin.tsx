@@ -10,12 +10,16 @@ import {
   AdminRetreatListType,
   AdminRetreatModel,
   HotelGroup,
+  LodgingTagModel,
   RetreatNoteModel,
   RetreatTask,
   RetreatToTask,
+  RFPModel,
   User,
 } from "../../models"
+import {GooglePlace} from "../../utils"
 import {
+  ADD_GOOGLE_PLACE,
   ADD_RETREAT_TASKS_SUCCESS,
   DELETE_HOTEL_GROUP_SUCCESS,
   DELETE_RETREAT_ATTENDEES_SUCCESS,
@@ -24,9 +28,11 @@ import {
   GET_DESTINATIONS_SUCCESS,
   GET_HOTELS_BY_DEST_SUCCESS,
   GET_HOTELS_BY_ID_SUCCESS,
+  GET_HOTELS_FOR_DATAGRID_SUCCESS,
   GET_HOTELS_SEARCH_SUCCESS,
   GET_HOTEL_DETAILS_SUCCESS,
   GET_HOTEL_GROUP_SUCCESS,
+  GET_LODGING_TAGS_SUCCESS,
   GET_LOGIN_TOKEN_SUCCESS,
   GET_RETREATS_LIST_SUCCESS,
   GET_RETREAT_ATTENDEES_SUCCESS,
@@ -35,6 +41,7 @@ import {
   GET_RETREAT_DETAILS_SUCCESS,
   GET_RETREAT_NOTES_SUCCESS,
   GET_RETREAT_TASKS_SUCCESS,
+  GET_RFP_SUCCESS,
   GET_TASKS_LIST_SUCCESS,
   GET_TASK_SUCCESS,
   GET_USERS_SUCCESS,
@@ -113,6 +120,14 @@ export type AdminState = {
   tasks: {
     [id: number]: RetreatTask | undefined
   }
+  lodgingTags: {
+    [id: number]: LodgingTagModel
+  }
+  googlePlaces: {[place_id: string]: GooglePlace}
+  hotelsDataGridTotal: number
+  RFPs: {
+    [id: string]: RFPModel | undefined
+  }
   hotelGroups: {
     [id: number]: HotelGroup | undefined
   }
@@ -140,6 +155,10 @@ const initialState: AdminState = {
   usersByRetreat: {},
   userLoginTokens: {},
   tasks: {},
+  lodgingTags: {},
+  googlePlaces: {},
+  hotelsDataGridTotal: 0,
+  RFPs: {},
   hotelGroups: {},
 }
 
@@ -274,6 +293,23 @@ export default function AdminReducer(
           ...state.hotelsDetails,
           [payload.hotel.id]: payload.hotel,
         },
+      }
+    case GET_HOTELS_FOR_DATAGRID_SUCCESS:
+      meta = (action as unknown as {meta: {id: number}}).meta
+      payload = (action as unknown as ApiAction).payload as {
+        hotels: AdminHotelDetailsModel[]
+        total: number
+      }
+      return {
+        ...state,
+        hotels: {
+          ...state.hotels,
+          ...payload.hotels.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+        hotelsDataGridTotal: payload.total,
       }
     case POST_SELECTED_HOTEL_SUCCESS:
     case PUT_SELECTED_HOTEL_SUCCESS:
@@ -441,6 +477,40 @@ export default function AdminReducer(
           .sort((a, b) => (a.location > b.location ? 0 : 1))
           .map((dest) => dest.id),
       }
+    case GET_LODGING_TAGS_SUCCESS:
+      let lodgingTags = (
+        (action as ApiAction).payload as {lodging_tags: LodgingTagModel[]}
+      ).lodging_tags
+      let newTags = lodgingTags.reduce((last: any, curr: LodgingTagModel) => {
+        return {...last, [curr.id]: curr}
+      }, {})
+      return {
+        ...state,
+        lodgingTags: {
+          ...state.lodgingTags,
+          ...newTags,
+        },
+      }
+    case ADD_GOOGLE_PLACE:
+      let newPlace = action as GooglePlace
+      return {
+        ...state,
+        googlePlaces: {
+          ...state.googlePlaces,
+          [newPlace.place_id]: newPlace,
+        },
+      }
+    case GET_RFP_SUCCESS:
+      payload = (action as ApiAction).payload as {
+        request_for_proposal: RFPModel
+      }
+      let newRFPState = {...state}
+
+      newRFPState.RFPs = {
+        ...newRFPState.RFPs,
+        [payload.request_for_proposal.id]: payload.request_for_proposal,
+      }
+      return newRFPState
     case POST_HOTEL_GROUP_SUCCESS:
     case GET_HOTEL_GROUP_SUCCESS:
     case PATCH_HOTEL_GROUP_SUCCESS:

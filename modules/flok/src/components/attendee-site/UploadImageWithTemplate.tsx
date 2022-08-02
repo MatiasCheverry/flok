@@ -59,8 +59,8 @@ let useImageStyles = makeStyles((theme) => ({
     textOverflow: "ellipsis",
     whiteSpace: "nowrap",
     overflow: "hidden",
-    marginTop: "4px",
-    marginLeft: "8px",
+    marginTop: theme.spacing(0.5),
+    marginLeft: theme.spacing(1),
   },
 }))
 type UploadImageWithTemplateProps = {
@@ -89,31 +89,31 @@ export default function UploadImageWithTemplate(
     }
   }
   let presetImages = useSelector((state: RootState) => {
-    return state.retreat.presetImages
+    return state.retreat.presetImages[props.type]
   })
 
   let rows: {img1: ImageModel; img2?: ImageModel}[] = []
   useEffect(() => {
-    !presetImages[props.type][0] && dispatch(getPresetImages(props.type))
-  }, [presetImages, props.type, dispatch])
+    !presetImages[0] && getPresetImages(props.type)
+  }, [presetImages, props.type])
   let classes = useImageStyles()
   if (!isSmallScreen) {
-    for (let i = 0; i < presetImages[props.type].length; i += 2) {
-      if (i < presetImages[props.type].length - 1) {
+    for (let i = 0; i < presetImages.length; i += 2) {
+      if (i < presetImages.length - 1) {
         rows.push({
-          img1: presetImages[props.type][i].image,
-          img2: presetImages[props.type][i + 1].image,
+          img1: presetImages[i].image,
+          img2: presetImages[i + 1].image,
         })
       } else {
         rows.push({
-          img1: presetImages[props.type][i].image,
+          img1: presetImages[i].image,
         })
       }
     }
   } else {
-    for (let i = 0; i < presetImages[props.type].length; i++) {
+    for (let i = 0; i < presetImages.length; i++) {
       rows.push({
-        img1: presetImages[props.type][i].image,
+        img1: presetImages[i].image,
       })
     }
   }

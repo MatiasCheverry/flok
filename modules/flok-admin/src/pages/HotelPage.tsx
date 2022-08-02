@@ -105,6 +105,12 @@ function HotelPage(props: HotelPageProps) {
             component={ReactRouterLink}>
             Hotels
           </Link>
+          <Link
+            color="inherit"
+            to={AppRoutes.getPath("HotelsListPage")}
+            component={ReactRouterLink}>
+            Hotels List
+          </Link>
           <AppTypography color="textPrimary">{hotel?.name}</AppTypography>
         </Breadcrumbs>
         <Typography variant="h1">{hotel?.name}</Typography>

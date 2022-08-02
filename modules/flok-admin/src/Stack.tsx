@@ -2,6 +2,7 @@ import React from "react"
 import {Route, Switch} from "react-router-dom"
 import HomePage from "./pages/HomePage"
 import HotelPage from "./pages/HotelPage"
+import HotelsListPage from "./pages/HotelsListPage"
 import HotelsPage from "./pages/HotelsPage"
 import RetreatAttendeePage from "./pages/RetreatAttendeePage"
 import RetreatAttendeesPage from "./pages/RetreatAttendeesPage"
@@ -82,6 +83,11 @@ export class AppRoutes {
       path: "/hotels",
     },
     {
+      name: "HotelsListPage",
+      component: <HotelsListPage />,
+      path: "/hotels/list",
+    },
+    {
       name: "HotelPage",
       component: <HotelPage />,
       path: "/hotels/:hotelId",
@@ -91,6 +97,7 @@ export class AppRoutes {
       component: <UsersPage />,
       path: "/users",
     },
+
     // {
     //   name: "UserPage",
     //   component: <UserPage />,

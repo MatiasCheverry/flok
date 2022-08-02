@@ -1,10 +1,14 @@
-import {Button, Dialog, makeStyles} from "@material-ui/core"
+import {Button, Dialog, Link, makeStyles} from "@material-ui/core"
 import Box from "@material-ui/core/Box"
 import Typography from "@material-ui/core/Typography"
 import {push} from "connected-react-router"
 import {useState} from "react"
 import {useDispatch} from "react-redux"
-import {RouteComponentProps, withRouter} from "react-router-dom"
+import {
+  Link as ReactRouterLink,
+  RouteComponentProps,
+  withRouter,
+} from "react-router-dom"
 import AddDestinationModal from "../components/lodging/AddDestinationModal"
 import HotelSelectModal from "../components/lodging/HotelSelectModal"
 import NewHotelForm from "../components/lodging/NewHotelForm"
@@ -30,6 +34,14 @@ let useStyles = makeStyles((theme) => ({
     flex: 1,
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
+  },
+  link: {
+    "&:hover": {
+      textDecoration: "none",
+    },
+  },
+  linkBox: {
+    marginLeft: theme.spacing(1),
   },
 }))
 
@@ -98,6 +110,16 @@ function HotelsPage(props: LodgingContentPageProps) {
               }}>
               Add a new destination
             </Button>
+          </Box>
+          <Box clone className={classes.linkBox}>
+            <Link
+              className={classes.link}
+              component={ReactRouterLink}
+              to={AppRoutes.getPath("HotelsListPage")}>
+              <Button color="primary" variant="outlined">
+                View Hotels List
+              </Button>
+            </Link>
           </Box>
         </Box>
         {newHotelOpen && (

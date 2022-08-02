@@ -1,4 +1,6 @@
 import {Route, Switch} from "react-router-dom"
+import RetreatHotelSearchPage from "./components/lodging/RetreatHotelSearchPage"
+import RetreatRfpPage from "./components/lodging/RetreatRfpPage"
 import PageContainer from "./components/page/PageContainer"
 import PageSidenav, {PageDemoSidenav} from "./components/page/PageSidenav"
 import {Constants} from "./config"
@@ -14,6 +16,7 @@ import AttendeesPage from "./pages/dashboard/AttendeesPage"
 import BudgetEstimatePage from "./pages/dashboard/BudgetEstimatePage"
 import RetreatBudgetPage from "./pages/dashboard/BudgetPage"
 import FlightsPage from "./pages/dashboard/FlightsPage"
+import HotelProfilePage from "./pages/dashboard/HotelProfilePage"
 import ItineraryPage from "./pages/dashboard/ItineraryPage"
 import LandingPageGenerator from "./pages/dashboard/LandingPageGenerator"
 import LodgingContractPage from "./pages/dashboard/LodgingContractPage"
@@ -58,7 +61,11 @@ export class AppRoutes {
     RetreatLodgingPage: "/r/:retreatIdx/lodging",
     RetreatLodgingProposalsPage: "/r/:retreatIdx/lodging/proposals",
     RetreatLodgingProposalPage: "/r/:retreatIdx/lodging/proposals/:hotelGuid", // no sidebar
-    RetreatLodgingContractPage: "/r/:retreatIdx/lodging/contract", // no sidebar
+    RetreatLodgingContractPage: "/r/:retreatIdx/lodging/contract",
+
+    RetreatHotelSearchPage: "/r/:retreatIdx/lodging/hotels",
+    RetreatHotelProfilePage: "/r/:retreatIdx/lodging/hotels/:hotelGuid", // no sidebar work in progress
+    RetreatRfpPage: "/r/:retreatIdx/lodging/rfp",
 
     RetreatAttendeesPage: "/r/:retreatIdx/attendees",
     RetreatAttendeePage: "/r/:retreatIdx/attendees/:attendeeId/profile",
@@ -241,6 +248,15 @@ export default function Stack() {
                 exact
                 path={AppRoutes.getPath("RetreatLodgingContractPage")}>
                 <LodgingContractPage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatHotelProfilePage")}>
+                <HotelProfilePage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatHotelSearchPage")}>
+                <RetreatHotelSearchPage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatRfpPage")}>
+                <RetreatRfpPage />
               </Route>
 
               {/* Attendees */}

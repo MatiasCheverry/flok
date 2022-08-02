@@ -108,7 +108,11 @@ export default function ProposalsListPageBody(
     let reviewableHotels = hotelsById
       ? selectedHotels
           .filter((selectedHotel) => hotelsById[selectedHotel.hotel_id])
-          .filter((selectedHotel) => selectedHotel.state === "REVIEW")
+          .filter(
+            (selectedHotel) =>
+              selectedHotel.state === "REVIEW" ||
+              selectedHotel.state === "REQUESTED"
+          )
       : []
     reviewableHotels.forEach((selectedHotel) => {
       let destinationId = hotelsById[selectedHotel.hotel_id].destination_id
@@ -256,6 +260,7 @@ export default function ProposalsListPageBody(
                       hotel={hotel}
                       destination={destination}
                       proposals={proposals}
+                      requested={selectedHotel.state === "REQUESTED"}
                       proposalUrl={AppRoutes.getPath(
                         "RetreatLodgingProposalPage",
                         {

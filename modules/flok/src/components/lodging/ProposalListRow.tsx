@@ -100,6 +100,7 @@ type ProposalListRowProps = {
   openInTab?: boolean
   proposalUrl?: string
   unavailable?: boolean
+  requested?: boolean
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
   let classes = useStyles(props)
@@ -220,7 +221,7 @@ export default function ProposalListRow(props: ProposalListRowProps) {
       </div>
       <Button
         className={classes.viewProposalButton}
-        disabled={unavailable}
+        disabled={unavailable || props.requested}
         variant={unavailable ? "contained" : "outlined"}
         color="primary"
         {...(openInTab && proposalUrl
@@ -236,11 +237,13 @@ export default function ProposalListRow(props: ProposalListRowProps) {
             }
           : {})}>
         <AppTypography variant="inherit" noWrap>
-          {unavailable
-            ? "No Availability"
-            : `View Proposal${
-                proposals!.length > 1 ? `s (${proposals!.length})` : ""
-              }`}
+          {!props.requested
+            ? unavailable
+              ? "No Availability"
+              : `View Proposal${
+                  proposals!.length > 1 ? `s (${proposals!.length})` : ""
+                }`
+            : "Requested"}
         </AppTypography>
       </Button>
     </Paper>

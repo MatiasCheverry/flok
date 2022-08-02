@@ -23,11 +23,7 @@ import {
 } from "@material-ui/icons"
 import {createContext, PropsWithChildren, useContext, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {
-  Link as ReactRouterLink,
-  matchPath,
-  useRouteMatch,
-} from "react-router-dom"
+import {Link as ReactRouterLink, matchPath} from "react-router-dom"
 import AppImage from "../../components/base/AppImage"
 import {Constants} from "../../config"
 import {ResourceNotFound} from "../../models"
@@ -514,8 +510,6 @@ export function PageDemoSidenav(props: {}) {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
-  let {path} = useRouteMatch()
-  console.log(path)
 
   return (
     <Drawer
