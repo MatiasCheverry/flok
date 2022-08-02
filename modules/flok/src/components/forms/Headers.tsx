@@ -79,6 +79,7 @@ export function FormHeader(props: FormHeaderProps) {
     variant: "outlined",
     fullWidth: true,
     size: "small",
+    spellCheck: true,
   }
   let [editActive, setEditActive] = useState(false)
   return (
@@ -233,6 +234,7 @@ export function FormQuestionHeader(props: FormQuestionHeaderProps) {
     variant: "outlined",
     fullWidth: true,
     size: "small",
+    spellCheck: true,
   }
 
   return props.editable === "both" && props.editActive ? (

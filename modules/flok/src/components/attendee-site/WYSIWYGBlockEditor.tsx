@@ -117,6 +117,7 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
       />
       <form onSubmit={formik.handleSubmit}>
         <Editor
+          spellCheck
           editorState={formik.values.content}
           onEditorStateChange={(val) => formik.setFieldValue(`content`, val)}
           wrapperClassName={classes.wrapper}
