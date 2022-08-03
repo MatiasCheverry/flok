@@ -43,6 +43,7 @@ type LandingPageGeneratorNavToolProps = {
   retreatIdx: number
   selectedPage: AttendeeLandingWebsitePageModel
   website: AttendeeLandingWebsiteModel
+  selectedPageIdx: number
 }
 
 function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
@@ -57,12 +58,13 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
       <div className={classes.tabsAndControlsDiv}>
         <div className={classes.tabsDiv}>
           {!isSmallScreen ? (
-            props.pageIds.map((pageId) => (
+            props.pageIds.map((pageId, index) => (
               <div className={classes.tab}>
                 <LandingPageGeneratorTab
                   selected={pageId === props.selectedPage.id}
                   retreatIdx={props.retreatIdx}
-                  pageId={pageId}
+                  pageIdx={index}
+                  pageIds={props.pageIds}
                 />
               </div>
             ))
@@ -70,8 +72,9 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
             <div className={classes.tab}>
               <LandingPageGeneratorTab
                 selected={true}
+                pageIds={props.pageIds}
                 retreatIdx={props.retreatIdx}
-                pageId={props.selectedPage.id}
+                pageIdx={props.selectedPageIdx}
               />
             </div>
           )}
@@ -82,7 +85,7 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
               push(
                 AppRoutes.getPath("LandingPageGeneratorConfigAddPage", {
                   retreatIdx: props.retreatIdx.toString(),
-                  currentPageId: props.selectedPage.id.toString(),
+                  currentPageIdx: props.selectedPageIdx.toString(),
                 })
               )
             )
@@ -95,7 +98,7 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
               push(
                 AppRoutes.getPath("LandingPageGeneratorConfig", {
                   retreatIdx: props.retreatIdx.toString(),
-                  currentPageId: props.selectedPage.id.toString(),
+                  currentPageIdx: props.selectedPageIdx.toString(),
                 })
               )
             )

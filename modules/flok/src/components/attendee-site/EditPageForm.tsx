@@ -28,7 +28,7 @@ let useStyles = makeStyles((theme) => ({
 type EditPageFormProps = {
   pageId: number
   retreatIdx: string
-  currentPageId: string
+  currentPageIdx: string
 }
 
 function EditPageForm(props: EditPageFormProps) {
@@ -47,7 +47,7 @@ function EditPageForm(props: EditPageFormProps) {
         push(
           AppRoutes.getPath("LandingPageGeneratorConfig", {
             retreatIdx: props.retreatIdx.toString(),
-            currentPageId: props.currentPageId,
+            currentPageIdx: props.currentPageIdx,
           })
         )
       )

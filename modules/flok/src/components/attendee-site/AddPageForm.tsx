@@ -20,6 +20,7 @@ let useStyles = makeStyles((theme) => ({
 type AddPageFormProps = {
   websiteId: number
   retreatIdx: number
+  websitePageIds: number[]
 }
 function AddPageForm(props: AddPageFormProps) {
   let classes = useStyles()
@@ -33,7 +34,7 @@ function AddPageForm(props: AddPageFormProps) {
         push(
           AppRoutes.getPath("LandingPageGeneratorPage", {
             retreatIdx: props.retreatIdx.toString(),
-            currentPageId: result.payload.page.id,
+            currentPageIdx: props.websitePageIds.length.toString(),
           })
         )
       )

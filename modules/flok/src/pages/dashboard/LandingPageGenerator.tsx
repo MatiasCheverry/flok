@@ -113,27 +113,34 @@ let useStyles = makeStyles((theme) => ({
 export default function LandingPageGenerator() {
   let router = useRouteMatch<{
     retreatIdx: string
-    currentPageId: string
+    currentPageIdx: string
   }>()
   let [retreat, retreatIdx] = useRetreat()
-  let currentPageId = router.params.currentPageId
+  let currentPageIdx = router.params.currentPageIdx
   let {path} = useRouteMatch()
   let config = path === AppRoutes.getPath("LandingPageGeneratorConfig")
   const classes = useStyles()
   let dispatch = useDispatch()
   let website = useAttendeeLandingWebsite(retreat.attendees_website_id ?? -1)
-  let page = useAttendeeLandingPage(parseInt(currentPageId))
+  let page = useAttendeeLandingPage(
+    website?.page_ids[parseInt(currentPageIdx)]
+      ? website.page_ids[parseInt(currentPageIdx)]
+      : -1
+  )
 
   if (!website || !website.page_ids[0]) {
     return <CreateRetreatWebsite />
   }
-  if (!currentPageId) {
+  if (
+    !currentPageIdx ||
+    parseInt(currentPageIdx) > website.page_ids.length - 1
+  ) {
     return (
       <RedirectPage
         pageName="LandingPageGeneratorPage"
         pathParams={{
           retreatIdx: retreatIdx.toString(),
-          currentPageId: website.page_ids[0].toString(),
+          currentPageIdx: "0",
         }}
       />
     )
@@ -148,7 +155,7 @@ export default function LandingPageGenerator() {
             push(
               AppRoutes.getPath("LandingPageGeneratorPage", {
                 retreatIdx: retreatIdx.toString(),
-                currentPageId: currentPageId,
+                currentPageIdx: currentPageIdx,
               })
             )
           )
@@ -161,11 +168,12 @@ export default function LandingPageGenerator() {
                   Pages
                 </Typography>
               </div>
-              {website.page_ids.map((pageId) => {
+              {website.page_ids.map((pageId, index) => {
                 return (
                   <PageWebsiteLink
-                    pageId={pageId}
-                    currentPageId={currentPageId}
+                    websitePageIds={website?.page_ids}
+                    pageIdx={index}
+                    currentPageIdx={currentPageIdx}
                     retreatIdx={retreatIdx}
                   />
                 )
@@ -177,7 +185,7 @@ export default function LandingPageGenerator() {
                   "LandingPageGeneratorConfigWebsiteSettings",
                   {
                     retreatIdx: retreatIdx.toString(),
-                    currentPageId: currentPageId,
+                    currentPageIdx: currentPageIdx,
                   }
                 )}>
                 <Typography
@@ -197,7 +205,11 @@ export default function LandingPageGenerator() {
               </div>
 
               <div>
-                <AddPageForm websiteId={website.id} retreatIdx={retreatIdx} />
+                <AddPageForm
+                  websiteId={website.id}
+                  retreatIdx={retreatIdx}
+                  websitePageIds={website.page_ids}
+                />
               </div>
             </div>
           </Route>
@@ -213,7 +225,7 @@ export default function LandingPageGenerator() {
                       push(
                         AppRoutes.getPath("LandingPageGeneratorConfig", {
                           retreatIdx: retreatIdx.toString(),
-                          currentPageId: currentPageId,
+                          currentPageIdx: currentPageIdx,
                         })
                       )
                     )
@@ -230,7 +242,7 @@ export default function LandingPageGenerator() {
                   isLive={retreat.registration_live}
                   websiteId={website.id}
                   retreatIdx={retreatIdx}
-                  currentPageId={currentPageId}
+                  currentPageIdx={currentPageIdx}
                 />
               </div>
             </div>
@@ -253,6 +265,7 @@ export default function LandingPageGenerator() {
           <div className={classes.navToolbarWrapper}>
             {page && (
               <LandingPageGeneratorNavTool
+                selectedPageIdx={parseInt(currentPageIdx)}
                 retreatIdx={retreatIdx}
                 pageIds={website.page_ids}
                 selectedPage={page}
@@ -261,7 +274,13 @@ export default function LandingPageGenerator() {
             )}
           </div>
 
-          {page && <LandingPageEditForm pageId={page?.id} config={config} />}
+          {page && (
+            <LandingPageEditForm
+              pageIdx={page?.id}
+              config={config}
+              websitePageIds={website.page_ids}
+            />
+          )}
         </div>
       </Box>
     </PageBody>
@@ -291,33 +310,41 @@ let useEditPageStyles = makeStyles((theme) => ({
 }))
 
 type EditPageToolBarProps = RouteComponentProps<{
-  pageId: string
+  pageIdx: string
   retreatIdx: string
-  currentPageId: string
+  currentPageIdx: string
 }>
 function EditPageToolBar(props: EditPageToolBarProps) {
-  let currentPageId = props.match.params.currentPageId
-  let pageId = parseInt(props.match.params.pageId)
+  let currentPageIdx = props.match.params.currentPageIdx
+  let pageIdx = parseInt(props.match.params.pageIdx)
+  let [retreat, retreatIdx] = useRetreat()
+  let website = useAttendeeLandingWebsite(retreat.attendees_website_id ?? -1)
+  let pageId = website?.page_ids[pageIdx]
   let dispatch = useDispatch()
   let classes = useEditPageStyles()
-  let [retreat, retreatIdx] = useRetreat()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  let page = useAttendeeLandingPage(pageId)
-  let website = useAttendeeLandingWebsite(retreat.attendees_website_id ?? -1)
+  let page = useAttendeeLandingPage(pageId ?? -1)
+
   async function handleDeletePage() {
     let deleteResult = (await dispatch(
-      deletePage(pageId)
+      deletePage(pageId ?? -1)
     )) as unknown as ApiAction
     if (!deleteResult.error) {
+      let deleteIdx = website?.page_ids
+        ? website.page_ids.indexOf(deleteResult.meta.pageId)
+        : -1
+      console.log(deleteIdx)
       setDeleteModalOpen(false)
       dispatch(
         push(
           AppRoutes.getPath("LandingPageGeneratorConfig", {
             retreatIdx: retreatIdx.toString(),
-            currentPageId:
-              deleteResult.meta.pageId.toString() === currentPageId
-                ? website?.page_ids[0].toString() ?? currentPageId
-                : currentPageId,
+            currentPageIdx:
+              deleteIdx.toString() === currentPageIdx
+                ? "0"
+                : deleteIdx > parseInt(currentPageIdx)
+                ? currentPageIdx
+                : (parseInt(currentPageIdx) - 1).toString(),
           })
         )
       )
@@ -341,7 +368,7 @@ function EditPageToolBar(props: EditPageToolBarProps) {
                 push(
                   AppRoutes.getPath("LandingPageGeneratorConfig", {
                     retreatIdx: retreatIdx.toString(),
-                    currentPageId: currentPageId,
+                    currentPageIdx: currentPageIdx,
                   })
                 )
               )
@@ -360,9 +387,9 @@ function EditPageToolBar(props: EditPageToolBarProps) {
       </div>
       <div className={classes.editWebsiteFormWrapper}>
         <EditPageForm
-          pageId={pageId}
+          pageId={pageId ?? -1}
           retreatIdx={retreatIdx.toString()}
-          currentPageId={currentPageId}
+          currentPageIdx={currentPageIdx}
         />
       </div>
     </div>

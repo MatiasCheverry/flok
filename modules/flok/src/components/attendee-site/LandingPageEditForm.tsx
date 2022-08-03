@@ -6,12 +6,13 @@ import {useAttendeeLandingPage} from "../../utils/retreatUtils"
 import WYSIWYGBlockEditor from "./WYSIWYGBlockEditor"
 
 type LandingPageEditFormProps = {
-  pageId: number
+  pageIdx: number
   config: boolean
+  websitePageIds: number[]
 }
 
 function LandingPageEditForm(props: LandingPageEditFormProps) {
-  let page = useAttendeeLandingPage(props.pageId)
+  let page = useAttendeeLandingPage(props.pageIdx)
   let dispatch = useDispatch()
 
   if (!page) {
@@ -27,7 +28,7 @@ function LandingPageEditForm(props: LandingPageEditFormProps) {
           onClick={() =>
             dispatch(
               postBlock({
-                page_id: props.pageId,
+                page_id: props.websitePageIds[props.pageIdx],
                 type: "WYSIWYG",
               })
             )

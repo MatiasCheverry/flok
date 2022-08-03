@@ -43,7 +43,7 @@ let useStyles = makeStyles((theme) => ({
 type EditWebsiteFormProps = {
   websiteId: number
   retreatIdx: number
-  currentPageId: string
+  currentPageIdx: string
   isLive: boolean
 }
 function EditWebsiteForm(props: EditWebsiteFormProps) {
@@ -70,7 +70,7 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
         push(
           AppRoutes.getPath("LandingPageGeneratorConfig", {
             retreatIdx: props.retreatIdx.toString(),
-            currentPageId: props.currentPageId,
+            currentPageIdx: props.currentPageIdx,
           })
         )
       )

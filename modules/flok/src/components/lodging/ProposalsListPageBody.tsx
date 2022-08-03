@@ -73,7 +73,6 @@ export default function ProposalsListPageBody(
         hotel.state !== "PENDING"
       ) {
         setShowOld(false)
-        console.log(hotel)
         break
       }
     }

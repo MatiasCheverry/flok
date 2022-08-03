@@ -76,15 +76,16 @@ export class AppRoutes {
 
     // AttendeelLanding page
     LandingPageGeneratorHome: "/r/:retreatIdx/attendees/landing",
-    LandingPageGeneratorPage: "/r/:retreatIdx/attendees/landing/:currentPageId",
+    LandingPageGeneratorPage:
+      "/r/:retreatIdx/attendees/landing/:currentPageIdx",
     LandingPageGeneratorConfig:
-      "/r/:retreatIdx/attendees/landing/:currentPageId/config",
+      "/r/:retreatIdx/attendees/landing/:currentPageIdx/config",
     LandingPageGeneratorConfigWebsiteSettings:
-      "/r/:retreatIdx/attendees/landing/:currentPageId/config/website-settings",
+      "/r/:retreatIdx/attendees/landing/:currentPageIdx/config/website-settings",
     LandingPageGeneratorConfigPageSettings:
-      "/r/:retreatIdx/attendees/landing/:currentPageId/config/page-settings/:pageId",
+      "/r/:retreatIdx/attendees/landing/:currentPageIdx/config/page-settings/:pageIdx",
     LandingPageGeneratorConfigAddPage:
-      "/r/:retreatIdx/attendees/landing/:currentPageId/config/add-page",
+      "/r/:retreatIdx/attendees/landing/:currentPageIdx/config/add-page",
 
     RetreatFlightsPage: "/r/:retreatIdx/flights",
 

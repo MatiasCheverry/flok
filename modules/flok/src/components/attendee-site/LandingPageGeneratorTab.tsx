@@ -16,13 +16,14 @@ let useStyles = makeStyles((theme) => ({
 }))
 
 type LandingPageGeneratorTabProps = {
-  pageId: number
+  pageIdx: number
   retreatIdx: number
   selected: boolean
+  pageIds: number[]
 }
 
 function LandingPageGeneratorTab(props: LandingPageGeneratorTabProps) {
-  let page = useAttendeeLandingPage(props.pageId)
+  let page = useAttendeeLandingPage(props.pageIds[props.pageIdx])
   let classes = useStyles()
 
   return (
@@ -31,7 +32,7 @@ function LandingPageGeneratorTab(props: LandingPageGeneratorTabProps) {
       className={classes.link}
       to={AppRoutes.getPath("LandingPageGeneratorPage", {
         retreatIdx: props.retreatIdx.toString(),
-        currentPageId: props.pageId.toString(),
+        currentPageIdx: props.pageIdx.toString(),
       })}>
       <AppTypography
         className={classes.tabText}

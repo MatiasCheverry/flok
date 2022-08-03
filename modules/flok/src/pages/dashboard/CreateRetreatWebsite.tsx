@@ -73,7 +73,7 @@ function CreateRetreatWebsite() {
         push(
           AppRoutes.getPath("LandingPageGeneratorPage", {
             retreatIdx: retreatIdx.toString(),
-            currentPageId: websiteResponse.payload.website.page_ids[0],
+            currentPageIdx: "0",
           })
         )
       )
