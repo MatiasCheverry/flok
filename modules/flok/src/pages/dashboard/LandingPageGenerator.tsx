@@ -333,7 +333,6 @@ function EditPageToolBar(props: EditPageToolBarProps) {
       let deleteIdx = website?.page_ids
         ? website.page_ids.indexOf(deleteResult.meta.pageId)
         : -1
-      console.log(deleteIdx)
       setDeleteModalOpen(false)
       dispatch(
         push(

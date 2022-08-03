@@ -89,7 +89,6 @@ function ProposalsListPage(props: ProposalsListPageProps) {
         hotel.state !== "PENDING"
       ) {
         setShowOld(false)
-        console.log(hotel)
         break
       }
     }
