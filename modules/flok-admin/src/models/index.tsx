@@ -204,6 +204,9 @@ export type AdminHotelDetailsModel = {
   google_place_id?: string
   google_place_name?: string
   address_coordinates?: [number, number]
+  brand?: string
+  notes: string
+  sourcing_tags?: string
 }
 
 export type AdminHotelModel = Pick<

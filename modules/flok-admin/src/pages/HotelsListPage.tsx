@@ -15,6 +15,7 @@ import {AdminHotelModel} from "../models"
 import {AppRoutes} from "../Stack"
 import {RootState} from "../store"
 import {getHotelsForDataGrid} from "../store/actions/admin"
+import {useDestinations} from "../utils"
 let useStyles = makeStyles((theme) => ({
   body: {
     flex: "1 1 auto",
@@ -54,7 +55,6 @@ export default function HotelsListPage() {
   let classes = useStyles()
   let dispatch = useDispatch()
   let [loadingHotels, setLoadingHotels] = useState(false)
-
   function filterHotels(
     hotel: AdminHotelModel,
     filters: {
@@ -111,6 +111,7 @@ export default function HotelsListPage() {
     operator?: string
     value?: string
   }>({column: undefined, operator: undefined, value: undefined})
+  let [destinations, destinationsLoading] = useDestinations()
 
   useEffect(() => {
     async function getInititialHotels() {
@@ -129,7 +130,7 @@ export default function HotelsListPage() {
 
         <div>
           <Paper className={classes.dataGridPaper}>
-            {loadingHotels ? (
+            {loadingHotels || destinationsLoading ? (
               <CircularProgress className={classes.loadingSpinner} />
             ) : (
               <DataGrid
@@ -188,6 +189,16 @@ export default function HotelsListPage() {
                     headerName: "Country",
                     width: 200,
                     sortable: false,
+                  },
+                  {
+                    field: "destination",
+                    headerName: "Destination",
+                    width: 200,
+                    sortable: false,
+                    valueGetter: (params) => {
+                      return destinations[params.row.destination_id as number]
+                        ?.location
+                    },
                   },
                 ]}
                 rows={hotels as unknown as AdminHotelModel[]}

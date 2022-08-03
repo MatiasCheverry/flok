@@ -26,7 +26,6 @@ import {
   getLodgingTags,
   patchHotel,
 } from "../../store/actions/admin"
-import {ApiAction} from "../../store/actions/api"
 import {
   fetchGooglePlace,
   getTextFieldErrorProps,
@@ -37,7 +36,6 @@ import {
 import AppLoadingScreen from "../base/AppLoadingScreen"
 import AppTypography from "../base/AppTypography"
 import GooglePlacesAutoComplete from "./GoogleLocationsAutocomplete"
-
 let useStyles = makeStyles((theme) => ({
   root: {
     display: "flex",
@@ -86,40 +84,25 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
   )
   let [selectedGooglePlaceId, setSelectedGooglePlaceId] = useState("")
 
-  let googlePlaces = useSelector((state: RootState) => state.admin.googlePlaces)
+  let googlePlace = useSelector((state: RootState) => {
+    if (selectedGooglePlaceId) {
+      return state.admin.googlePlaces[selectedGooglePlaceId]
+    }
+  })
   useEffect(() => {
     !Object.values(lodgingTags).length && dispatch(getLodgingTags())
   }, [dispatch, lodgingTags])
 
   async function updateHotelProfile(values: Partial<AdminHotelDetailsModel>) {
     setLoadingUpdate(true)
-    let response = (await dispatch(
-      patchHotel(props.hotel.id, values)
-    )) as unknown as ApiAction
+    await dispatch(patchHotel(props.hotel.id, values))
     setLoadingUpdate(false)
-    if (!response.error) {
-      setInitialFormikValues(formik.values)
-    }
   }
 
   let [autoCompleteInput, setAutoCompleteInput] = useState(
     props.hotel.google_place_name ?? ""
   )
-  function returnLatLng(): [number, number] | undefined {
-    let lat = !googlePlaces[selectedGooglePlaceId]
-      ? props.hotel.address_coordinates
-        ? props.hotel.address_coordinates[1]
-        : undefined
-      : googlePlaces[selectedGooglePlaceId].lng
-    let lng = !googlePlaces[selectedGooglePlaceId]
-      ? props.hotel.address_coordinates
-        ? props.hotel.address_coordinates[0]
-        : undefined
-      : googlePlaces[selectedGooglePlaceId].lat
-    if (lat && lng) {
-      return [lat, lng]
-    }
-  }
+  let [newOption, setNewOption] = useState("")
 
   useEffect(() => {
     if (props.hotel.google_place_name) {
@@ -137,23 +120,16 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
       website_url: props.hotel.website_url,
       sub_location: props.hotel.sub_location,
       lodging_tags: props.hotel.lodging_tags,
-      city: !googlePlaces[selectedGooglePlaceId]
-        ? props.hotel.city
-        : googlePlaces[selectedGooglePlaceId].city,
-      state: !googlePlaces[selectedGooglePlaceId]
-        ? props.hotel.state
-        : googlePlaces[selectedGooglePlaceId].state,
-      country: !googlePlaces[selectedGooglePlaceId]
-        ? props.hotel.country
-        : googlePlaces[selectedGooglePlaceId].country,
+      city: props.hotel.city,
+      state: props.hotel.state,
+      country: props.hotel.country,
       num_rooms: props.hotel.num_rooms,
-      address_coordinates: returnLatLng(),
-      google_place_name: !googlePlaces[selectedGooglePlaceId]
-        ? props.hotel.google_place_name
-        : googlePlaces[selectedGooglePlaceId].name,
-      google_place_id: !googlePlaces[selectedGooglePlaceId]
-        ? props.hotel.google_place_id
-        : googlePlaces[selectedGooglePlaceId].place_id,
+      address_coordinates: props.hotel.address_coordinates,
+      google_place_name: props.hotel.google_place_name,
+      google_place_id: props.hotel.google_place_id,
+      brand: props.hotel.brand ?? "",
+      notes: props.hotel.notes ?? "",
+      sourcing_tags: props.hotel.sourcing_tags ?? "",
     }),
     validationSchema: yup.object({
       website_url: yup.string().url().nullable(),
@@ -162,14 +138,28 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
     }),
     onSubmit: updateHotelProfile,
   })
-  let [initialFormikValues, setInitialFormikValues] = useState(
-    formik.initialValues
-  )
   const commonTextFieldProps: TextFieldProps = {
     onChange: formik.handleChange,
     InputLabelProps: {shrink: true},
     disabled: loadingUpdate,
   }
+
+  let {setFieldValue} = formik
+  useEffect(() => {
+    if (googlePlace) {
+      setFieldValue("country", googlePlace.country)
+      setFieldValue("state", googlePlace.state)
+      setFieldValue("city", googlePlace.city)
+      setFieldValue("google_place_name", googlePlace.name)
+      setFieldValue("google_place_id", googlePlace.place_id)
+      setFieldValue(
+        "address_coordinates",
+        googlePlace.lat && googlePlace.lng
+          ? [googlePlace.lat, googlePlace.lng]
+          : undefined
+      )
+    }
+  }, [googlePlace, setFieldValue])
   return (
     <form className={classes.root} onSubmit={formik.handleSubmit}>
       <Paper elevation={0} className={classes.formGroup}>
@@ -368,6 +358,94 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
             fullWidth
           />
         </div>
+        <Typography variant="h4">Sourcing Info</Typography>
+        <TextField
+          {...commonTextFieldProps}
+          id="brand"
+          label="Brand"
+          value={formik.values.brand ?? ""}
+          fullWidth
+        />
+        <Autocomplete
+          fullWidth
+          multiple
+          id="preferences_dates_flexible_months"
+          options={Array.from(
+            new Set([
+              ...(formik.values.sourcing_tags
+                ? formik.values.sourcing_tags.split(",")
+                : []
+              ).map((a) => a.toLocaleLowerCase()),
+              ...(newOption && newOption.length > 1
+                ? [`Add \`${newOption.toLocaleLowerCase()}\``]
+                : []),
+            ])
+          )}
+          getOptionLabel={(option) => {
+            return option && option[0].toLocaleUpperCase() + option.slice(1)
+          }}
+          filterSelectedOptions
+          selectOnFocus
+          clearOnBlur
+          handleHomeEndKeys
+          onInputChange={(e, value, reason) => {
+            if (reason !== "reset" || e != null) setNewOption(value)
+          }}
+          inputValue={newOption}
+          value={
+            formik.values.sourcing_tags
+              ? formik.values.sourcing_tags
+                  .split(",")
+                  .filter((a) => !!a)
+                  .map((a) => a.toLocaleLowerCase())
+              : []
+          }
+          onChange={(e, newVals) => {
+            newVals = newVals.map((val) => {
+              val = val.toLocaleLowerCase()
+              if (val.startsWith("add `")) {
+                val = val.slice(5, -1)
+              }
+              return val
+            })
+            formik.setFieldValue(
+              "sourcing_tags",
+              Array.from(
+                new Set(newVals.sort().map((a) => a.toLocaleLowerCase()))
+              ).join(",")
+            )
+          }}
+          renderInput={(params) => {
+            return (
+              <TextField
+                variant="outlined"
+                {...params}
+                {...commonTextFieldProps}
+                inputProps={{
+                  ...params.inputProps,
+                  onKeyPress: (e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault()
+                      return false
+                    }
+                  },
+                }}
+                onChange={undefined}
+                label="Sourcing Tags"
+                placeholder="Select Sourcing Tags"
+              />
+            )
+          }}
+        />
+        <TextField
+          {...commonTextFieldProps}
+          id="notes"
+          label="Sourcing Notes"
+          value={formik.values.notes ?? ""}
+          fullWidth
+          multiline={true}
+          rows={3}
+        />
         <Typography variant="h4">For Proposals</Typography>
         <TextField
           {...commonTextFieldProps}
@@ -409,7 +487,7 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
           disabled={
             _.isEqual(
               nullifyEmptyString(formik.values),
-              nullifyEmptyString(initialFormikValues)
+              nullifyEmptyString(formik.initialValues)
             ) ||
             loadingUpdate ||
             !formik.isValid
