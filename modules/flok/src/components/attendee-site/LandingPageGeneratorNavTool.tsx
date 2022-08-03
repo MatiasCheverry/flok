@@ -31,7 +31,7 @@ let useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
     maxWidth: "85%",
-    overflow: "scroll",
+    overflow: "auto",
   },
   tab: {
     margin: theme.spacing(1),

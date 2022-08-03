@@ -7,6 +7,7 @@ import AppTypography from "../base/AppTypography"
 let useStyles = makeStyles((theme) => ({
   tabText: {
     color: theme.palette.common.black,
+    whiteSpace: "nowrap",
   },
   link: {
     "&:hover": {
