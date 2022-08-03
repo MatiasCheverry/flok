@@ -444,7 +444,7 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
           value={formik.values.notes ?? ""}
           fullWidth
           multiline={true}
-          rows={3}
+          minRows={3}
         />
         <Typography variant="h4">For Proposals</Typography>
         <TextField
