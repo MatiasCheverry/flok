@@ -1,6 +1,7 @@
 import {Button, makeStyles} from "@material-ui/core"
 import clsx from "clsx"
 import {useFormik} from "formik"
+import {useState} from "react"
 import {useDispatch} from "react-redux"
 import * as yup from "yup"
 import {
@@ -11,6 +12,7 @@ import {
 } from "../../models/form"
 import {ApiAction} from "../../store/actions/api"
 import {postFormResponse} from "../../store/actions/form"
+import AppLoadingScreen from "../base/AppLoadingScreen"
 import {useForm} from "./FormProvider"
 import FormQuestionProvider from "./FormQuestionProvider"
 import {FormHeader} from "./Headers"
@@ -45,12 +47,15 @@ let useStyles = makeStyles((theme) => ({
 }))
 
 type FormViewerProps = {
-  onSuccess?: (formResponse: FormResponseModel) => void
+  onSuccess?: (
+    formResponse: FormResponseModel
+  ) => void | Promise<ApiAction | undefined>
 }
 export default function FormViewer(props: FormViewerProps) {
   let classes = useStyles(props)
   let dispatch = useDispatch()
   let form = useForm()
+  let [submissionLoading, setSubmissionLoading] = useState(false)
   let formik = useFormik<{[key: string]: string}>({
     initialValues: form.questions.reduce(
       (prev, currId) => ({...prev, [currId.toString()]: ""}),
@@ -70,6 +75,7 @@ export default function FormViewer(props: FormViewerProps) {
         answers: answers,
       }
       async function postAttendeeFormResponse() {
+        setSubmissionLoading(true)
         let formResponseApiResponse = (await dispatch(
           postFormResponse(formResponse, FormResponseType.ATTENDEE_REGISTRATION)
         )) as unknown as ApiAction<{form_response: FormResponseModel}>
@@ -79,8 +85,9 @@ export default function FormViewer(props: FormViewerProps) {
           formResponseApiResponse.payload.form_response.id != null &&
           props.onSuccess
         ) {
-          props.onSuccess(formResponseApiResponse.payload.form_response)
+          await props.onSuccess(formResponseApiResponse.payload.form_response)
         }
+        setSubmissionLoading(false)
       }
       postAttendeeFormResponse()
     },
@@ -95,6 +102,7 @@ export default function FormViewer(props: FormViewerProps) {
           title={form.title}
           description={form.description ?? ""}
         />
+        {submissionLoading && <AppLoadingScreen />}
       </div>
       {form.questions.map((questionId) => (
         <div

@@ -64,6 +64,7 @@ export function deleteUserSignin() {
     if (!signupResponse.error) {
       dispatch(setUserLoggedOut())
     }
+    return signupResponse
   }
 }
 

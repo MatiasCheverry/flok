@@ -8,12 +8,15 @@ import {
 } from "@material-ui/core"
 import {Menu} from "@material-ui/icons"
 import {push} from "connected-react-router"
-import {useState} from "react"
-import {useDispatch} from "react-redux"
+import {useEffect, useState} from "react"
+import {useDispatch, useSelector} from "react-redux"
 import {AppRoutes} from "../../Stack"
+import {RootState} from "../../store"
+import {getUserHome} from "../../store/actions/user"
 import {FlokTheme} from "../../theme"
 import {titleToNavigation} from "../../utils"
 import {useAttendeeLandingPage} from "../../utils/retreatUtils"
+import AppUserSettings from "../base/AppUserSettings"
 
 let useStyles = makeStyles((theme) => ({
   logo: {
@@ -49,6 +52,7 @@ let useStyles = makeStyles((theme) => ({
     justifyContent: "right",
     display: "flex",
     alignItems: "center",
+    gap: theme.spacing(2),
   },
   navLinkContainer: {
     width: "33%",
@@ -70,6 +74,40 @@ let useStyles = makeStyles((theme) => ({
     display: "flex",
     flexDirection: "column",
   },
+  userHeader: {
+    display: "flex",
+    gap: theme.spacing(1),
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  userActions: {
+    padding: theme.spacing(1),
+    position: "absolute",
+    marginTop: theme.spacing(3),
+    marginLeft: theme.spacing(2),
+    display: "flex",
+    gap: theme.spacing(0.5),
+    alignItems: "center",
+    cursor: "pointer",
+  },
+  userHeaderSideNav: {},
+  userHeaderSideNavWrapper: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginTop: "auto",
+    marginBottom: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
+  },
+  sideNavLogout: {
+    width: "80%",
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(2),
+    marginLeft: "auto",
+    marginRight: "auto",
+  },
 }))
 type RetreatWebsiteHeaderProps = {
   logo: string
@@ -78,15 +116,24 @@ type RetreatWebsiteHeaderProps = {
   selectedPage: string
   homeRoute: string
   registrationLink?: string
+  registrationPage?: true
 }
 
 function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
   let dispatch = useDispatch()
   let classes = useStyles()
+
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
+  let user = useSelector((state: RootState) => state.user.user)
+  let loginStatus = useSelector((state: RootState) => state.user.loginStatus)
+  useEffect(() => {
+    if (loginStatus === "UNKNOWN" || !user) {
+      dispatch(getUserHome())
+    }
+  }, [dispatch, loginStatus, user])
   return (
     <div className={classes.header}>
       <div className={classes.imgWrapper}>
@@ -109,22 +156,38 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
             })}
           </div>
           <div className={classes.registerWrapper}>
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              className={classes.registerButton}
-              onClick={() => {
-                dispatch(
-                  push(
-                    AppRoutes.getPath("AttendeeSiteFormPage", {
-                      retreatName: props.retreatName,
-                    })
+            {props.registrationPage && user ? (
+              <AppUserSettings
+                user={user}
+                collapsable
+                onLogoutSuccess={() =>
+                  dispatch(
+                    push(
+                      AppRoutes.getPath("AttendeeSiteHome", {
+                        retreatName: props.retreatName,
+                      })
+                    )
                   )
-                )
-              }}>
-              Register Now
-            </Button>
+                }
+              />
+            ) : (
+              <Button
+                color="primary"
+                variant="contained"
+                size="small"
+                className={classes.registerButton}
+                onClick={() => {
+                  dispatch(
+                    push(
+                      AppRoutes.getPath("AttendeeSiteFormPage", {
+                        retreatName: props.retreatName,
+                      })
+                    )
+                  )
+                }}>
+                Register Now
+              </Button>
+            )}
           </div>
         </>
       ) : (
@@ -167,6 +230,22 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
               }}>
               Register Now
             </Button>
+            {loginStatus === "LOGGED_IN" && user && (
+              <div className={classes.userHeaderSideNavWrapper}>
+                <AppUserSettings
+                  user={user}
+                  onLogoutSuccess={() =>
+                    dispatch(
+                      push(
+                        AppRoutes.getPath("AttendeeSiteHome", {
+                          retreatName: props.retreatName,
+                        })
+                      )
+                    )
+                  }
+                />
+              </div>
+            )}
           </Drawer>
         </>
       )}

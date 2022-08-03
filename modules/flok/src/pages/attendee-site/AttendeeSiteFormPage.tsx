@@ -13,6 +13,7 @@ import {ResourceNotFound} from "../../models"
 import {enqueueSnackbar} from "../../notistack-lib/actions"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
+import {ApiAction} from "../../store/actions/api"
 import {postAttendeeRegRequest} from "../../store/actions/retreat"
 import {getUserHome} from "../../store/actions/user"
 import {replaceDashes} from "../../utils"
@@ -91,6 +92,7 @@ export default function AttendeeSiteFormPage() {
     <PageContainer>
       <PageBody>
         <RetreatWebsiteHeader
+          registrationPage={true}
           logo={
             website.logo_image?.image_url ??
             ImageUtils.getImageUrl("logoIconTextTrans")
@@ -123,11 +125,32 @@ export default function AttendeeSiteFormPage() {
                   </>
                 ) : (
                   <FormViewer
-                    onSuccess={(formResponse) => {
+                    onSuccess={async (formResponse) => {
                       if (attendee) {
-                        dispatch(
+                        let response = (await dispatch(
                           postAttendeeRegRequest(attendee?.id, formResponse.id)
-                        )
+                        )) as unknown as ApiAction
+                        if (!response.error) {
+                          dispatch(
+                            enqueueSnackbar({
+                              message:
+                                "Successfully registered for the retreat",
+                              options: {
+                                variant: "success",
+                              },
+                            })
+                          )
+                        } else {
+                          dispatch(
+                            enqueueSnackbar({
+                              message: "Something Went Wrong",
+                              options: {
+                                variant: "error",
+                              },
+                            })
+                          )
+                        }
+                        return response
                       } else {
                         dispatch(
                           enqueueSnackbar({
