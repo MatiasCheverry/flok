@@ -1,5 +1,4 @@
 import {
-  ClickAwayListener,
   makeStyles,
   TextField,
   TextFieldProps,
@@ -97,35 +96,33 @@ export function FormHeader(props: FormHeaderProps) {
       }}
       tabIndex={0}>
       {editActive && props.editable ? (
-        <ClickAwayListener onClickAway={() => setEditActive(false)}>
-          <form className={classes.root}>
-            <TextField
-              {...commonTextFieldProps}
-              id="title"
-              value={titleFormik.values.title ?? ""}
-              onChange={titleFormik.handleChange}
-              onBlur={() => titleFormik.handleSubmit()}
-              placeholder={"Form title"}
-              InputProps={{
-                className: classes.formTitle,
-              }}
-            />
-            <TextField
-              {...commonTextFieldProps}
-              id="description"
-              value={descriptionFormik.values.description ?? ""}
-              onChange={descriptionFormik.handleChange}
-              onBlur={() => descriptionFormik.handleSubmit()}
-              placeholder={"(Optional) form description"}
-              InputProps={{
-                className: classes.formDescription,
-              }}
-              multiline
-              rows={2}
-              rowsMax={10}
-            />
-          </form>
-        </ClickAwayListener>
+        <form className={classes.root}>
+          <TextField
+            {...commonTextFieldProps}
+            id="title"
+            value={titleFormik.values.title ?? ""}
+            onChange={titleFormik.handleChange}
+            onBlur={() => titleFormik.handleSubmit()}
+            placeholder={"Form title"}
+            InputProps={{
+              className: classes.formTitle,
+            }}
+          />
+          <TextField
+            {...commonTextFieldProps}
+            id="description"
+            value={descriptionFormik.values.description ?? ""}
+            onChange={descriptionFormik.handleChange}
+            onBlur={() => descriptionFormik.handleSubmit()}
+            placeholder={"(Optional) form description"}
+            InputProps={{
+              className: classes.formDescription,
+            }}
+            multiline
+            rows={2}
+            rowsMax={10}
+          />
+        </form>
       ) : (
         <div className={classes.root}>
           <Typography
