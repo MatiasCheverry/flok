@@ -1,26 +1,65 @@
 import {
+  AppBar,
   Button,
   Drawer,
-  IconButton,
-  Link,
   makeStyles,
+  MenuItem,
+  Toolbar,
+  Tooltip,
   useMediaQuery,
 } from "@material-ui/core"
-import {Menu} from "@material-ui/icons"
+import clsx from "clsx"
 import {push} from "connected-react-router"
-import {useEffect, useState} from "react"
+import {PropsWithChildren, useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
+import {Link as ReactRouterLink} from "react-router-dom"
+import {AttendeeLandingWebsiteModel, RetreatModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getUserHome} from "../../store/actions/user"
 import {FlokTheme} from "../../theme"
-import {titleToNavigation} from "../../utils"
+import {toPathStr} from "../../utils"
+import {ImageUtils} from "../../utils/imageUtils"
 import {useAttendeeLandingPage} from "../../utils/retreatUtils"
-import AppUserSettings from "../base/AppUserSettings"
 
 let useStyles = makeStyles((theme) => ({
+  appBar: {},
+  appBarSidenav: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    height: "100%",
+    "& > *:nth-child(1)": {},
+    "& > *:nth-child(2)": {},
+    "& > *:nth-child(3)": {
+      flexGrow: 1,
+      justifyContent: "flex-end",
+      display: "flex",
+      flexDirection: "column",
+    },
+  },
+  appBarTopnav: {
+    display: "flex",
+    justifyContent: "space-between",
+    width: "100%",
+    "& > *": {
+      display: "flex",
+    },
+    "& > *:nth-child(1)": {
+      justifyContent: "flex-start",
+    },
+    "& > *:nth-child(2)": {
+      justifyContent: "center",
+      flexGrow: 1,
+      marinLeft: theme.spacing(1),
+      marinRight: theme.spacing(1),
+    },
+    "& > *:nth-child(3)": {
+      justifyContent: "flex-end",
+    },
+  },
   logo: {
-    height: "50px",
+    height: "40px",
     [theme.breakpoints.down("sm")]: {
       width: "120px",
       height: "auto",
@@ -110,23 +149,20 @@ let useStyles = makeStyles((theme) => ({
   },
 }))
 type RetreatWebsiteHeaderProps = {
-  logo: string
-  pageIds: number[]
-  retreatName: string
-  selectedPage: string
-  homeRoute: string
-  registrationLink?: string
-  registrationPage?: true
+  website: AttendeeLandingWebsiteModel
+  retreat: RetreatModel
+  selectedPage: string | "registration"
 }
 
 function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
   let dispatch = useDispatch()
   let classes = useStyles()
-
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
-  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [sidenavOpen, setSidenavOpen] = useState(false)
+
+  // User Related
   let user = useSelector((state: RootState) => state.user.user)
   let loginStatus = useSelector((state: RootState) => state.user.loginStatus)
   useEffect(() => {
@@ -134,122 +170,151 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
       dispatch(getUserHome())
     }
   }, [dispatch, loginStatus, user])
+  function onLogoutSuccess() {
+    dispatch(
+      push(
+        AppRoutes.getPath("AttendeeSiteHome", {
+          retreatName: sitePathName,
+        })
+      )
+    )
+  }
+
+  let isRegistrationPage = props.selectedPage === "registration"
+  let sitePathName = toPathStr(props.website.name)
+  let registrationLive = !!props.retreat.registration_live
+
   return (
-    <div className={classes.header}>
-      <div className={classes.imgWrapper}>
-        <a href={props.homeRoute}>
-          <img src={props.logo} className={classes.logo} alt="logo"></img>
-        </a>
-      </div>
+    <NavWrapper
+      variant={isSmallScreen ? "sidenav" : "topnav"}
+      open={sidenavOpen}
+      onClose={() => setSidenavOpen(false)}>
+      <ReactRouterLink
+        to={AppRoutes.getPath("AttendeeSiteHome", {
+          retreatName: sitePathName,
+        })}>
+        <img
+          src={
+            props.website.logo_image?.image_url ??
+            ImageUtils.getImageUrl("logoIconTextTrans")
+          }
+          className={classes.logo}
+          alt="logo"
+        />
+      </ReactRouterLink>
+      <WithNavItems variant={isSmallScreen ? "sidenav" : "topnav"}>
+        {props.website.page_ids.map((pageId) => {
+          return (
+            <RetreatWebsiteHeaderLink
+              retreatName={sitePathName}
+              pageId={pageId}
+            />
+          )
+        })}
+      </WithNavItems>
+      <RegisterButton
+        to={
+          registrationLive
+            ? AppRoutes.getPath("AttendeeSiteFormPage", {
+                retreatName: sitePathName,
+              })
+            : undefined
+        }
+      />
+    </NavWrapper>
+    // <div className={classes.header}>
+    //   <div className={classes.imgWrapper}>
+    //     <a
+    //       href={AppRoutes.getPath("AttendeeSiteHome", {
+    //         retreatName: sitePathName,
+    //       })}>
+    //       <img
+    //         src={
+    //           props.website.logo_image?.image_url ??
+    //           ImageUtils.getImageUrl("logoIconTextTrans")
+    //         }
+    //         className={classes.logo}
+    //         alt="logo"></img>
+    //     </a>
+    //   </div>
 
-      {!isSmallScreen ? (
-        <>
-          <div className={classes.navLinkContainer}>
-            {props.pageIds.map((pageId) => {
-              return (
-                <RetreatWebsiteHeaderLink
-                  retreatName={props.retreatName}
-                  pageId={pageId}
-                  selectedPage={props.selectedPage}
-                />
-              )
-            })}
-          </div>
-          <div className={classes.registerWrapper}>
-            {props.registrationPage && user ? (
-              <AppUserSettings
-                user={user}
-                collapsable
-                onLogoutSuccess={() =>
-                  dispatch(
-                    push(
-                      AppRoutes.getPath("AttendeeSiteHome", {
-                        retreatName: props.retreatName,
-                      })
-                    )
-                  )
-                }
-              />
-            ) : (
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                className={classes.registerButton}
-                onClick={() => {
-                  dispatch(
-                    push(
-                      AppRoutes.getPath("AttendeeSiteFormPage", {
-                        retreatName: props.retreatName,
-                      })
-                    )
-                  )
-                }}>
-                Register Now
-              </Button>
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          <IconButton onClick={() => setDrawerOpen(true)}>
-            <Menu />
-          </IconButton>
-          <Drawer
-            anchor={"right"}
-            open={drawerOpen}
-            onClose={() => {
-              setDrawerOpen(false)
-            }}
-            className={classes.drawer}>
-            <div className={classes.mobileNavLinkContainer}>
-              {props.pageIds.map((pageId) => {
-                return (
-                  <RetreatWebsiteHeaderLink
-                    retreatName={props.retreatName}
-                    pageId={pageId}
-                    selectedPage={props.selectedPage}
-                  />
-                )
-              })}
-            </div>
+    //   {!isSmallScreen ? (
+    //     <>
+    //       <div className={classes.navLinkContainer}>
+    //         {props.website.page_ids.map((pageId) => {
+    //           return (
+    //             <RetreatWebsiteHeaderLink
+    //               retreatName={sitePathName}
+    //               pageId={pageId}
+    //               selectedPage={props.selectedPage}
+    //             />
+    //           )
+    //         })}
+    //       </div>
+    //       <div className={classes.registerWrapper}>
+    //         {isRegistrationPage && user ? (
+    //           <AppUserSettings
+    //             user={user}
+    //             collapsable
+    //             onLogoutSuccess={onLogoutSuccess}
+    //           />
+    //         ) : (
 
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              className={classes.registerButton}
-              onClick={() => {
-                dispatch(
-                  push(
-                    AppRoutes.getPath("AttendeeSiteFormPage", {
-                      retreatName: props.retreatName,
-                    })
-                  )
-                )
-              }}>
-              Register Now
-            </Button>
-            {loginStatus === "LOGGED_IN" && user && (
-              <div className={classes.userHeaderSideNavWrapper}>
-                <AppUserSettings
-                  user={user}
-                  onLogoutSuccess={() =>
-                    dispatch(
-                      push(
-                        AppRoutes.getPath("AttendeeSiteHome", {
-                          retreatName: props.retreatName,
-                        })
-                      )
-                    )
-                  }
-                />
-              </div>
-            )}
-          </Drawer>
-        </>
-      )}
-    </div>
+    //         )}
+    //       </div>
+    //     </>
+    //   ) : (
+    //     <>
+    //       {/* <IconButton onClick={() => setDrawerOpen(true)}>
+    //         <Menu />
+    //       </IconButton>
+    //       <Drawer
+    //         anchor={"right"}
+    //         open={drawerOpen}
+    //         onClose={() => {
+    //           setDrawerOpen(false)
+    //         }}
+    //         className={classes.drawer}>
+    //         <div className={classes.mobileNavLinkContainer}>
+    //           {props.website.page_ids.map((pageId) => {
+    //             return (
+    //               <RetreatWebsiteHeaderLink
+    //                 retreatName={sitePathName}
+    //                 pageId={pageId}
+    //                 selectedPage={props.selectedPage}
+    //               />
+    //             )
+    //           })}
+    //         </div>
+
+    //         <Button
+    //           color="primary"
+    //           variant="contained"
+    //           size="small"
+    //           className={classes.registerButton}
+    //           onClick={() => {
+    //             dispatch(
+    //               push(
+    //                 AppRoutes.getPath("AttendeeSiteFormPage", {
+    //                   retreatName: sitePathName,
+    //                 })
+    //               )
+    //             )
+    //           }}>
+    //           Register Now
+    //         </Button>
+    //         {loginStatus === "LOGGED_IN" && user && (
+    //           <div className={classes.userHeaderSideNavWrapper}>
+    //             <AppUserSettings
+    //               user={user}
+    //               onLogoutSuccess={onLogoutSuccess}
+    //             />
+    //           </div>
+    //         )}
+    //       </Drawer> */}
+    //     </>
+    //   )}
+    // </div>
   )
 }
 export default RetreatWebsiteHeader
@@ -270,25 +335,79 @@ let useLinkStyles = makeStyles((theme) => ({
 type RetreatWebsiteHeaderLinkProps = {
   retreatName: string
   pageId: number
-  selectedPage: string
+  active?: boolean
 }
 function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
   let classes = useLinkStyles()
   let page = useAttendeeLandingPage(props.pageId)
 
   return (
-    <Link
-      underline={
-        page && titleToNavigation(page.title) === props.selectedPage
-          ? "always"
-          : "none"
-      }
-      href={AppRoutes.getPath("AttendeeSitePage", {
+    <MenuItem
+      selected={props.active}
+      button
+      component={ReactRouterLink}
+      to={AppRoutes.getPath("AttendeeSitePage", {
         retreatName: props.retreatName,
-        pageName: titleToNavigation(page?.title ?? "home"),
+        pageName: toPathStr(page?.title ?? "home"),
       })}
       className={classes.navigationLink}>
       {page?.title}
-    </Link>
+    </MenuItem>
+  )
+}
+
+function WithNavItems(
+  props: PropsWithChildren<{variant: "sidenav" | "topnav"}>
+) {
+  return props.variant === "sidenav" ? (
+    <div>{props.children}</div>
+  ) : (
+    <div style={{display: "flex"}}>{props.children}</div>
+  )
+}
+
+function NavWrapper(
+  props: PropsWithChildren<{
+    variant: "mobile" | "large"
+    logo: Element
+    registerButton: Element
+    navItems: Element[] // should be list of MenuItem's
+    open?: boolean
+    onClose?: () => void
+  }>
+) {
+  let classes = useStyles()
+  return (
+    <>
+      <AppBar position="static" color="transparent" elevation={0}>
+        <Toolbar className={clsx(classes.appBar, classes.appBarTopnav)}>
+          {props.children}
+        </Toolbar>
+      </AppBar>
+      <Drawer anchor={"right"} open={true} onClose={props.onClose}>
+        <div className={clsx(classes.appBar, classes.appBarSidenav)}>
+          {props.children}
+        </div>
+      </Drawer>
+    </>
+  )
+}
+
+function RegisterButton(props: {to?: string}) {
+  let button = (
+    <Button
+      color="primary"
+      variant="contained"
+      size="small"
+      disabled={!props.to}>
+      Register Now
+    </Button>
+  )
+  return props.to ? (
+    <ReactRouterLink to={props.to}>{button}</ReactRouterLink>
+  ) : (
+    <Tooltip title="Registration isn't live yet">
+      <span>{button}</span>
+    </Tooltip>
   )
 }

@@ -3,7 +3,6 @@ import {Alert} from "@material-ui/lab"
 import {useEffect} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {useRouteMatch} from "react-router-dom"
-import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import FormProvider from "../../components/forms/FormProvider"
 import FormResponseViewer from "../../components/forms/FormResponseViewer"
 import FormViewer from "../../components/forms/FormViewer"
@@ -11,13 +10,11 @@ import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
 import {ResourceNotFound} from "../../models"
 import {enqueueSnackbar} from "../../notistack-lib/actions"
-import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
 import {postAttendeeRegRequest} from "../../store/actions/retreat"
 import {getUserHome} from "../../store/actions/user"
-import {replaceDashes} from "../../utils"
-import {ImageUtils} from "../../utils/imageUtils"
+import {fromPathStr} from "../../utils"
 import {
   useAttendeeLandingWebsiteName,
   useMyAttendee,
@@ -65,7 +62,7 @@ export default function AttendeeSiteFormPage() {
   let retreatName = params.retreatName
   let user = useSelector((state: RootState) => state.user)
   let [website, websiteLoading] = useAttendeeLandingWebsiteName(
-    replaceDashes(retreatName)
+    fromPathStr(retreatName)
   )
   let [retreat, retreatLoading] = useRetreat(website?.retreat_id ?? -1)
   let [attendee] = useMyAttendee(
@@ -91,7 +88,7 @@ export default function AttendeeSiteFormPage() {
   ) : (
     <PageContainer>
       <PageBody>
-        <RetreatWebsiteHeader
+        {/* <RetreatWebsiteHeader
           registrationPage={true}
           logo={
             website.logo_image?.image_url ??
@@ -104,7 +101,7 @@ export default function AttendeeSiteFormPage() {
           })}
           selectedPage={"form-page"}
           registrationLink={AppRoutes.getPath("AttendeeSiteFormPage")}
-        />
+        /> */}
         <div className={classes.overallPage}>
           <div className={classes.body}>
             {retreat.attendees_registration_form_id != null ? (

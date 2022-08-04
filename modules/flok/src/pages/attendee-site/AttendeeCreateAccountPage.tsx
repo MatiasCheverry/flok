@@ -18,7 +18,7 @@ import PageContainer from "../../components/page/PageContainer"
 import {AppRoutes} from "../../Stack"
 import {ApiAction} from "../../store/actions/api"
 import {postAttendeePasswordReset} from "../../store/actions/user"
-import {replaceDashes} from "../../utils"
+import {fromPathStr} from "../../utils"
 import {useAttendeeLandingWebsiteName} from "../../utils/retreatUtils"
 
 const useStyles = makeStyles((theme) => ({
@@ -84,7 +84,7 @@ export default function AttendeeCreateAccountPage() {
   const [response, setResponse] = useState<"success" | "error" | undefined>(
     undefined
   )
-  let [website] = useAttendeeLandingWebsiteName(replaceDashes(retreatName))
+  let [website] = useAttendeeLandingWebsiteName(fromPathStr(retreatName))
   let formik = useFormik({
     initialValues: {
       email: "",

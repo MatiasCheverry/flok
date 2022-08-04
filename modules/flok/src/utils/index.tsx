@@ -189,22 +189,10 @@ export function getTextFieldErrorProps(
   }
 }
 
-export function titleToNavigation(str: string) {
-  let letters = str.split("")
-  letters.forEach((letter, i) => {
-    if (letter === " ") {
-      letters[i] = "-"
-    }
-  })
-  return letters.join("").toLowerCase()
+export function toPathStr(str: string) {
+  return str.replaceAll(" ", "-").toLowerCase()
 }
 
-export function replaceDashes(str: string) {
-  let strArray = str.split("")
-  strArray.forEach((char, i) => {
-    if (char === "-") {
-      strArray[i] = " "
-    }
-  })
-  return strArray.join("")
+export function fromPathStr(str: string) {
+  return str.replaceAll("-", " ").toLowerCase()
 }

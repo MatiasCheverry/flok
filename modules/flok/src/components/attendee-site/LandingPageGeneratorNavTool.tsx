@@ -14,7 +14,7 @@ import {
 } from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {FlokTheme} from "../../theme"
-import {titleToNavigation} from "../../utils"
+import {toPathStr} from "../../utils"
 import LandingPageGeneratorTab from "./LandingPageGeneratorTab"
 
 let useStyles = makeStyles((theme) => ({
@@ -105,8 +105,8 @@ function LandingPageGeneratorNavTool(props: LandingPageGeneratorNavToolProps) {
       </div>
       <Link
         href={AppRoutes.getPath("AttendeeSitePage", {
-          retreatName: titleToNavigation(props.website.name),
-          pageName: titleToNavigation(props.selectedPage.title ?? "home"),
+          retreatName: toPathStr(props.website.name),
+          pageName: toPathStr(props.selectedPage.title ?? "home"),
         })}
         target="landing-page">
         <Button variant="outlined" color="primary" size="small">

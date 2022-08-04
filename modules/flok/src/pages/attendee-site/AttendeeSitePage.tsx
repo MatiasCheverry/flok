@@ -5,13 +5,12 @@ import {useRouteMatch} from "react-router-dom"
 import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
-import {AppRoutes} from "../../Stack"
-import {replaceDashes} from "../../utils"
-import {ImageUtils} from "../../utils/imageUtils"
+import {fromPathStr} from "../../utils"
 import {
   useAttendeeLandingPageBlock,
   useAttendeeLandingPageName,
   useAttendeeLandingWebsiteName,
+  useRetreat,
 } from "../../utils/retreatUtils"
 import LoadingPage from "../misc/LoadingPage"
 import NotFound404Page from "../misc/NotFound404Page"
@@ -45,33 +44,26 @@ export default function AttendeeSite() {
   let {retreatName, pageName} = router.params
   let classes = useStyles()
   let [website, websiteLoading] = useAttendeeLandingWebsiteName(
-    replaceDashes(retreatName)
+    fromPathStr(retreatName)
   )
+  let [retreat, retreatLoading] = useRetreat(website?.retreat_id || -1)
   let [page, pageLoading] = useAttendeeLandingPageName(
     website?.id ?? 0,
-    replaceDashes(pageName ?? "home")
+    fromPathStr(pageName ?? "home")
   )
   const titleTag = document.getElementById("titleTag")
   titleTag!.innerHTML = `${website?.name} | ${page?.title}`
-  return websiteLoading || pageLoading ? (
+  return websiteLoading || pageLoading || retreatLoading ? (
     <LoadingPage />
-  ) : !page || !website ? (
+  ) : !page || !website || !retreat || retreat === "RESOURCE_NOT_FOUND" ? (
     <NotFound404Page />
   ) : (
     <PageContainer>
       <PageBody>
         <RetreatWebsiteHeader
-          logo={
-            website.logo_image?.image_url ??
-            ImageUtils.getImageUrl("logoIconTextTrans")
-          }
-          pageIds={website.page_ids}
-          retreatName={retreatName}
-          homeRoute={AppRoutes.getPath("AttendeeSiteHome", {
-            retreatName: retreatName,
-          })}
+          retreat={retreat}
+          website={website}
           selectedPage={pageName ?? "home"}
-          registrationLink={AppRoutes.getPath("AttendeeSiteFormPage")}
         />
         {website.banner_image && (
           <img
