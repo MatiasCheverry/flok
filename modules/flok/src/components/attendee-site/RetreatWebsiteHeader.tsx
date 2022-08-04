@@ -1,15 +1,19 @@
 import {
   Button,
+  ButtonProps,
   Drawer,
   IconButton,
   Link,
   makeStyles,
+  Tooltip,
   useMediaQuery,
 } from "@material-ui/core"
 import {Menu} from "@material-ui/icons"
 import {push} from "connected-react-router"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
+import {Link as ReactRouterLink} from "react-router-dom"
+import {RetreatModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getUserHome} from "../../store/actions/user"
@@ -64,7 +68,6 @@ let useStyles = makeStyles((theme) => ({
   },
   registerButton: {
     [theme.breakpoints.down("sm")]: {
-      width: "70%",
       marginLeft: "auto",
       marginRight: "auto",
     },
@@ -117,6 +120,7 @@ type RetreatWebsiteHeaderProps = {
   homeRoute: string
   registrationLink?: string
   registrationPage?: true
+  retreat: RetreatModel
 }
 
 function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
@@ -129,6 +133,11 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
   const [drawerOpen, setDrawerOpen] = useState(false)
   let user = useSelector((state: RootState) => state.user.user)
   let loginStatus = useSelector((state: RootState) => state.user.loginStatus)
+  let showRegisterNowButton = props.retreat.registration_live
+    ? true
+    : user?.retreat_ids
+    ? user.retreat_ids.includes(props.retreat.id)
+    : false
   useEffect(() => {
     if (loginStatus === "UNKNOWN" || !user) {
       dispatch(getUserHome())
@@ -171,22 +180,15 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                 }
               />
             ) : (
-              <Button
-                color="primary"
-                variant="contained"
-                size="small"
-                className={classes.registerButton}
-                onClick={() => {
-                  dispatch(
-                    push(
-                      AppRoutes.getPath("AttendeeSiteFormPage", {
+              <RegisterNowButton
+                to={
+                  showRegisterNowButton
+                    ? AppRoutes.getPath("AttendeeSiteFormPage", {
                         retreatName: props.retreatName,
                       })
-                    )
-                  )
-                }}>
-                Register Now
-              </Button>
+                    : undefined
+                }
+              />
             )}
           </div>
         </>
@@ -213,23 +215,17 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                 )
               })}
             </div>
-
-            <Button
-              color="primary"
-              variant="contained"
-              size="small"
-              className={classes.registerButton}
-              onClick={() => {
-                dispatch(
-                  push(
-                    AppRoutes.getPath("AttendeeSiteFormPage", {
-                      retreatName: props.retreatName,
-                    })
-                  )
-                )
-              }}>
-              Register Now
-            </Button>
+            <div className={classes.registerButton}>
+              <RegisterNowButton
+                to={
+                  showRegisterNowButton
+                    ? AppRoutes.getPath("AttendeeSiteFormPage", {
+                        retreatName: props.retreatName,
+                      })
+                    : undefined
+                }
+              />
+            </div>
             {loginStatus === "LOGGED_IN" && user && (
               <div className={classes.userHeaderSideNavWrapper}>
                 <AppUserSettings
@@ -290,5 +286,27 @@ function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
       className={classes.navigationLink}>
       {page?.title}
     </Link>
+  )
+}
+
+function RegisterNowButton(props: {to?: string}) {
+  const buttonProps: Pick<ButtonProps, "color" | "variant" | "size"> = {
+    color: "primary",
+    variant: "contained",
+    size: "small",
+  }
+  const registerText = "Register Now"
+  return props.to ? (
+    <Button {...buttonProps} component={ReactRouterLink} to={props.to}>
+      {registerText}
+    </Button>
+  ) : (
+    <Tooltip title="Registration isn't live yet">
+      <span>
+        <Button {...buttonProps} disabled>
+          {registerText}
+        </Button>
+      </span>
+    </Tooltip>
   )
 }

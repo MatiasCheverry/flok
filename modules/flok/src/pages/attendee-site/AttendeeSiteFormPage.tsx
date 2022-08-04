@@ -92,6 +92,7 @@ export default function AttendeeSiteFormPage() {
     <PageContainer>
       <PageBody>
         <RetreatWebsiteHeader
+          retreat={retreat}
           registrationPage={true}
           logo={
             website.logo_image?.image_url ??

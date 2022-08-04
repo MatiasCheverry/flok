@@ -5,6 +5,7 @@ import {useRouteMatch} from "react-router-dom"
 import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
+import {ResourceNotFound} from "../../models"
 import {AppRoutes} from "../../Stack"
 import {replaceDashes} from "../../utils"
 import {ImageUtils} from "../../utils/imageUtils"
@@ -12,6 +13,7 @@ import {
   useAttendeeLandingPageBlock,
   useAttendeeLandingPageName,
   useAttendeeLandingWebsiteName,
+  useRetreat,
 } from "../../utils/retreatUtils"
 import LoadingPage from "../misc/LoadingPage"
 import NotFound404Page from "../misc/NotFound404Page"
@@ -47,20 +49,22 @@ export default function AttendeeSite() {
   let [website, websiteLoading] = useAttendeeLandingWebsiteName(
     replaceDashes(retreatName)
   )
+  let [retreat, retreatLoading] = useRetreat(website?.retreat_id ?? -1)
   let [page, pageLoading] = useAttendeeLandingPageName(
     website?.id ?? 0,
     replaceDashes(pageName ?? "home")
   )
   const titleTag = document.getElementById("titleTag")
   titleTag!.innerHTML = `${website?.name} | ${page?.title}`
-  return websiteLoading || pageLoading ? (
+  return websiteLoading || pageLoading || retreatLoading ? (
     <LoadingPage />
-  ) : !page || !website ? (
+  ) : !page || !website || !retreat || retreat === ResourceNotFound ? (
     <NotFound404Page />
   ) : (
     <PageContainer>
       <PageBody>
         <RetreatWebsiteHeader
+          retreat={retreat}
           logo={
             website.logo_image?.image_url ??
             ImageUtils.getImageUrl("logoIconTextTrans")
