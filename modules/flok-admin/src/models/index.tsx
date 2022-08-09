@@ -207,6 +207,9 @@ export type AdminHotelDetailsModel = {
   brand?: string
   notes: string
   sourcing_tags?: string
+  is_pareto_task_complete?: boolean
+  hotel_contact_email?: string
+  hotel_contact_name?: string
 }
 
 export type AdminHotelModel = Pick<
