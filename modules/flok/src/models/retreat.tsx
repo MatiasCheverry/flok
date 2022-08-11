@@ -175,6 +175,13 @@ export type RetreatModel = {
 
   // hotel groups
   group_ids: number[]
+
+  // flights page
+  flights_live?: boolean
+  flights_page_id?: number
+  hide_group_flights?: boolean
+  require_flight_receipts?: boolean
+  flights_email?: string
 }
 
 export type RetreatTripModel = {

@@ -26,7 +26,7 @@ let useStyles = makeStyles((theme) => ({
       width: (props: FlightCardProps) => (props.isEditing ? "80%" : "100%"),
       gap: (props: FlightCardProps) => (props.overall ? theme.spacing(2) : "0"),
     },
-    width: (props: FlightCardProps) => (props.isEditing ? "100%" : "65%"),
+    width: (props: FlightCardProps) => (props.isEditing ? "100%" : "100%"),
     justifyContent: "space-around",
     overflow: "scroll",
     paddingLeft: theme.spacing(1),

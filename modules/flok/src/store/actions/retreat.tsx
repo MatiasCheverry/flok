@@ -696,6 +696,8 @@ export function patchRetreat(
       | "retreat_name"
       | "request_for_proposal_id"
       | "attendees_registration_form_id"
+      | "hide_group_flights"
+      | "require_flight_receipts"
     >
   >
 ) {
@@ -795,6 +797,28 @@ export function postRegistrationLive(retreatId: number) {
   )
 }
 
+export const POST_FLIGHTS_LIVE_REQUEST = "POST_FLIGHTS_LIVE_REQUEST"
+export const POST_FLIGHTS_LIVE_SUCCESS = "POST_FLIGHTS_LIVE_SUCCESS"
+export const POST_FLIGHTS_LIVE_FAILURE = "POST_FLIGHTS_LIVE_FAILURE"
+export function postFlightsLive(retreatId: number) {
+  let endpoint = `/v1.0/retreats/${retreatId}/go-live-flightsasdf`
+  return createApiAction(
+    {
+      method: "POST",
+      endpoint,
+      types: [
+        {type: POST_FLIGHTS_LIVE_REQUEST},
+        {type: POST_FLIGHTS_LIVE_SUCCESS, meta: {retreatId}},
+        {type: POST_FLIGHTS_LIVE_FAILURE, meta: {retreatId}},
+      ],
+    },
+    {
+      successMessage: "Website is now live",
+      errorMessage: "Something went wrong",
+    }
+  )
+}
+
 export const POST_SELECTED_HOTEL_REQUEST = "POST_SELECTED_HOTEL_REQUEST"
 export const POST_SELECTED_HOTEL_SUCCESS = "POST_SELECTED_HOTEL_SUCCESS"
 export const POST_SELECTED_HOTEL_FAILURE = "POST_SELECTED_HOTEL_FAILURE"
@@ -880,4 +904,33 @@ export function postAttendeeRegRequest(
       {type: POST_ATTENDEE_REG_FAILURE},
     ],
   })
+}
+type AttendeeLandingWebsitePageTemplateType = "FLIGHTS"
+type TemplatedPagePost = Partial<AttendeeLandingWebsitePageModel> & {
+  retreat_id?: number
+  type: AttendeeLandingWebsitePageTemplateType
+}
+export const POST_TEMPLATED_PAGE_REQUEST = "POST_TEMPLATED_PAGE_REQUEST"
+export const POST_TEMPLATED_PAGE_SUCCESS = "POST_TEMPLATED_PAGE_SUCCESS"
+export const POST_TEMPLATED_PAGE_FAILURE = "POST_TEMPLATED_PAGE_FAILURE"
+export function postTemplatedPage(values: TemplatedPagePost) {
+  let endpoint = `/v1.0/website-pages/templated`
+  let retreatId = values.retreat_id
+  let type = values.type
+  return createApiAction(
+    {
+      method: "POST",
+      endpoint,
+      body: JSON.stringify(values),
+      types: [
+        {type: POST_TEMPLATED_PAGE_REQUEST},
+        {type: POST_TEMPLATED_PAGE_SUCCESS, meta: {retreatId, type}},
+        {type: POST_TEMPLATED_PAGE_FAILURE},
+      ],
+    },
+    {
+      successMessage: "Successfully added page",
+      errorMessage: "Something went wrong.",
+    }
+  )
 }

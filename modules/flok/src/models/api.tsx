@@ -45,6 +45,7 @@ export type AttendeeLandingWebsiteApiResponse = {
 export type AttendeeLandingWebsitePageApiResponse = {
   page: AttendeeLandingWebsitePageModel
 }
+
 export type AttendeeLandingWebsitePageBlockApiResponse = {
   block: AttendeeLandingWebsiteBlockModel
 }

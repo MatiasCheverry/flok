@@ -111,6 +111,17 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     marginRight: "auto",
   },
+  navigationLink: {
+    paddingRight: theme.spacing(2),
+    color: theme.palette.grey[900],
+    [theme.breakpoints.down("sm")]: {
+      minWidth: 200,
+      height: "45px",
+      fontSize: "1.3rem",
+      fontWeight: theme.typography.fontWeightBold,
+      marginLeft: theme.spacing(2),
+    },
+  },
 }))
 type RetreatWebsiteHeaderProps = {
   logo: string
@@ -163,6 +174,19 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                 />
               )
             })}
+            {props.retreat.flights_live && (
+              <Link
+                underline={
+                  "flights-page" === props.selectedPage ? "always" : "none"
+                }
+                href={AppRoutes.getPath("AttendeeSitePage", {
+                  retreatName: props.retreatName,
+                  pageName: "flights",
+                })}
+                className={classes.navigationLink}>
+                Flights
+              </Link>
+            )}
           </div>
           <div className={classes.registerWrapper}>
             {props.registrationPage && user ? (
@@ -214,6 +238,19 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                   />
                 )
               })}
+              {props.retreat.flights_live && (
+                <Link
+                  underline={
+                    "flights-page" === props.selectedPage ? "always" : "none"
+                  }
+                  href={AppRoutes.getPath("AttendeeSitePage", {
+                    retreatName: props.retreatName,
+                    pageName: "flights",
+                  })}
+                  className={classes.navigationLink}>
+                  Flights
+                </Link>
+              )}
             </div>
             <div className={classes.registerButton}>
               <RegisterNowButton

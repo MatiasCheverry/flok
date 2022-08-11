@@ -51,6 +51,7 @@ import {
   PATCH_WEBSITE_SUCCESS,
   POST_ATTENDEE_REG_SUCCESS,
   POST_BLOCK_SUCCESS,
+  POST_FLIGHTS_LIVE_SUCCESS,
   POST_INITIAL_WEBSITE_SUCCESS,
   POST_PAGE_SUCCESS,
   POST_REGISTRATION_LIVE_SUCCESS,
@@ -58,6 +59,7 @@ import {
   POST_RETREAT_ATTENDEES_SUCCESS,
   POST_RFP_SUCCESS,
   POST_SELECTED_HOTEL_SUCCESS,
+  POST_TEMPLATED_PAGE_SUCCESS,
   PUT_RETREAT_PREFERENCES_SUCCESS,
   PUT_RETREAT_TASK_SUCCESS,
 } from "../actions/retreat"
@@ -125,6 +127,7 @@ export default function retreatReducer(
     case PUT_RETREAT_TASK_SUCCESS:
     case POST_SELECTED_HOTEL_SUCCESS:
     case POST_REGISTRATION_LIVE_SUCCESS:
+    case POST_FLIGHTS_LIVE_SUCCESS:
     case PATCH_RETREAT_SUCCESS:
       retreat = ((action as ApiAction).payload as {retreat: RetreatModel})
         .retreat
@@ -311,6 +314,43 @@ export default function retreatReducer(
           },
         },
       }
+    case POST_TEMPLATED_PAGE_SUCCESS:
+      payload = (action as ApiAction)
+        .payload as AttendeeLandingWebsitePageApiResponse
+      let meta = action as unknown as {
+        meta: {
+          type: "FLIGHTS"
+          retreatId: number | undefined
+        }
+      }
+      let oldRetreat =
+        state.retreats[meta.meta.retreatId ? meta.meta.retreatId : -1]
+      let newRetreat =
+        oldRetreat === ResourceNotFound ? ResourceNotFound : {...oldRetreat}
+      if (newRetreat !== "RESOURCE_NOT_FOUND") {
+        newRetreat.flights_page_id = payload.page.id
+      }
+      return {
+        ...state,
+        pages: {...state.pages, [payload.page.id]: payload.page},
+        websites: {
+          ...state.websites,
+          [payload.page.website_id]: {
+            ...state.websites[payload.page.website_id]!,
+            page_ids: [
+              ...(state.websites[payload.page.website_id]
+                ? state.websites[payload.page.website_id]!.page_ids
+                : []),
+              payload.page.id,
+            ],
+          },
+        },
+        retreats: {
+          ...state.retreats,
+          [newRetreat !== ResourceNotFound ? newRetreat.id : -1]: newRetreat,
+        },
+      }
+
     case DELETE_PAGE_SUCCESS:
       const pageId = (action as unknown as {meta: {pageId: number}}).meta.pageId
       let websiteId = Object.values(state.websites).find((website) =>

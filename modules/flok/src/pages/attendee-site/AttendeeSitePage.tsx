@@ -108,7 +108,7 @@ let useBlockRendererStyles = makeStyles((theme) => ({
 type WYSIWYGBlockRendererProps = {
   blockId: number
 }
-function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
+export function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
   let block = useAttendeeLandingPageBlock(props.blockId)
   let classes = useBlockRendererStyles()
   return block?.content ? (

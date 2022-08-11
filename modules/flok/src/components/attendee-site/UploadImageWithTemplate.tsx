@@ -15,14 +15,13 @@ import {
   useMediaQuery,
 } from "@material-ui/core"
 import {HighlightOffRounded} from "@material-ui/icons"
-import {useEffect, useState} from "react"
+import {useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import config, {IMAGE_SERVER_BASE_URL_KEY} from "../../config"
 import {ImageModel} from "../../models"
 import {PresetImageType} from "../../models/retreat"
 import {enqueueSnackbar} from "../../notistack-lib/actions"
 import {RootState} from "../../store"
-import {getPresetImages} from "../../store/actions/retreat"
 import {FlokTheme} from "../../theme"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 
@@ -93,9 +92,9 @@ export default function UploadImageWithTemplate(
   })
 
   let rows: {img1: ImageModel; img2?: ImageModel}[] = []
-  useEffect(() => {
-    !presetImages[props.type][0] && dispatch(getPresetImages(props.type))
-  }, [presetImages, props.type, dispatch])
+  // useEffect(() => {
+  //   !presetImages[props.type][0] && dispatch(getPresetImages(props.type))
+  // }, [presetImages, props.type, dispatch])
   let classes = useImageStyles()
   if (!isSmallScreen) {
     for (let i = 0; i < presetImages[props.type].length; i += 2) {

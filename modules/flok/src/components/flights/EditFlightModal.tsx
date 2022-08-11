@@ -32,10 +32,13 @@ let useStyles = makeStyles((theme) => ({
   },
   cardLine: {
     display: "flex",
+    alignItems: "center",
   },
   editButton: {
     height: "35px",
-    top: "10px",
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: theme.spacing(1.5),
+    },
   },
   tripLegRow: {
     display: "flex",

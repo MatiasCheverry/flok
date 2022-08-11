@@ -11,6 +11,7 @@ import FlightCardContainer from "./FlightCardContainer"
 
 type AttendeeFlightTabProps = {
   attendee: RetreatAttendeeModel
+  hideHeader?: true
 }
 let useStyles = makeStyles((theme) => ({
   flightCardContainer: {
@@ -27,7 +28,7 @@ let useStyles = makeStyles((theme) => ({
   },
   headerLine: {
     display: "flex",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
     alignItems: "center",
   },
   editButton: {},
@@ -50,7 +51,7 @@ let useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     backgroundColor: theme.palette.common.white,
     borderRadius: theme.shape.borderRadius,
-    width: "65%",
+    width: "100%",
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
     paddingLeft: theme.spacing(1),
@@ -197,9 +198,11 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
               }}
             />
           )}
-          <Typography variant="h3" className={classes.header}>
-            {attendee.first_name + " " + attendee.last_name}'s Flights
-          </Typography>
+          {!props.hideHeader && (
+            <Typography variant="h3" className={classes.header}>
+              {attendee.first_name + " " + attendee.last_name}'s Flights
+            </Typography>
+          )}
           {attendee.travel && (
             <>
               <div className={classes.headerLine}>

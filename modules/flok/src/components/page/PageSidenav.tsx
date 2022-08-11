@@ -20,6 +20,7 @@ import {
   MapRounded,
   PeopleAlt,
   SvgIconComponent,
+  Web,
 } from "@material-ui/icons"
 import {createContext, PropsWithChildren, useContext, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
@@ -130,28 +131,24 @@ let navItems: NavItem[] = [
   {
     title: "Attendees",
     icon: PeopleAlt,
-    activeRoutes: [],
+    activeRoutes: [
+      "RetreatAttendeePage",
+      "RetreatAttendeesPage",
+      "RetreatAttendeeRegResponsePage",
+    ],
     redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !retreat.attendees_v2_released,
+    navSubItems: [],
+  },
+  {
+    title: "Website",
+    icon: Web,
+    activeRoutes: [],
+    redirect: redirectFlok("LandingPageGeneratorHome"),
     hidden: (retreat) => !retreat.attendees_v2_released,
     navSubItems: [
       {
-        title: "Attendees",
-        activeRoutes: [
-          "RetreatAttendeePage",
-          "RetreatAttendeesPage",
-          "RetreatAttendeeRegResponsePage",
-        ],
-        redirect: redirectFlok("RetreatAttendeesPage"),
-        hidden: (retreat) => !retreat.attendees_v2_released,
-      },
-      {
-        title: "Registration",
-        activeRoutes: ["RetreatAttendeesRegFormBuilderPage"],
-        redirect: redirectFlok("RetreatAttendeesRegFormBuilderPage"),
-        hidden: (retreat) => !retreat.attendees_v2_released,
-      },
-      {
-        title: "Website",
+        title: "Site Builder",
         activeRoutes: [
           "LandingPageGeneratorConfig",
           "LandingPageGeneratorConfigAddPage",
@@ -163,6 +160,25 @@ let navItems: NavItem[] = [
         redirect: redirectFlok("LandingPageGeneratorHome"),
         hidden: (retreat) => !retreat.attendees_v2_released,
       },
+      {
+        title: "Registration",
+        activeRoutes: [
+          "RetreatAttendeesRegFormBuilderPage",
+          "RetreatAttendeesRegFormBuilderConfig",
+        ],
+        redirect: redirectFlok("RetreatAttendeesRegFormBuilderPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+
+      {
+        title: "Flights",
+        activeRoutes: [
+          "RetreatFlightsOptionsPage",
+          "RetreatFlightsOptionsConfig",
+        ],
+        redirect: redirectFlok("RetreatFlightsOptionsPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
     ],
   },
   {
@@ -170,6 +186,7 @@ let navItems: NavItem[] = [
     icon: FlightRounded,
     activeRoutes: ["RetreatFlightsPage", "RetreatAttendeeFlightsPage"],
     redirect: redirectFlok("RetreatFlightsPage"),
+    hidden: (retreat) => !!retreat.attendees_v2_released,
   },
   {
     title: "Itinerary",

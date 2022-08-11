@@ -105,6 +105,12 @@ let useStyles = makeStyles((theme) => ({
     flex: "1 1 auto",
     height: 0,
   },
+  flightsWrapper: {
+    width: "75%",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+  },
 }))
 
 function AttendeePage() {
@@ -416,7 +422,11 @@ function AttendeePage() {
             path={AppRoutes.getPath("RetreatAttendeeFlightsPage")}
             render={() => (
               <div className={classes.fullPageTab}>
-                {attendee && <AttendeeFlightTab attendee={attendee} />}
+                {attendee && (
+                  <div className={classes.flightsWrapper}>
+                    <AttendeeFlightTab attendee={attendee} />
+                  </div>
+                )}
               </div>
             )}
             exact

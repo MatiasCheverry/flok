@@ -10,6 +10,7 @@ import {
   Link,
   makeStyles,
   Paper,
+  Switch,
   Table,
   TableBody,
   TableCell,
@@ -19,45 +20,60 @@ import {
   TableRow,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@material-ui/core"
 import {
   DataGrid,
   GridToolbarContainer,
   GridToolbarExport,
 } from "@material-ui/data-grid"
-import {Add, CloudUpload, DoneAll, GetApp, Person} from "@material-ui/icons"
+import {
+  Add,
+  CloudUpload,
+  Dns,
+  DoneAll,
+  Flight,
+  GetApp,
+  Person,
+  Search,
+} from "@material-ui/icons"
 import CloseIcon from "@material-ui/icons/Close"
 import {Alert} from "@material-ui/lab"
 import {push} from "connected-react-router"
 import {useEffect, useState} from "react"
-import {useDispatch} from "react-redux"
+import {useDispatch, useSelector} from "react-redux"
 import {withRouter} from "react-router-dom"
-import SiteGoLiveButton from "../../components/attendee-site/SiteGoLiveButton"
 import AppCsvXlsxUpload from "../../components/base/AppCsvXlsxUpload"
 import AttendeeDeleteDropDown from "../../components/lodging/AttendeeDeleteDropdown"
 import PageBody from "../../components/page/PageBody"
 import {AttendeeBatchUploadApiResponse} from "../../models/api"
 import {RetreatAttendeeModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
+import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
 import {
   deleteRetreatAttendees,
+  getTrips,
   postRetreatAttendees,
   postRetreatAttendeesBatch,
 } from "../../store/actions/retreat"
+import {FlokTheme} from "../../theme"
 import {useQuery} from "../../utils"
 import {useRetreatAttendees} from "../../utils/retreatUtils"
 import {useRetreat} from "../misc/RetreatProvider"
 
-function dateFormat(date?: string) {
+function dateFormat(date: Date | undefined) {
   if (date === undefined) {
     return ""
   }
   let dateFormatter = Intl.DateTimeFormat("en-US", {
     dateStyle: "short",
-    timeZone: "UTC",
+    timeStyle: "short",
   })
-  return dateFormatter.format(new Date(date))
+  return dateFormatter.format(date)
+}
+function currencyFormat(num: Number) {
+  return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
 
 let useStyles = makeStyles((theme) => ({
@@ -155,6 +171,10 @@ let useStyles = makeStyles((theme) => ({
     marginBottom: theme.spacing(2),
     minHeight: 300,
   },
+  infoChip: {
+    borderColor: theme.palette.text.secondary,
+    color: theme.palette.text.secondary,
+  },
 }))
 
 function AttendeesPage() {
@@ -163,8 +183,41 @@ function AttendeesPage() {
 
   let [retreat, retreatIdx] = useRetreat()
   let [addQueryParam, setAddQueryParam] = useQuery("add")
-
+  let trips = useSelector((state: RootState) => {
+    return state.retreat.trips
+  })
   let [attendeeTravelInfo] = useRetreatAttendees(retreat.id)
+  let [loadingTrips, setLoadingTrips] = useState(false)
+  let missingTrips = attendeeTravelInfo.reduce((prev, attendee) => {
+    let ret: {[key: number]: undefined} = {}
+    let depId =
+      attendee.travel && attendee.travel.dep_trip
+        ? attendee.travel.dep_trip.id
+        : undefined
+    let arrId =
+      attendee.travel && attendee.travel.arr_trip
+        ? attendee.travel.arr_trip.id
+        : undefined
+    if (depId && !trips[depId]) {
+      ret[depId] = undefined
+    }
+    if (arrId && !trips[arrId]) {
+      ret[arrId] = undefined
+    }
+    return {...prev, ...ret}
+  }, {})
+  useEffect(() => {
+    async function loadTrips() {
+      setLoadingTrips(true)
+      await dispatch(
+        getTrips(Object.keys(missingTrips).map((id) => parseInt(id)))
+      )
+      setLoadingTrips(false)
+    }
+    if (Object.keys(missingTrips).length && !loadingTrips) {
+      loadTrips()
+    }
+  }, [dispatch, missingTrips, loadingTrips])
 
   let [addDialogOpen, setAddDialogOpen] = useState(
     addQueryParam?.toLowerCase() === "single" ||
@@ -337,6 +390,7 @@ function AttendeesPage() {
 
     setNewAttendeeErrorState(errorState)
   }
+  let [showFlights, setShowFlights] = useState(false)
 
   return (
     <PageBody appBar>
@@ -344,12 +398,6 @@ function AttendeesPage() {
         <div className={classes.header}>
           <Typography variant="h1">Attendees</Typography>
           <div className={classes.pageTitle}>
-            {retreat.attendees_v2_released ? (
-              <SiteGoLiveButton
-                isLive={retreat.registration_live}
-                retreatId={retreat.id}
-              />
-            ) : undefined}
             <Link
               variant="body1"
               underline="always"
@@ -390,6 +438,8 @@ function AttendeesPage() {
                 },
                 searchTerm: attendeeSearchTerm,
                 setSearchTerm: setAttendeeSearchTerm,
+                showFlights: showFlights,
+                setShowFlights: setShowFlights,
               },
             }}
             onCellClick={(params) => {
@@ -406,7 +456,9 @@ function AttendeesPage() {
             }}
             rows={attendeeTravelInfo
               .filter((attendee) => {
-                let attendeeName = `${attendee.first_name.toLowerCase()} ${attendee.last_name.toLowerCase()}`
+                let attendeeName = `${
+                  attendee.first_name ? attendee.first_name.toLowerCase() : ""
+                } ${attendee.last_name ? attendee.last_name.toLowerCase() : ""}`
                 return (
                   attendee.info_status !== "NOT_ATTENDING" &&
                   attendee.info_status !== "CANCELLED" &&
@@ -451,7 +503,7 @@ function AttendeesPage() {
                 width: 150,
                 valueGetter: (params) => {
                   if (params.value) {
-                    return dateFormat(params.value as string)
+                    return dateFormat(new Date(params.value as string))
                   }
                 },
               },
@@ -461,14 +513,14 @@ function AttendeesPage() {
                 width: 165,
                 valueGetter: (params) => {
                   if (params.value) {
-                    return dateFormat(params.value as string)
+                    return dateFormat(new Date(params.value as string))
                   }
                 },
               },
               {
                 field: "info_status",
-                headerName: "Status",
-                width: 150,
+                headerName: "Registration Status",
+                width: 180,
                 renderCell: (params) => {
                   if (params.value === "INFO_ENTERED") {
                     return (
@@ -484,6 +536,97 @@ function AttendeesPage() {
                         variant="outlined"
                         label="Not Registered"
                         className={classes.warningChip}
+                      />
+                    )
+                  }
+                },
+              },
+              {
+                field: "arrival",
+                headerName: "Flight Arrival",
+                width: 160,
+                hide: !showFlights,
+                valueGetter: (params) => {
+                  let attendee = params.row
+                  return attendee.travel &&
+                    attendee.travel.arr_trip &&
+                    attendee.travel.arr_trip.trip_legs.length &&
+                    trips[attendee.travel.arr_trip.id] &&
+                    trips[attendee.travel.arr_trip.id].trip_legs[
+                      trips[attendee.travel.arr_trip.id].trip_legs.length - 1
+                    ]
+                    ? trips[attendee.travel.arr_trip.id].trip_legs[
+                        trips[attendee.travel.arr_trip.id].trip_legs.length - 1
+                      ].arr_datetime
+                    : undefined
+                },
+                valueFormatter: (params) => {
+                  return !isNaN(new Date(params.value as string).getTime())
+                    ? dateFormat(new Date(params.value as string))
+                    : undefined
+                },
+              },
+              {
+                field: "departure",
+                hide: !showFlights,
+                headerName: "Flight Departure",
+                width: 160,
+                valueGetter: (params) => {
+                  let attendee = params.row
+                  return attendee.travel &&
+                    attendee.travel.dep_trip &&
+                    trips[attendee.travel.dep_trip.id] &&
+                    trips[attendee.travel.dep_trip.id].trip_legs.length
+                    ? trips[attendee.travel.dep_trip.id].trip_legs[0]
+                        .dep_datetime
+                    : undefined
+                },
+                valueFormatter: (params) => {
+                  return !isNaN(new Date(params.value as string).getTime())
+                    ? dateFormat(new Date(params.value as string))
+                    : undefined
+                },
+              },
+              {
+                field: "cost",
+                hide: !showFlights,
+                headerName: "Flights Cost",
+                width: 150,
+                valueGetter: (params) => params.row.travel?.cost,
+                valueFormatter: (params) => {
+                  if (params.value) {
+                    return currencyFormat(params.value as number)
+                  }
+                },
+              },
+              {
+                field: "flight_status",
+                hide: !showFlights,
+                headerName: "Flight Status",
+                width: 180,
+                renderCell: (params) => {
+                  if (params.value === "BOOKED") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="Booked"
+                        className={classes.successChip}
+                      />
+                    )
+                  } else if (params.value === "PENDING") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="To Book"
+                        className={classes.warningChip}
+                      />
+                    )
+                  } else if (params.value === "OPT_OUT") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="Opted Out"
+                        className={classes.infoChip}
                       />
                     )
                   }
@@ -796,38 +939,88 @@ type CustomToolbarAttendeePageProps = {
   onBatchUploadAttendee: () => void
   searchTerm: string
   setSearchTerm: (newValue: string) => void
+  setShowFlights: (newValue: boolean) => void
+  showFlights: boolean
 }
 function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   let classes = useToolbarStyles()
+  let [searchExpanded, setSearchExpanded] = useState(false)
+  const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
+    theme.breakpoints.down("sm")
+  )
   return (
     <GridToolbarContainer className={classes.toolbarContainer}>
-      <Button onClick={props.onAddAttendee} className={classes.toolbarButton}>
-        <Add fontSize="small" />
-        &nbsp; Add Attendee
-      </Button>
-      <Button
-        onClick={props.onBatchUploadAttendee}
-        className={classes.toolbarButton}>
-        <CloudUpload fontSize="small" />
-        &nbsp; Batch Upload Attendees
-      </Button>
-      <GridToolbarExport className={classes.toolbarButton} />
-      <TextField
-        value={props.searchTerm}
-        onChange={(e) => {
-          props.setSearchTerm(e.target.value)
-        }}
-        className={classes.searchBar}
-        margin="dense"
-        variant="outlined"
-        size="small"
-        placeholder="Search Attendees"
-        inputProps={{
-          style: {
-            height: 28,
-          },
-        }}
-      />
+      {!(searchExpanded && isSmallScreen) && (
+        <Button onClick={props.onAddAttendee} className={classes.toolbarButton}>
+          <Add fontSize="small" />
+          &nbsp;
+          {!searchExpanded && !isSmallScreen && "Add Attendee"}
+        </Button>
+      )}
+      {!(searchExpanded && isSmallScreen) && (
+        <Button
+          onClick={props.onBatchUploadAttendee}
+          className={classes.toolbarButton}>
+          <CloudUpload fontSize="small" />
+          &nbsp; {!searchExpanded && !isSmallScreen && "Batch Upload Attendees"}
+        </Button>
+      )}
+      {!(searchExpanded && isSmallScreen) && (
+        <div
+          style={{display: "flex", alignItems: "center", gap: "3px"}}
+          className={classes.toolbarButton}>
+          <Switch color="primary" size="small" />
+          {searchExpanded || isSmallScreen ? <Dns /> : "Show Form Response"}
+        </div>
+      )}
+      {!(searchExpanded && isSmallScreen) && (
+        <div
+          style={{display: "flex", alignItems: "center", gap: "3px"}}
+          className={classes.toolbarButton}
+          onClick={() => {
+            props.setShowFlights(!props.showFlights)
+          }}>
+          <Switch color="primary" size="small" checked={props.showFlights} />
+          {searchExpanded || isSmallScreen ? <Flight /> : "Show Flight Info"}
+        </div>
+      )}
+      {!(searchExpanded && isSmallScreen) && (
+        <GridToolbarExport
+          className={classes.toolbarButton}
+          onFocus={() => {
+            setSearchExpanded(false)
+          }}
+        />
+      )}
+      {!searchExpanded ? (
+        <IconButton
+          className={classes.searchBar}
+          onClick={() => {
+            setSearchExpanded(true)
+          }}>
+          <Search />
+        </IconButton>
+      ) : (
+        <TextField
+          onBlur={() => {
+            setSearchExpanded(false)
+          }}
+          value={props.searchTerm}
+          onChange={(e) => {
+            props.setSearchTerm(e.target.value)
+          }}
+          className={classes.searchBar}
+          margin="dense"
+          variant="outlined"
+          size="small"
+          placeholder="Search Attendees"
+          inputProps={{
+            style: {
+              height: 28,
+            },
+          }}
+        />
+      )}
     </GridToolbarContainer>
   )
 }
