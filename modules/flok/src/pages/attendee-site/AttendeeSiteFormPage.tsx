@@ -3,6 +3,7 @@ import {Alert} from "@material-ui/lab"
 import {useEffect} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {useRouteMatch} from "react-router-dom"
+import AttendeeSiteFooter from "../../components/attendee-site/AttendeeSiteFooter"
 import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import FormProvider from "../../components/forms/FormProvider"
 import FormResponseViewer from "../../components/forms/FormResponseViewer"
@@ -172,6 +173,7 @@ export default function AttendeeSiteFormPage() {
             )}
           </div>
         </div>
+        <AttendeeSiteFooter />
       </PageBody>
     </PageContainer>
   )
