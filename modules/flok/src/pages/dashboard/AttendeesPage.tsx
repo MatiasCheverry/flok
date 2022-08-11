@@ -39,6 +39,7 @@ import {
 } from "@material-ui/icons"
 import CloseIcon from "@material-ui/icons/Close"
 import {Alert} from "@material-ui/lab"
+import clsx from "clsx"
 import {push} from "connected-react-router"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
@@ -180,6 +181,7 @@ let useStyles = makeStyles((theme) => ({
 function AttendeesPage() {
   let classes = useStyles()
   let dispatch = useDispatch()
+  let [showExportText, setShowExportText] = useState(true)
 
   let [retreat, retreatIdx] = useRetreat()
   let [addQueryParam, setAddQueryParam] = useQuery("add")
@@ -419,6 +421,7 @@ function AttendeesPage() {
         </div>
         <div className={classes.dataGridWrapper}>
           <DataGrid
+            localeText={{toolbarExport: showExportText ? "Export" : ""}}
             pageSize={50}
             rowsPerPageOptions={[]}
             isRowSelectable={() => false}
@@ -440,6 +443,7 @@ function AttendeesPage() {
                 setSearchTerm: setAttendeeSearchTerm,
                 showFlights: showFlights,
                 setShowFlights: setShowFlights,
+                setShowExportText: setShowExportText,
               },
             }}
             onCellClick={(params) => {
@@ -921,8 +925,8 @@ let useToolbarStyles = makeStyles((theme) => ({
     fontSize: "0.8125rem",
     lineHeight: "1.75",
     textTransform: "uppercase",
-    minWidth: "64px",
-    padding: "4px 5px",
+    minWidth: "5px",
+    // padding: "4px 5px",
     borderRadius: "4px",
     color: "#1976d2",
   },
@@ -933,6 +937,14 @@ let useToolbarStyles = makeStyles((theme) => ({
   toolbarContainer: {
     gap: theme.spacing(1.5),
   },
+  exportLabel: {
+    display: "none",
+  },
+  startIcon: {
+    display: "flex",
+    marginLeft: 0,
+    marginRight: 0,
+  },
 }))
 type CustomToolbarAttendeePageProps = {
   onAddAttendee: () => void
@@ -941,6 +953,7 @@ type CustomToolbarAttendeePageProps = {
   setSearchTerm: (newValue: string) => void
   setShowFlights: (newValue: boolean) => void
   showFlights: boolean
+  setShowExportText: (newVal: boolean) => void
 }
 function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   let classes = useToolbarStyles()
@@ -948,13 +961,21 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
+  let {setShowExportText} = props
+  useEffect(() => {
+    if (!searchExpanded && !isSmallScreen) {
+      setShowExportText(true)
+    } else {
+      setShowExportText(false)
+    }
+  }, [isSmallScreen, searchExpanded, setShowExportText])
   return (
     <GridToolbarContainer className={classes.toolbarContainer}>
       {!(searchExpanded && isSmallScreen) && (
         <Button onClick={props.onAddAttendee} className={classes.toolbarButton}>
           <Add fontSize="small" />
-          &nbsp;
-          {!searchExpanded && !isSmallScreen && "Add Attendee"}
+
+          {!searchExpanded && !isSmallScreen && <>&nbsp; Add Attendee</>}
         </Button>
       )}
       {!(searchExpanded && isSmallScreen) && (
@@ -962,15 +983,35 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
           onClick={props.onBatchUploadAttendee}
           className={classes.toolbarButton}>
           <CloudUpload fontSize="small" />
-          &nbsp; {!searchExpanded && !isSmallScreen && "Batch Upload Attendees"}
+          {!searchExpanded && !isSmallScreen && (
+            <>&nbsp; Batch Upload Attendees</>
+          )}
         </Button>
+      )}
+      {!(searchExpanded && isSmallScreen) && (
+        <GridToolbarExport
+          size="medium"
+          className={classes.toolbarButton}
+          classes={{
+            startIcon: clsx(
+              searchExpanded || isSmallScreen ? classes.startIcon : undefined
+            ),
+          }}
+          onFocus={() => {
+            setSearchExpanded(false)
+          }}
+        />
       )}
       {!(searchExpanded && isSmallScreen) && (
         <div
           style={{display: "flex", alignItems: "center", gap: "3px"}}
           className={classes.toolbarButton}>
           <Switch color="primary" size="small" />
-          {searchExpanded || isSmallScreen ? <Dns /> : "Show Form Response"}
+          {searchExpanded || isSmallScreen ? (
+            <Dns fontSize="small" />
+          ) : (
+            "Show Form Response"
+          )}
         </div>
       )}
       {!(searchExpanded && isSmallScreen) && (
@@ -981,16 +1022,12 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
             props.setShowFlights(!props.showFlights)
           }}>
           <Switch color="primary" size="small" checked={props.showFlights} />
-          {searchExpanded || isSmallScreen ? <Flight /> : "Show Flight Info"}
+          {searchExpanded || isSmallScreen ? (
+            <Flight fontSize="small" />
+          ) : (
+            "Show Flight Info"
+          )}
         </div>
-      )}
-      {!(searchExpanded && isSmallScreen) && (
-        <GridToolbarExport
-          className={classes.toolbarButton}
-          onFocus={() => {
-            setSearchExpanded(false)
-          }}
-        />
       )}
       {!searchExpanded ? (
         <IconButton
@@ -1003,7 +1040,9 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
       ) : (
         <TextField
           onBlur={() => {
-            setSearchExpanded(false)
+            if (!props.searchTerm) {
+              setSearchExpanded(false)
+            }
           }}
           value={props.searchTerm}
           onChange={(e) => {
