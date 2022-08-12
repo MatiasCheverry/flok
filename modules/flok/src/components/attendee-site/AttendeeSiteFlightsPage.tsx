@@ -19,6 +19,7 @@ import AppTabPanel from "../page/AppTabPanel"
 import PageBody from "../page/PageBody"
 import PageContainer from "../page/PageContainer"
 import AttendeeFlightsDataGrid from "./AttendeeFlightsDataGrid"
+import AttendeeSiteFooter from "./AttendeeSiteFooter"
 import RetreatWebsiteHeader from "./RetreatWebsiteHeader"
 
 let useStyles = makeStyles((theme) => ({
@@ -160,6 +161,7 @@ export default function AttendeeSiteFlightsPage() {
             </div>
           </AppTabPanel>
         </div>
+        <AttendeeSiteFooter />
       </PageBody>
     </PageContainer>
   )
