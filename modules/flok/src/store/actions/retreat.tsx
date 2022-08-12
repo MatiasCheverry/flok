@@ -801,7 +801,7 @@ export const POST_FLIGHTS_LIVE_REQUEST = "POST_FLIGHTS_LIVE_REQUEST"
 export const POST_FLIGHTS_LIVE_SUCCESS = "POST_FLIGHTS_LIVE_SUCCESS"
 export const POST_FLIGHTS_LIVE_FAILURE = "POST_FLIGHTS_LIVE_FAILURE"
 export function postFlightsLive(retreatId: number) {
-  let endpoint = `/v1.0/retreats/${retreatId}/go-live-flightsasdf`
+  let endpoint = `/v1.0/retreats/${retreatId}/go-live-flights`
   return createApiAction(
     {
       method: "POST",

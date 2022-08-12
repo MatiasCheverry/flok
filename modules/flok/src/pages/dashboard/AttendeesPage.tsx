@@ -554,7 +554,6 @@ function AttendeesPage() {
                   let attendee = params.row
                   return attendee.travel &&
                     attendee.travel.arr_trip &&
-                    attendee.travel.arr_trip.trip_legs.length &&
                     trips[attendee.travel.arr_trip.id] &&
                     trips[attendee.travel.arr_trip.id].trip_legs[
                       trips[attendee.travel.arr_trip.id].trip_legs.length - 1
