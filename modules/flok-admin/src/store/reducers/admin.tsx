@@ -124,7 +124,7 @@ export type AdminState = {
     [id: number]: LodgingTagModel
   }
   googlePlaces: {[place_id: string]: GooglePlace}
-  hotelsDataGridTotal: number
+  hotelsDataGridHasNext: boolean
   RFPs: {
     [id: string]: RFPModel | undefined
   }
@@ -157,7 +157,7 @@ const initialState: AdminState = {
   tasks: {},
   lodgingTags: {},
   googlePlaces: {},
-  hotelsDataGridTotal: 0,
+  hotelsDataGridHasNext: false,
   RFPs: {},
   hotelGroups: {},
 }
@@ -298,7 +298,7 @@ export default function AdminReducer(
       meta = (action as unknown as {meta: {id: number}}).meta
       payload = (action as unknown as ApiAction).payload as {
         hotels: AdminHotelDetailsModel[]
-        total: number
+        has_next: boolean
       }
       return {
         ...state,
@@ -309,7 +309,7 @@ export default function AdminReducer(
             {}
           ),
         },
-        hotelsDataGridTotal: payload.total,
+        hotelsDataGridHasNext: payload.has_next,
       }
     case POST_SELECTED_HOTEL_SUCCESS:
     case PUT_SELECTED_HOTEL_SUCCESS:

@@ -6,6 +6,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   makeStyles,
   Paper,
   TextField,
@@ -130,6 +131,9 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
       brand: props.hotel.brand ?? "",
       notes: props.hotel.notes ?? "",
       sourcing_tags: props.hotel.sourcing_tags ?? "",
+      hotel_contact_email: props.hotel.hotel_contact_email ?? "",
+      hotel_contact_name: props.hotel.hotel_contact_name ?? "",
+      is_pareto_task_complete: props.hotel.is_pareto_task_complete ?? false,
     }),
     validationSchema: yup.object({
       website_url: yup.string().url().nullable(),
@@ -218,6 +222,17 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
             </Button>
           </DialogActions>
         </Dialog>
+        <FormControlLabel
+          control={
+            <Checkbox
+              color="primary"
+              checked={formik.values.is_pareto_task_complete}
+              id="is_pareto_task_complete"
+              onChange={formik.handleChange}
+            />
+          }
+          label="Is Pareto Task Completed?"
+        />
         <Typography variant="h4">Hotel General Info</Typography>
         <TextField
           {...commonTextFieldProps}
@@ -366,6 +381,22 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
           value={formik.values.brand ?? ""}
           fullWidth
         />
+        <div className={classes.locationGroup}>
+          <TextField
+            {...commonTextFieldProps}
+            id="hotel_contact_name"
+            label="Hotel Contact Name"
+            value={formik.values.hotel_contact_name ?? ""}
+            fullWidth
+          />
+          <TextField
+            {...commonTextFieldProps}
+            id="hotel_contact_email"
+            label="Hotel Contact Email"
+            value={formik.values.hotel_contact_email ?? ""}
+            fullWidth
+          />
+        </div>
         <Autocomplete
           fullWidth
           multiple

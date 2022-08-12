@@ -802,13 +802,14 @@ export function getHotelsForDataGrid(
     column?: string
     operator?: string
     value?: string
+    pareto?: "complete" | "incomplete"
   }
 ) {
   let endpoint = `/v1.0/admin/hotels/datagrid?offset=${offset}${
     filters?.column && filters?.operator && filters?.value
       ? `&column=${filters.column}&operator=${filters.operator}&value=${filters.value}`
       : ""
-  }`
+  }&pareto=${filters?.pareto ?? "none"}`
   return createApiAction({
     endpoint,
     method: "GET",
