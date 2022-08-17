@@ -2,6 +2,7 @@ import {makeStyles} from "@material-ui/core"
 import {RawDraftContentState} from "draft-js"
 import draftToHtml from "draftjs-to-html"
 import {useRouteMatch} from "react-router-dom"
+import AttendeeSiteFooter from "../../components/attendee-site/AttendeeSiteFooter"
 import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
@@ -88,6 +89,7 @@ export default function AttendeeSite() {
             <WYSIWYGBlockRenderer blockId={page.block_ids[0]} />
           )}
         </div>
+        <AttendeeSiteFooter />
       </PageBody>
     </PageContainer>
   )
