@@ -140,7 +140,11 @@ export default function AttendeeSiteFlightsPage() {
           <AppTabPanel show={tabValue === "my-flight"}>
             <div className={classes.flightTabWrapper}>
               {attendee ? (
-                <AttendeeFlightTab attendee={attendee} hideHeader />
+                <AttendeeFlightTab
+                  attendee={attendee}
+                  hideHeader
+                  receiptRestricted={retreat.require_flight_receipts}
+                />
               ) : (
                 "Oops, looks like you are not an attendee on this retreat"
               )}

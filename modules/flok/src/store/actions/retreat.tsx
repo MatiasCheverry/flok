@@ -934,3 +934,32 @@ export function postTemplatedPage(values: TemplatedPagePost) {
     }
   )
 }
+
+export const POST_RECEIPT_TO_ATTENDEE_REQUEST =
+  "POST_RECEIPT_TO_ATTENDEE_REQUEST"
+export const POST_RECEIPT_TO_ATTENDEE_SUCCESS =
+  "POST_RECEIPT_TO_ATTENDEE_SUCCESS"
+export const POST_RECEIPT_TO_ATTENDEE_FAILURE =
+  "POST_RECEIPT_TO_ATTENDEE_FAILURE"
+export function postReceiptToAttendee(values: {
+  attendee_id: number
+  file_id: number
+}) {
+  let endpoint = `/v1.0/receipts`
+  return createApiAction(
+    {
+      method: "POST",
+      endpoint,
+      body: JSON.stringify(values),
+      types: [
+        {type: POST_RECEIPT_TO_ATTENDEE_REQUEST},
+        {type: POST_RECEIPT_TO_ATTENDEE_SUCCESS},
+        {type: POST_RECEIPT_TO_ATTENDEE_FAILURE},
+      ],
+    },
+    {
+      successMessage: "Successfully posted receipt",
+      errorMessage: "Something went wrong.",
+    }
+  )
+}

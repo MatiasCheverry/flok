@@ -13,6 +13,7 @@ import {
   AttendeeLandingWebsiteBlockModel,
   AttendeeLandingWebsiteModel,
   AttendeeLandingWebsitePageModel,
+  FileModel,
   HotelGroup,
   PresetImageModel,
   PresetImageType,
@@ -348,6 +349,26 @@ export default function retreatReducer(
         retreats: {
           ...state.retreats,
           [newRetreat !== ResourceNotFound ? newRetreat.id : -1]: newRetreat,
+        },
+      }
+    case "ADD_RECEIPT_TO_ATTENDEE":
+      payload = action as {
+        type: "ADD_RECEIPT_TO_ATTENDEE"
+        receipt: FileModel
+        attendee_id: number
+      }
+
+      return {
+        ...state,
+        attendees: {
+          ...state.attendees,
+          [payload.attendee_id]: {
+            ...state.attendees[payload.attendee_id],
+            receipts: [
+              ...state.attendees[payload.attendee_id].receipts,
+              payload.receipt,
+            ],
+          },
         },
       }
 

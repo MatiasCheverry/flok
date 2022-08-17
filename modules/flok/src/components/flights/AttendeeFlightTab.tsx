@@ -1,4 +1,11 @@
-import {Button, Chip, makeStyles, Typography} from "@material-ui/core"
+import {
+  Button,
+  Chip,
+  makeStyles,
+  Paper,
+  Popper,
+  Typography,
+} from "@material-ui/core"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RetreatAttendeeModel} from "../../models/retreat"
@@ -12,6 +19,7 @@ import FlightCardContainer from "./FlightCardContainer"
 type AttendeeFlightTabProps = {
   attendee: RetreatAttendeeModel
   hideHeader?: true
+  receiptRestricted?: boolean
 }
 let useStyles = makeStyles((theme) => ({
   flightCardContainer: {
@@ -95,6 +103,16 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     lineHeight: "25px",
   },
+  linkStyle: {
+    backgroundColor: "transparent",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "underline",
+    display: "inline",
+    margin: 0,
+    padding: 0,
+    color: "#0000EE", //To match default color of a link
+  },
 }))
 
 function AttendeeFlightTab(props: AttendeeFlightTabProps) {
@@ -112,6 +130,9 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
       return state.retreat.trips[travel?.dep_trip.id]
     }
   })
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const popperOpen = Boolean(anchorEl)
+  const id = popperOpen ? "simple-popper" : undefined
 
   const renderFlightStatusChip = (val: "BOOKED" | "OPT_OUT" | "PENDING") => {
     if (val === "BOOKED") {
@@ -189,6 +210,8 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
           )}
           {attendee.travel && (
             <EditAttendeeTravelModal
+              receiptRestricted={props.receiptRestricted}
+              numberOfReceipts={attendee.receipts.length}
               open={openEditAttendeeTravelModal}
               flightStatus={attendee.flight_status}
               flightCost={attendee.travel.cost}
@@ -239,6 +262,75 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                         : "N/A"}
                     </Typography>
                   </div>
+                  {/* <Tooltip
+                    title={
+                      attendee.receipts.length
+                        ? attendee.receipts
+                            .map((receipt) => receipt.file_url)
+                            .join(", ")
+                        : "Click edit in the top left to add receipts"
+                    }> */}
+                  <div className={classes.flightInfoSection}>
+                    <Typography className={classes.flightInfoHeader}>
+                      Receipts
+                    </Typography>
+                    <div
+                      className={classes.linkStyle}
+                      onMouseEnter={(event) => {
+                        console.log(event.currentTarget)
+                        setAnchorEl(anchorEl ? null : event.currentTarget)
+                      }}
+                      onMouseLeave={() => {
+                        setAnchorEl(null)
+                      }}>
+                      <Typography className={classes.flightCost}>
+                        {attendee.receipts.length}
+                      </Typography>
+                      {/* <ClickAwayListener onClickAway={() => {}}> */}
+                      <Popper
+                        id={id}
+                        open={popperOpen}
+                        anchorEl={anchorEl}
+                        onClick={(event) => {
+                          setAnchorEl(anchorEl ? null : event.currentTarget)
+                        }}>
+                        <Paper style={{padding: 16}}>
+                          {attendee.receipts.length === 0 ? (
+                            <Typography>
+                              Click edit in the top left to add receipts
+                            </Typography>
+                          ) : (
+                            <>
+                              <Typography variant="h4">Receipts</Typography>
+                              <ul
+                                style={{
+                                  listStyleType: "none",
+                                  gap: 8,
+                                  display: "flex",
+                                  flexDirection: "column",
+                                }}>
+                                {attendee.receipts.map((receipt) => (
+                                  <li
+                                    style={{
+                                      maxWidth: 400,
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                    }}>
+                                    <a href={receipt.file_url}>
+                                      {receipt.file_url}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                        </Paper>
+                      </Popper>
+                      {/* </ClickAwayListener> */}
+                    </div>
+                  </div>
+                  {/* </Tooltip> */}
                 </div>
               </div>
             </>
