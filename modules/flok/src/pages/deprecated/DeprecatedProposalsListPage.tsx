@@ -5,6 +5,7 @@ import {RouteComponentProps, withRouter} from "react-router-dom"
 import AppMoreInfoIcon from "../../components/base/AppMoreInfoIcon"
 import AppTypography from "../../components/base/AppTypography"
 import ProposalListRow from "../../components/lodging/ProposalListRow"
+import {checkIfGroupHasHotelsReady} from "../../components/lodging/ProposalsListPageBody"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
 import PageHeader from "../../components/page/PageHeader"
@@ -202,6 +203,9 @@ function ProposalsListPage(props: ProposalsListPageProps) {
               selectedHotels.filter((hotel) => hotel.state !== "PENDING")
                 .length !== 0 &&
               hotelGroups
+                .filter((group) =>
+                  checkIfGroupHasHotelsReady(group, selectedHotels)
+                )
                 .sort((a, b) => a.id - b.id)
                 .map((group) => {
                   return (

@@ -1,7 +1,11 @@
 import {Box, makeStyles, Typography} from "@material-ui/core"
 import React, {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {RetreatModel, RetreatSelectedHotelProposal} from "../../models/retreat"
+import {
+  HotelGroup,
+  RetreatModel,
+  RetreatSelectedHotelProposal,
+} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
@@ -195,6 +199,9 @@ export default function ProposalsListPageBody(
           selectedHotels.filter((hotel) => hotel.state !== "PENDING").length !==
             0 &&
           hotelGroups
+            .filter((group) =>
+              checkIfGroupHasHotelsReady(group, selectedHotels)
+            )
             .sort((a, b) => a.id - b.id)
             .map((group) => {
               return (
@@ -334,4 +341,18 @@ export default function ProposalsListPageBody(
       </Box>
     </div>
   )
+}
+
+export function checkIfGroupHasHotelsReady(
+  group: HotelGroup,
+  hotels: RetreatSelectedHotelProposal[]
+) {
+  return !!hotels.find((hotel) => {
+    return (
+      hotel.group_id === group.id &&
+      (hotel.state === "REVIEW" ||
+        hotel.state === "REQUESTED" ||
+        hotel.state === "SELECTED")
+    )
+  })
 }
