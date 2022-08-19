@@ -200,20 +200,16 @@ type UploadImageProps = {
   headerText: string
   tooltipText?: string
   handleClear?: () => void
-  file?: true
-  multiple?: true
-  multipleNumber?: number
 }
-
+export const splitFileName = function (str: string) {
+  let popped = str.split("\\").pop()
+  if (popped) {
+    return popped.split("/").pop()
+  }
+}
 export function UploadImage(props: UploadImageProps) {
   const [loading, setLoading] = useState(false)
   let dispatch = useDispatch()
-  var splitFileName = function (str: string) {
-    let popped = str.split("\\").pop()
-    if (popped) {
-      return popped.split("/").pop()
-    }
-  }
 
   let classes = useImageStyles()
   return (
@@ -237,36 +233,22 @@ export function UploadImage(props: UploadImageProps) {
             Choose File
             <input
               type="file"
-              accept={
-                props.file
-                  ? "application/pdf"
-                  : "image/png, image/jpg, image/jpeg"
-              }
+              accept={"image/png, image/jpg, image/jpeg"}
               hidden
               onChange={(e) => {
                 if (e.target && e.target.files && e.target.files[0]) {
                   let data = new FormData()
                   data.append("file", e.target.files[0])
                   setLoading(true)
-                  fetch(
-                    props.file
-                      ? `${config.get(
-                          IMAGE_SERVER_BASE_URL_KEY
-                        )}/api/files?type=receipt`
-                      : `${config.get(IMAGE_SERVER_BASE_URL_KEY)}/api/images`,
-                    {
-                      body: data,
-                      method: "POST",
-                      mode: "cors",
-                    }
-                  )
+                  fetch(`${config.get(IMAGE_SERVER_BASE_URL_KEY)}/api/images`, {
+                    body: data,
+                    method: "POST",
+                    mode: "cors",
+                  })
                     .then((res) => res.json())
                     .then(async (resdata) => {
-                      if (props.file) {
-                        await props.handleChange(resdata.file)
-                      } else {
-                        await props.handleChange(resdata.image)
-                      }
+                      await props.handleChange(resdata.image)
+
                       setLoading(false)
                     })
                     .catch((error) => {
@@ -285,11 +267,7 @@ export function UploadImage(props: UploadImageProps) {
             />
           </Button>
           <Typography className={classes.fileNameText}>
-            {props.multiple
-              ? `${props.multipleNumber} files uploaded`
-              : props.value?.image_url
-              ? splitFileName(props.value?.image_url)
-              : "No file chosen"}
+            {props.value?.image_url && splitFileName(props.value?.image_url)}
           </Typography>
           {props.handleClear && (
             <IconButton onClick={props.handleClear} size="small">

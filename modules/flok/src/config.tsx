@@ -10,6 +10,9 @@ export const GOOGLE_TAG_MANAGER_ID_KEY = "google_tag_manager_id"
 export const DASHBOARD_VERSION_KEY = "dashboard_version"
 export const MAX_TASKS = "max_tasks"
 export const IMAGE_SERVER_BASE_URL_KEY = "image_server_base_url"
+export const DEFAULT_REGISTRATION_EMAIL_TEMPLATE =
+  "default_registration_email_template"
+export const DEFAULT_FLIGHTS_EMAIL_TEMPLATE = "default_flights_email_template"
 type ConfigKey =
   | typeof APP_VERSION_KEY
   | typeof SERVER_BASE_URL_KEY
@@ -21,6 +24,8 @@ type ConfigKey =
   | typeof DASHBOARD_VERSION_KEY
   | typeof MAX_TASKS
   | typeof IMAGE_SERVER_BASE_URL_KEY
+  | typeof DEFAULT_FLIGHTS_EMAIL_TEMPLATE
+  | typeof DEFAULT_REGISTRATION_EMAIL_TEMPLATE
 
 class Config {
   appConfig: {[key: string]: any}
@@ -29,6 +34,8 @@ class Config {
     [MIXPANEL_TOKEN_KEY]: "BOGUS_KEY", // use default key to prevent error's from non-initialized mixpanel instance
     [GOOGLE_MAPS_ID_HOTEL_PAGE_KEY]: "209c3e9f6984bce3",
     [MAX_TASKS]: 10,
+    [DEFAULT_FLIGHTS_EMAIL_TEMPLATE]: 1,
+    [DEFAULT_REGISTRATION_EMAIL_TEMPLATE]: 1,
   }
   constructor() {
     this.appConfig = {}

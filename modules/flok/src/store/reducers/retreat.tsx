@@ -13,6 +13,7 @@ import {
   AttendeeLandingWebsiteBlockModel,
   AttendeeLandingWebsiteModel,
   AttendeeLandingWebsitePageModel,
+  EmailTemplateModel,
   FileModel,
   HotelGroup,
   PresetImageModel,
@@ -25,9 +26,11 @@ import {
 import {ApiAction} from "../actions/api"
 import {
   DELETE_PAGE_SUCCESS,
+  DELETE_RECEIPT_TO_ATTENDEE_SUCCESS,
   DELETE_RETREAT_ATTENDEES_SUCCESS,
   GET_ATTENDEE_SUCCESS,
   GET_BLOCK_SUCCESS,
+  GET_EMAIL_TEMPLATE_SUCCESS,
   GET_HOTEL_GROUP_SUCCESS,
   GET_MY_ATTENDEE_SUCCESS,
   GET_PAGE_SUCCESS,
@@ -46,12 +49,14 @@ import {
   PATCH_ATTENDEE_SUCCESS,
   PATCH_ATTENDEE_TRAVEL_SUCCESS,
   PATCH_BLOCK_SUCCESS,
+  PATCH_EMAIL_TEMPLATE_SUCCESS,
   PATCH_PAGE_SUCCESS,
   PATCH_RETREAT_SUCCESS,
   PATCH_TRIP_SUCCESS,
   PATCH_WEBSITE_SUCCESS,
   POST_ATTENDEE_REG_SUCCESS,
   POST_BLOCK_SUCCESS,
+  POST_EMAIL_TEMPLATE_SUCCESS,
   POST_FLIGHTS_LIVE_SUCCESS,
   POST_INITIAL_WEBSITE_SUCCESS,
   POST_PAGE_SUCCESS,
@@ -97,6 +102,9 @@ export type RetreatState = {
   hotelGroups: {
     [id: number]: HotelGroup
   }
+  emailTemplates: {
+    [id: number]: EmailTemplateModel
+  }
 }
 
 const initialState: RetreatState = {
@@ -113,6 +121,7 @@ const initialState: RetreatState = {
   },
   RFPs: {},
   hotelGroups: {},
+  emailTemplates: {},
 }
 
 export default function retreatReducer(
@@ -371,6 +380,32 @@ export default function retreatReducer(
           },
         },
       }
+    case DELETE_RECEIPT_TO_ATTENDEE_SUCCESS:
+      let metaResponse = action as unknown as {
+        meta: {
+          attendeeId: number
+          receiptId: number
+        }
+      }
+      let newReceipts = [
+        ...state.attendees[metaResponse.meta.attendeeId].receipts,
+      ]
+      let indexOfReceipt = newReceipts.findIndex((file) => {
+        return file.id === metaResponse.meta.receiptId
+      })
+      if (indexOfReceipt !== -1) {
+        newReceipts.splice(indexOfReceipt, 1)
+      }
+      return {
+        ...state,
+        attendees: {
+          ...state.attendees,
+          [metaResponse.meta.attendeeId]: {
+            ...state.attendees[metaResponse.meta.attendeeId],
+            receipts: newReceipts,
+          },
+        },
+      }
 
     case DELETE_PAGE_SUCCESS:
       const pageId = (action as unknown as {meta: {pageId: number}}).meta.pageId
@@ -456,6 +491,20 @@ export default function retreatReducer(
         [payload.request_for_proposal.id]: payload.request_for_proposal,
       }
       return newRFPState
+    case POST_EMAIL_TEMPLATE_SUCCESS:
+    case GET_EMAIL_TEMPLATE_SUCCESS:
+    case PATCH_EMAIL_TEMPLATE_SUCCESS:
+      payload = (action as ApiAction).payload as {
+        email_template: EmailTemplateModel
+      }
+      return {
+        ...state,
+        emailTemplates: {
+          ...state.emailTemplates,
+          [payload.email_template.id]: payload.email_template,
+        },
+      }
+
     default:
       return state
   }

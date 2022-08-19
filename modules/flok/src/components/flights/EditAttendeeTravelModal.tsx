@@ -4,19 +4,25 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  IconButton,
   makeStyles,
   TextField,
+  Typography,
 } from "@material-ui/core"
+import {HighlightOffRounded} from "@material-ui/icons"
 import {useFormik} from "formik"
 import NumberFormat from "react-number-format"
 import {useDispatch} from "react-redux"
+import {RetreatAttendeeModel} from "../../models/retreat"
 import {ApiAction} from "../../store/actions/api"
 import {
+  deleteReceiptToAttendee,
   patchAttendee,
   patchAttendeeTravel,
   postReceiptToAttendee,
 } from "../../store/actions/retreat"
-import {UploadImage} from "../attendee-site/EditWebsiteForm"
+import {splitFileName} from "../attendee-site/EditWebsiteForm"
+import AppUploadFile from "../base/AppUploadFile"
 
 let useStyles = makeStyles((theme) => ({
   textField: {
@@ -27,7 +33,6 @@ let useStyles = makeStyles((theme) => ({
       width: 200,
     },
   },
-
   form: {
     display: "flex",
     marginTop: theme.spacing(1),
@@ -37,16 +42,36 @@ let useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     gap: theme.spacing(2),
   },
+  receiptContainer: {
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
+    maxWidth: 300,
+  },
+  receiptWrapper: {
+    display: "flex",
+    marginLeft: theme.spacing(2),
+    justifyContent: "space-between",
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+    alignItems: "center",
+  },
+  receiptLink: {
+    whiteSpace: "nowrap",
+    maxWidth: 300,
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 }))
 
 type EditAttendeeTravelModalProps = {
   open: boolean
   flightStatus: "PENDING" | "OPT_OUT" | "BOOKED"
   flightCost: number
-  attendeeId: number
   handleClose: () => void
-  numberOfReceipts: number
   receiptRestricted?: boolean
+  attendee: RetreatAttendeeModel
 }
 const attendeeFlightStateOptions = [
   {value: "PENDING", text: "Not Booked"},
@@ -61,7 +86,7 @@ function EditAttendeeTravelModal(props: EditAttendeeTravelModalProps) {
       flight_status: props.flightStatus ?? "PENDING",
     },
     onSubmit: (values) => {
-      dispatch(patchAttendee(props.attendeeId, values))
+      dispatch(patchAttendee(props.attendee.id, values))
     },
     enableReinitialize: true,
   })
@@ -75,7 +100,7 @@ function EditAttendeeTravelModal(props: EditAttendeeTravelModalProps) {
         // @ts-ignore
         values.cost = null
       }
-      dispatch(patchAttendeeTravel(props.attendeeId, values))
+      dispatch(patchAttendeeTravel(props.attendee.id, values))
     },
     enableReinitialize: true,
   })
@@ -85,9 +110,11 @@ function EditAttendeeTravelModal(props: EditAttendeeTravelModalProps) {
       <DialogContent>
         <form className={classes.form}>
           <TextField
-            disabled={props.receiptRestricted && props.numberOfReceipts === 1}
+            disabled={
+              props.receiptRestricted && props.attendee.receipts.length === 0
+            }
             helperText={
-              props.receiptRestricted && props.numberOfReceipts === 1
+              props.receiptRestricted && props.attendee.receipts.length === 0
                 ? "You must submit your receipts before you can change your status to Booked"
                 : ""
             }
@@ -124,57 +151,54 @@ function EditAttendeeTravelModal(props: EditAttendeeTravelModalProps) {
               inputComponent: CurrencyNumberFormat as any,
             }}
             size="small"></TextField>
-          <UploadImage
-            multiple
-            multipleNumber={props.numberOfReceipts}
-            file
-            id="receipt"
-            value={undefined}
-            handleChange={async (file) => {
-              let response = (await dispatch(
-                postReceiptToAttendee({
-                  attendee_id: props.attendeeId,
-                  file_id: file.id,
-                })
-              )) as unknown as ApiAction
-              if (!response.error) {
-                dispatch({
-                  type: "ADD_RECEIPT_TO_ATTENDEE",
-                  receipt: file,
-                  attendee_id: props.attendeeId,
-                })
+          <div>
+            <Typography>Flight Receipts</Typography>
+            <div className={classes.receiptContainer}>
+              {props.attendee.receipts.map((receipt) => {
+                return (
+                  <div className={classes.receiptWrapper}>
+                    <a href={receipt.file_url} className={classes.receiptLink}>
+                      {splitFileName(receipt.file_url)}
+                    </a>
+                    <IconButton
+                      onClick={() => {
+                        console.log(receipt.id)
+                        dispatch(
+                          deleteReceiptToAttendee(receipt.id, props.attendee.id)
+                        )
+                      }}
+                      size="small">
+                      <HighlightOffRounded />
+                    </IconButton>
+                  </div>
+                )
+              })}
+            </div>
+            <AppUploadFile
+              type="RECEIPT"
+              accepts="image/png, image/jpg, application/pdf, image/jpeg"
+              rightText={
+                props.attendee.receipts.length === 0 ? "No receipts added" : ""
               }
-            }}
-            headerText="Upload Receipt"
-          />
+              id="receipt"
+              handleChange={async (file) => {
+                let response = (await dispatch(
+                  postReceiptToAttendee({
+                    attendee_id: props.attendee.id,
+                    file_id: file.id,
+                  })
+                )) as unknown as ApiAction
+                if (!response.error) {
+                  dispatch({
+                    type: "ADD_RECEIPT_TO_ATTENDEE",
+                    receipt: file,
+                    attendee_id: props.attendee.id,
+                  })
+                }
+              }}
+            />
+          </div>
         </form>
-        {/* <div>
-          <Document
-            file={{
-              url: "https://flok-b32d43c.s3.amazonaws.com/andrew-busel-standard-resume_2-6100ae1c.pdf",
-            }}
-            onLoadError={(error) =>
-              alert("Error while loading page! " + error.message)
-            }
-            onLoadSuccess={() => {}}>
-            <Page pageNumber={1} />
-          </Document>
-          <p>
-            Page {1} of {2}
-          </p>
-        </div> */}
-        {/* <object
-          data="https://flok-b32d43c.s3.amazonaws.com/andrew-busel-standard-resume_2-6100ae1c.pdf"
-          type="application/pdf"
-          width="100%"
-          height="100%">
-          <p>
-            Alternative text - include a link{" "}
-            <a href="https://flok-b32d43c.s3.amazonaws.com/andrew-busel-standard-resume_2-6100ae1c.pdf">
-              to the PDF!
-            </a>
-          </p>
-        </object> */}
       </DialogContent>
       <DialogActions>
         <div>

@@ -181,7 +181,10 @@ export type RetreatModel = {
   flights_page_id?: number
   hide_group_flights?: boolean
   require_flight_receipts?: boolean
-  flights_email?: string
+
+  //  Email templates
+  registration_email_template_id?: number
+  flights_email_template_id?: number
 }
 
 export type RetreatTripModel = {
@@ -515,4 +518,10 @@ export type HotelGroup = {
   id: number
   title: string
   retreat_id: number
+}
+
+export type EmailTemplateModel = {
+  id: number
+  subject: string
+  body: string
 }

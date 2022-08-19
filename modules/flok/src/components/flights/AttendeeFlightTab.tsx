@@ -11,6 +11,7 @@ import {useDispatch, useSelector} from "react-redux"
 import {RetreatAttendeeModel} from "../../models/retreat"
 import {RootState} from "../../store"
 import {getTrip, instantiateAttendeeTrips} from "../../store/actions/retreat"
+import {splitFileName} from "../attendee-site/EditWebsiteForm"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import EditAttendeeTravelModal from "./EditAttendeeTravelModal"
 import EditFlightModal from "./EditFlightModal"
@@ -211,11 +212,10 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
           {attendee.travel && (
             <EditAttendeeTravelModal
               receiptRestricted={props.receiptRestricted}
-              numberOfReceipts={attendee.receipts.length}
+              attendee={attendee}
               open={openEditAttendeeTravelModal}
               flightStatus={attendee.flight_status}
               flightCost={attendee.travel.cost}
-              attendeeId={attendee.id}
               handleClose={() => {
                 setOpenEditAttendeeTravelModal(false)
               }}
@@ -286,14 +286,7 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                       <Typography className={classes.flightCost}>
                         {attendee.receipts.length}
                       </Typography>
-                      {/* <ClickAwayListener onClickAway={() => {}}> */}
-                      <Popper
-                        id={id}
-                        open={popperOpen}
-                        anchorEl={anchorEl}
-                        onClick={(event) => {
-                          setAnchorEl(anchorEl ? null : event.currentTarget)
-                        }}>
+                      <Popper id={id} open={popperOpen} anchorEl={anchorEl}>
                         <Paper style={{padding: 16}}>
                           {attendee.receipts.length === 0 ? (
                             <Typography>
@@ -301,7 +294,6 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                             </Typography>
                           ) : (
                             <>
-                              <Typography variant="h4">Receipts</Typography>
                               <ul
                                 style={{
                                   listStyleType: "none",
@@ -318,7 +310,7 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                                       textOverflow: "ellipsis",
                                     }}>
                                     <a href={receipt.file_url}>
-                                      {receipt.file_url}
+                                      {splitFileName(receipt.file_url)}
                                     </a>
                                   </li>
                                 ))}
@@ -327,7 +319,6 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                           )}
                         </Paper>
                       </Popper>
-                      {/* </ClickAwayListener> */}
                     </div>
                   </div>
                   {/* </Tooltip> */}

@@ -4,6 +4,7 @@ import {
   AttendeeLandingWebsiteBlockModel,
   AttendeeLandingWebsiteModel,
   AttendeeLandingWebsitePageModel,
+  EmailTemplateModel,
   RetreatAttendeeModel,
   RetreatModel,
   RetreatSelectedHotelProposalState,
@@ -698,6 +699,8 @@ export function patchRetreat(
       | "attendees_registration_form_id"
       | "hide_group_flights"
       | "require_flight_receipts"
+      | "registration_email_template_id"
+      | "flights_email_template_id"
     >
   >
 ) {
@@ -962,4 +965,108 @@ export function postReceiptToAttendee(values: {
       errorMessage: "Something went wrong.",
     }
   )
+}
+
+export const DELETE_RECEIPT_TO_ATTENDEE_REQUEST =
+  "DELETE_RECEIPT_TO_ATTENDEE_REQUEST"
+export const DELETE_RECEIPT_TO_ATTENDEE_SUCCESS =
+  "DELETE_RECEIPT_TO_ATTENDEE_SUCCESS"
+export const DELETE_RECEIPT_TO_ATTENDEE_FAILURE =
+  "DELETE_RECEIPT_TO_ATTENDEE_FAILURE"
+export function deleteReceiptToAttendee(receiptId: number, attendeeId: number) {
+  let endpoint = `/v1.0/receipts/${receiptId}`
+  return createApiAction(
+    {
+      method: "DELETE",
+      endpoint,
+      types: [
+        {type: DELETE_RECEIPT_TO_ATTENDEE_REQUEST},
+        {
+          type: DELETE_RECEIPT_TO_ATTENDEE_SUCCESS,
+          meta: {attendeeId, receiptId},
+        },
+        {type: DELETE_RECEIPT_TO_ATTENDEE_FAILURE},
+      ],
+    },
+    {
+      successMessage: "Successfully deleted receipt",
+      errorMessage: "Something went wrong.",
+    }
+  )
+}
+
+export const POST_EMAIL_TEMPLATE_REQUEST = "POST_EMAIL_TEMPLATE_REQUEST"
+export const POST_EMAIL_TEMPLATE_SUCCESS = "POST_EMAIL_TEMPLATE_SUCCESS"
+export const POST_EMAIL_TEMPLATE_FAILURE = "POST_EMAIL_TEMPLATE_FAILURE"
+export function postEmailTemplate(
+  values: Pick<EmailTemplateModel, "body" | "subject">
+) {
+  let endpoint = `/v1.0/email-templates`
+
+  return createApiAction({
+    method: "POST",
+    endpoint,
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_EMAIL_TEMPLATE_REQUEST},
+      {type: POST_EMAIL_TEMPLATE_SUCCESS},
+      {type: POST_EMAIL_TEMPLATE_FAILURE},
+    ],
+  })
+}
+
+export const GET_EMAIL_TEMPLATE_REQUEST = "GET_EMAIL_TEMPLATE_REQUEST"
+export const GET_EMAIL_TEMPLATE_SUCCESS = "GET_EMAIL_TEMPLATE_SUCCESS"
+export const GET_EMAIL_TEMPLATE_FAILURE = "GET_EMAIL_TEMPLATE_FAILURE"
+export function getEmailTemplate(templateId: number) {
+  let endpoint = `/v1.0/email-templates/${templateId}`
+
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_EMAIL_TEMPLATE_REQUEST},
+      {type: GET_EMAIL_TEMPLATE_SUCCESS},
+      {type: GET_EMAIL_TEMPLATE_FAILURE},
+    ],
+  })
+}
+
+export const PATCH_EMAIL_TEMPLATE_REQUEST = "PATCH_EMAIL_TEMPLATE_REQUEST"
+export const PATCH_EMAIL_TEMPLATE_SUCCESS = "PATCH_EMAIL_TEMPLATE_SUCCESS"
+export const PATCH_EMAIL_TEMPLATE_FAILURE = "PATCH_EMAIL_TEMPLATE_FAILURE"
+export function patchEmailTemplate(
+  templateId: number,
+  values: Pick<EmailTemplateModel, "body" | "subject">
+) {
+  let endpoint = `/v1.0/email-templates/${templateId}`
+
+  return createApiAction({
+    method: "PATCH",
+    endpoint,
+    body: JSON.stringify(values),
+    types: [
+      {type: PATCH_EMAIL_TEMPLATE_REQUEST},
+      {type: PATCH_EMAIL_TEMPLATE_SUCCESS},
+      {type: PATCH_EMAIL_TEMPLATE_FAILURE},
+    ],
+  })
+}
+
+export const POST_SEND_SAMPLE_EMAIL_REQUEST = "POST_SEND_SAMPLE_EMAIL_REQUEST"
+export const POST_SEND_SAMPLE_EMAIL_SUCCESS = "POST_SEND_SAMPLE_EMAIL_SUCCESS"
+export const POST_SEND_SAMPLE_EMAIL_FAILURE = "POST_SEND_SAMPLE_EMAIL_FAILURE"
+export function postSendSampleEmailTemplate(templateId: number) {
+  let endpoint = `/v1.0/send-sample-email`
+
+  return createApiAction({
+    method: "POST",
+    endpoint,
+    body: JSON.stringify({template_id: templateId}),
+    types: [
+      {type: POST_SEND_SAMPLE_EMAIL_REQUEST},
+      {type: POST_SEND_SAMPLE_EMAIL_SUCCESS},
+      {type: POST_SEND_SAMPLE_EMAIL_FAILURE},
+    ],
+  })
 }

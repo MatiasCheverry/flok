@@ -175,10 +175,8 @@ export function fetchGooglePlace(
       fields: ["name", "geometry"],
     },
     (place, status) => {
-      console.log("got earlier", status)
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         if (place && place.name && place.geometry?.location) {
-          console.log("got here")
           onFetch({
             name: place.name,
             place_id: placeId,
