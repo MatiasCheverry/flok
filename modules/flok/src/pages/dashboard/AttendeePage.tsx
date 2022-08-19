@@ -39,6 +39,7 @@ import {RootState} from "../../store"
 import {getAttendee, patchAttendee} from "../../store/actions/retreat"
 import {FlokTheme} from "../../theme"
 import {getTextFieldErrorProps} from "../../utils"
+import {useRetreat} from "../misc/RetreatProvider"
 
 let useStyles = makeStyles((theme) => ({
   section: {
@@ -124,6 +125,7 @@ function AttendeePage() {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
+  let [retreat] = useRetreat()
 
   const isFlights =
     route.path === AppRoutes.getPath("RetreatAttendeeFlightsPage")
@@ -193,7 +195,7 @@ function AttendeePage() {
             color="inherit"
             className={classes.tab}
             to={
-              isFlights
+              isFlights && !retreat.attendees_v2_released
                 ? AppRoutes.getPath("RetreatFlightsPage", {
                     retreatIdx: retreatIdx.toString(),
                   })
@@ -204,7 +206,9 @@ function AttendeePage() {
             <Icon>
               <ArrowBackIos />
             </Icon>
-            {isFlights ? "All Flights" : "All Attendees"}
+            {isFlights && !retreat.attendees_v2_released
+              ? "All Flights"
+              : "All Attendees"}
           </Link>
           <Tab
             className={classes.tab}
