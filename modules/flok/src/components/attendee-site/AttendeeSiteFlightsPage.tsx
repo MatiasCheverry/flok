@@ -113,12 +113,9 @@ export default function AttendeeSiteFlightsPage() {
             })}
             selectedPage={"flights-page"}
           />
-          {(website.banner_image || true) && (
+          {website.banner_image && (
             <img
-              src={
-                website.banner_image?.image_url ??
-                "https://images.unsplash.com/photo-1527489377706-5bf97e608852?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2159&q=80"
-              }
+              src={website.banner_image?.image_url}
               className={classes.bannerImg}
               alt="Banner"></img>
           )}

@@ -233,7 +233,7 @@ export function UploadImage(props: UploadImageProps) {
             Choose File
             <input
               type="file"
-              accept={"image/png, image/jpg, image/jpeg"}
+              accept="image/png, image/jpg, image/jpeg"
               hidden
               onChange={(e) => {
                 if (e.target && e.target.files && e.target.files[0]) {
@@ -267,7 +267,9 @@ export function UploadImage(props: UploadImageProps) {
             />
           </Button>
           <Typography className={classes.fileNameText}>
-            {props.value?.image_url && splitFileName(props.value?.image_url)}
+            {props.value?.image_url
+              ? splitFileName(props.value?.image_url)
+              : "No file chosen"}
           </Typography>
           {props.handleClear && (
             <IconButton onClick={props.handleClear} size="small">
