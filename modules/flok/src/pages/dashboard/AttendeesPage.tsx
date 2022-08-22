@@ -24,8 +24,10 @@ import {
 } from "@material-ui/core"
 import {
   DataGrid,
+  GridColumnHeaderParams,
   GridToolbarContainer,
   GridToolbarExport,
+  GridValueGetterParams,
 } from "@material-ui/data-grid"
 import {
   Add,
@@ -46,12 +48,16 @@ import {useDispatch, useSelector} from "react-redux"
 import {withRouter} from "react-router-dom"
 import AppCsvXlsxUpload from "../../components/base/AppCsvXlsxUpload"
 import AttendeeDeleteDropDown from "../../components/lodging/AttendeeDeleteDropdown"
+import AttendeeFlightReceiptViewer from "../../components/lodging/AttendeeFlightReceiptViewer"
+import AttendeeFormResponseDataGridHeader from "../../components/lodging/AttendeeFormResponseDataGridHeader"
 import PageBody from "../../components/page/PageBody"
 import {AttendeeBatchUploadApiResponse} from "../../models/api"
+import {FormResponseModel} from "../../models/form"
 import {RetreatAttendeeModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
+import {getFormQuestion, getFormResponse} from "../../store/actions/form"
 import {
   deleteRetreatAttendees,
   getTrips,
@@ -176,11 +182,22 @@ let useStyles = makeStyles((theme) => ({
     borderColor: theme.palette.text.secondary,
     color: theme.palette.text.secondary,
   },
+  linkStyle: {
+    backgroundColor: "transparent",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "underline",
+    display: "inline",
+    margin: 0,
+    padding: 0,
+    color: "#0000EE", //To match default color of a link
+  },
 }))
 
 function AttendeesPage() {
   let classes = useStyles()
   let dispatch = useDispatch()
+
   let [showExportText, setShowExportText] = useState(true)
 
   let [retreat, retreatIdx] = useRetreat()
@@ -221,6 +238,84 @@ function AttendeesPage() {
     }
   }, [dispatch, missingTrips, loadingTrips])
 
+  let [showFlights, setShowFlights] = useState(false)
+  let [showResponses, setShowResponses] = useState(false)
+
+  // For form response view
+  let responseIds = attendeeTravelInfo.map(
+    (attendee) => attendee.registration_form_response_id
+  )
+  let formResponses: {[id: number]: FormResponseModel} = useSelector(
+    (state: RootState) => {
+      return Object.assign(
+        {},
+        ...Object.entries(state.form.formResponses)
+          .filter((entry) => {
+            if (responseIds.indexOf(parseInt(entry[0])) !== -1) {
+              return entry
+            } else return false
+          })
+          .map((entry) => ({[entry[0]]: entry[1]}))
+      )
+    }
+  )
+  let questionIds: {[id: number]: true} = {}
+
+  let questions = useSelector((state: RootState) => {
+    return state.form.formQuestions
+  })
+  useEffect(() => {
+    responseIds.forEach((id) => {
+      if (id && !formResponses[id]) {
+        dispatch(getFormResponse(id))
+      }
+    })
+  }, [JSON.stringify(responseIds)])
+  useEffect(() => {
+    Object.keys(questionIds).forEach((id) => {
+      if (!questions[parseInt(id)]) {
+        dispatch(getFormQuestion(parseInt(id)))
+      }
+    })
+  }, [JSON.stringify(questionIds)])
+
+  Object.values(formResponses).forEach((formResponse) => {
+    formResponse.answers.forEach((answer) => {
+      if (!questionIds[answer.form_question_id]) {
+        questionIds[answer.form_question_id] = true
+      }
+    })
+  })
+
+  let otherForm = Object.keys(questionIds).map((id) => {
+    return {
+      field: questions[parseInt(id)]?.title ?? id,
+      renderHeader: (params: GridColumnHeaderParams) => {
+        return <AttendeeFormResponseDataGridHeader questionId={parseInt(id)} />
+      },
+      width: 250,
+      valueGetter: (params: GridValueGetterParams) => {
+        let attendee = params.row as RetreatAttendeeModel
+        if (attendee.registration_form_response_id) {
+          let formResponse =
+            formResponses[attendee.registration_form_response_id]
+          if (formResponse) {
+            let answer = formResponse.answers.find(
+              (answer) => answer.form_question_id === parseInt(id)
+            )
+            return answer ? answer.answer : ""
+          }
+        }
+      },
+      hide: !showResponses,
+    }
+  })
+  // useEffect(()=>{
+
+  // }, [questionIds])
+  console.log(formResponses, questionIds)
+
+  // For adding attendees
   let [addDialogOpen, setAddDialogOpen] = useState(
     addQueryParam?.toLowerCase() === "single" ||
       addQueryParam?.toLowerCase() === "batch"
@@ -392,7 +487,6 @@ function AttendeesPage() {
 
     setNewAttendeeErrorState(errorState)
   }
-  let [showFlights, setShowFlights] = useState(false)
 
   return (
     <PageBody appBar>
@@ -444,6 +538,8 @@ function AttendeesPage() {
                 showFlights: showFlights,
                 setShowFlights: setShowFlights,
                 setShowExportText: setShowExportText,
+                showResponses: showResponses,
+                setShowResponses: setShowResponses,
               },
             }}
             onCellClick={(params) => {
@@ -635,6 +731,18 @@ function AttendeesPage() {
                   }
                 },
               },
+              {
+                field: "flight_receipts",
+                hide: !showFlights,
+                headerName: "Flight Receipts",
+                align: "center",
+                width: 180,
+                renderCell: (params) => {
+                  let attendee = params.row as RetreatAttendeeModel
+                  return <AttendeeFlightReceiptViewer attendee={attendee} />
+                },
+              },
+              ...otherForm,
               {
                 field: "actions",
                 headerName: "",
@@ -953,6 +1061,8 @@ type CustomToolbarAttendeePageProps = {
   setShowFlights: (newValue: boolean) => void
   showFlights: boolean
   setShowExportText: (newVal: boolean) => void
+  setShowResponses: (newValue: boolean) => void
+  showResponses: boolean
 }
 function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   let classes = useToolbarStyles()
@@ -1003,9 +1113,12 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
       )}
       {!(searchExpanded && isSmallScreen) && (
         <div
+          onClick={() => {
+            props.setShowResponses(!props.showResponses)
+          }}
           style={{display: "flex", alignItems: "center", gap: "3px"}}
           className={classes.toolbarButton}>
-          <Switch color="primary" size="small" />
+          <Switch color="primary" size="small" checked={props.showResponses} />
           {searchExpanded || isSmallScreen ? (
             <Dns fontSize="small" />
           ) : (

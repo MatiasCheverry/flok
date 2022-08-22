@@ -262,14 +262,6 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                         : "N/A"}
                     </Typography>
                   </div>
-                  {/* <Tooltip
-                    title={
-                      attendee.receipts.length
-                        ? attendee.receipts
-                            .map((receipt) => receipt.file_url)
-                            .join(", ")
-                        : "Click edit in the top left to add receipts"
-                    }> */}
                   <div className={classes.flightInfoSection}>
                     <Typography className={classes.flightInfoHeader}>
                       Receipts
