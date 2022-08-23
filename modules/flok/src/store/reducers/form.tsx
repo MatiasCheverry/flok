@@ -16,6 +16,7 @@ import {
   DELETE_FORM_QUESTION_SUCCESS,
   GET_FORM_QUESTION_OPTION_SUCCESS,
   GET_FORM_QUESTION_SUCCESS,
+  GET_FORM_RESPONSES_SUCCESS,
   GET_FORM_RESPONSE_SUCCESS,
   GET_FORM_SUCCESS,
   PATCH_FORM_QUESTION_OPTION_SUCCESS,
@@ -155,7 +156,23 @@ export default function formReducer(
           } as FormModel,
         },
       }
-
+    case GET_FORM_RESPONSES_SUCCESS:
+      let formResponses = (
+        (action as ApiAction).payload as {form_responses: FormResponseModel[]}
+      ).form_responses
+      let newResponses = formResponses.reduce(
+        (last: any, curr: FormResponseModel) => {
+          return {...last, [curr.id]: curr}
+        },
+        {}
+      )
+      return {
+        ...state,
+        formResponses: {
+          ...state.formResponses,
+          ...newResponses,
+        },
+      }
     default:
       return state
   }

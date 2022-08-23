@@ -1070,3 +1070,24 @@ export function postSendSampleEmailTemplate(templateId: number) {
     ],
   })
 }
+
+export const GET_FORM_RESPONSES_REQUEST = "GET_FORM_RESPONSES_REQUEST"
+export const GET_FORM_RESPONSES_SUCCESS = "GET_FORM_RESPONSES_SUCCESS"
+export const GET_FORM_RESPONSES_FAILURE = "GET_FORM_RESPONSES_FAILURE"
+export function getFormResponses(formResponseIds: number[]) {
+  if (formResponseIds.length > 50) {
+    formResponseIds = formResponseIds.slice(0, 50)
+  }
+  let endpoint = `/v1.0/form-responses?${new URLSearchParams(
+    formResponseIds.map((id) => ["id", id.toString()])
+  )}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_FORM_RESPONSES_REQUEST},
+      {type: GET_FORM_RESPONSES_SUCCESS},
+      {type: GET_FORM_RESPONSES_FAILURE},
+    ],
+  })
+}

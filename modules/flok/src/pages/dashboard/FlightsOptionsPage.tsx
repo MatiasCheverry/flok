@@ -223,14 +223,14 @@ export default function FlightsOptionsPage() {
             <Button
               color="primary"
               variant="contained"
-              onClick={async () => {
-                let response = (await dispatch(
+              onClick={() => {
+                dispatch(
                   postTemplatedPage({
                     title: "Flights",
                     type: "FLIGHTS",
                     retreat_id: retreat.id,
                   })
-                )) as unknown as ApiAction
+                )
               }}>
               Create Flights Page?
             </Button>

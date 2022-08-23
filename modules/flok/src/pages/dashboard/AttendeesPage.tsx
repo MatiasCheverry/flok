@@ -57,9 +57,9 @@ import {RetreatAttendeeModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
-import {getFormQuestion, getFormResponse} from "../../store/actions/form"
 import {
   deleteRetreatAttendees,
+  getFormResponses,
   getTrips,
   postRetreatAttendees,
   postRetreatAttendeesBatch,
@@ -264,20 +264,32 @@ function AttendeesPage() {
   let questions = useSelector((state: RootState) => {
     return state.form.formQuestions
   })
+
+  let [loadingResponses, setLoadingResponses] = useState(false)
+  let missingResponses = attendeeTravelInfo.reduce((prev, attendee) => {
+    let ret: {[key: number]: undefined} = {}
+    if (
+      attendee.registration_form_response_id &&
+      !formResponses[attendee.registration_form_response_id]
+    ) {
+      ret[attendee.registration_form_response_id] = undefined
+    }
+    return {...prev, ...ret}
+  }, {})
   useEffect(() => {
-    responseIds.forEach((id) => {
-      if (id && !formResponses[id]) {
-        dispatch(getFormResponse(id))
-      }
-    })
-  }, [JSON.stringify(responseIds)])
-  useEffect(() => {
-    Object.keys(questionIds).forEach((id) => {
-      if (!questions[parseInt(id)]) {
-        dispatch(getFormQuestion(parseInt(id)))
-      }
-    })
-  }, [JSON.stringify(questionIds)])
+    async function loadResponses() {
+      setLoadingResponses(true)
+      await dispatch(
+        getFormResponses(
+          Object.keys(missingResponses).map((id) => parseInt(id))
+        )
+      )
+      setLoadingResponses(false)
+    }
+    if (Object.keys(missingResponses).length && !loadingResponses) {
+      loadResponses()
+    }
+  }, [dispatch, loadingResponses, missingResponses])
 
   Object.values(formResponses).forEach((formResponse) => {
     formResponse.answers.forEach((answer) => {
@@ -287,13 +299,14 @@ function AttendeesPage() {
     })
   })
 
-  let otherForm = Object.keys(questionIds).map((id) => {
+  let formQuestionColumns = Object.keys(questionIds).map((id) => {
     return {
       field: questions[parseInt(id)]?.title ?? id,
+      description: questions[parseInt(id)]?.title ?? id,
       renderHeader: (params: GridColumnHeaderParams) => {
         return <AttendeeFormResponseDataGridHeader questionId={parseInt(id)} />
       },
-      width: 250,
+      width: 275,
       valueGetter: (params: GridValueGetterParams) => {
         let attendee = params.row as RetreatAttendeeModel
         if (attendee.registration_form_response_id) {
@@ -310,10 +323,6 @@ function AttendeesPage() {
       hide: !showResponses,
     }
   })
-  // useEffect(()=>{
-
-  // }, [questionIds])
-  console.log(formResponses, questionIds)
 
   // For adding attendees
   let [addDialogOpen, setAddDialogOpen] = useState(
@@ -742,7 +751,7 @@ function AttendeesPage() {
                   return <AttendeeFlightReceiptViewer attendee={attendee} />
                 },
               },
-              ...otherForm,
+              ...formQuestionColumns,
               {
                 field: "actions",
                 headerName: "",
