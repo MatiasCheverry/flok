@@ -65,7 +65,6 @@ export default function RetreatProvider(props: PropsWithChildren<{}>) {
       dispatch(getRetreat(retreatId!))
     }
   }, [retreatIdx, dispatch, retreat, retreatId])
-
   return retreatId === undefined ? (
     <WrongSignInPage attendeeIds={user.attendee_ids} />
   ) : retreat === ResourceNotFound ? (

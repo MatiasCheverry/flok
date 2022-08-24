@@ -7,6 +7,7 @@ import {
   addGooglePlace,
   getDestinations,
   getHotelByGuid,
+  getHotels,
 } from "../store/actions/lodging"
 import {useScript} from "../utils"
 
@@ -28,6 +29,27 @@ export function useDestinations() {
     }
   }, [dispatch, destinations])
   return [destinations, loadingDestinations] as const
+}
+
+export function useHotelFromId(hotelId: number) {
+  let dispatch = useDispatch()
+  let [loadingHotel, setLoadingHotel] = useState(false)
+  let hotel: HotelModel | undefined = useSelector((state: RootState) => {
+    return state.lodging.hotels[hotelId]
+  })
+
+  useEffect(() => {
+    async function loadHotel() {
+      setLoadingHotel(true)
+      await dispatch(getHotels([hotelId]))
+      setLoadingHotel(false)
+    }
+    if (!hotel) {
+      loadHotel()
+    }
+  }, [hotel, hotelId, dispatch])
+
+  return [hotel, loadingHotel] as const
 }
 
 export function useHotel(hotelGuid: string) {

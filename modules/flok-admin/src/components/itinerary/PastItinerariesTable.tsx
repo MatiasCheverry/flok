@@ -1,22 +1,15 @@
-import { Button, makeStyles } from "@material-ui/core"
+import {Button, makeStyles} from "@material-ui/core"
 import {
   DataGrid,
   GridCellParams,
   GridColDef,
   GridSortModel,
-  GridToolbar
+  GridToolbar,
 } from "@material-ui/data-grid"
-import React, { useState } from "react"
-import { useDispatch } from "react-redux"
-import {
-  RetreatAttendeesState,
-  RetreatFlightsState,
-  RetreatIntakeState,
-  RetreatItineraryState,
-  RetreatLodgingState
-} from "../../models"
-import { enqueueSnackbar } from "../../notistack-lib/actions"
-import { getDateTimeString } from "../../utils"
+import React, {useState} from "react"
+import {useDispatch} from "react-redux"
+import {enqueueSnackbar} from "../../notistack-lib/actions"
+import {getDateTimeString} from "../../utils"
 
 let useStyles = makeStyles((theme) => ({
   root: {
@@ -34,28 +27,28 @@ let useStyles = makeStyles((theme) => ({
   },
 }))
 
-export type RetreatsTableRow = {
+export type PastItinerariesTableRow = {
   id: number
-  companyName: string
-  contactEmail: string
-  numAttendees: number
-  createdAt: Date
-  intake_state: RetreatIntakeState
-  lodging_state: RetreatLodgingState
-  attendees_state: RetreatAttendeesState
-  flights_state: RetreatFlightsState
-  itinerary_state: RetreatItineraryState
+  name: string
+  start_date: Date
+  end_date: Date
+  hotel_id: number
+  nights: number
+  team_size: number
+  itinerary_link: string
+  spotlight_img_id: number
+  location_ids: string[]
 }
 
-type RetreatsTableProps = {
-  rows: RetreatsTableRow[]
+type PastItinerariesTableProps = {
+  rows: PastItinerariesTableRow[]
   onSelect: (id: number) => void
 }
 
-export default function RetreatsTable(props: RetreatsTableProps) {
+export default function PastItinerariesTable(props: PastItinerariesTableProps) {
   let classes = useStyles(props)
   let dispatch = useDispatch()
-  function onViewRetreat(params: GridCellParams) {
+  function onViewItinerary(params: GridCellParams) {
     let rowIdAsString = params.getValue(params.id, "id")?.toString()
     let rowId = rowIdAsString ? parseInt(rowIdAsString) : null
     if (rowId != null && !isNaN(rowId)) {
@@ -64,6 +57,7 @@ export default function RetreatsTable(props: RetreatsTableProps) {
       dispatch(enqueueSnackbar({message: "Something went wrong"}))
     }
   }
+
   const [sortModel, setSortModel] = useState<GridSortModel | undefined>([
     {
       field: "createdAt",
@@ -83,7 +77,7 @@ export default function RetreatsTable(props: RetreatsTableProps) {
         <Button
           variant="contained"
           size="small"
-          onClick={() => onViewRetreat(params)}>
+          onClick={() => onViewItinerary(params)}>
           View
         </Button>
       ),
@@ -96,52 +90,54 @@ export default function RetreatsTable(props: RetreatsTableProps) {
     },
     {
       ...commonColDefs,
-      field: "companyName",
-      headerName: "Company",
+      field: "name",
+      headerName: "Name",
       width: 200,
     },
     {
       ...commonColDefs,
-      field: "numAttendees",
-      headerName: "# Attendees",
+      renderCell: (params) => (
+        <>{params.value ? (params.value as string[]).join(" | ") : undefined}</>
+      ),
+      field: "location_ids",
+      headerName: "Locations",
+      width: 250,
+    },
+    // {
+    //   ...commonColDefs,
+    //   field: "hotel_id",
+    //   headerName: "Hotel",
+    //   width: 200,
+    // },
+    {
+      ...commonColDefs,
+      field: "start_date",
+      headerName: "Start Date",
+      width: 125,
+    },
+    {
+      ...commonColDefs,
+      field: "end_date",
+      headerName: "End Date",
+      width: 125,
+    },
+    {
+      ...commonColDefs,
+      field: "nights",
+      headerName: "Nights",
       width: 100,
-      hideSortIcons: false,
     },
     {
       ...commonColDefs,
-      field: "contactEmail",
-      headerName: "Email",
-      width: 150,
+      field: "team_size",
+      headerName: "Team Size",
+      width: 125,
     },
     {
       ...commonColDefs,
-      field: "intake_state",
-      headerName: "Intake State",
-      width: 200,
-    },
-    {
-      ...commonColDefs,
-      field: "lodging_state",
-      headerName: "Lodging State",
-      width: 200,
-    },
-    {
-      ...commonColDefs,
-      field: "attendees_state",
-      headerName: "Attendees State",
-      width: 200,
-    },
-    {
-      ...commonColDefs,
-      field: "flights_state",
-      headerName: "Flights State",
-      width: 200,
-    },
-    {
-      ...commonColDefs,
-      field: "itinerary_state",
-      headerName: "Itinerary State",
-      width: 200,
+      field: "itinerary_link",
+      headerName: "Itinerary Link",
+      width: 300,
     },
     {
       ...commonColDefs,

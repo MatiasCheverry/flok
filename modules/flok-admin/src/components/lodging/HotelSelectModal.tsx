@@ -7,7 +7,7 @@ import {
   Paper,
   TextField,
 } from "@material-ui/core"
-import React, {useEffect, useState} from "react"
+import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {AdminHotelModel} from "../../models"
 import {RootState} from "../../store"
@@ -85,7 +85,7 @@ type HotelSelectFormProps = {
   onSubmit: (hotelId: number) => void
   submitText?: string
 }
-function HotelSelectForm(props: HotelSelectFormProps) {
+export function HotelSelectForm(props: HotelSelectFormProps) {
   let classes = useFormStyles()
   let dispatch = useDispatch()
   let destinationsList = useSelector(

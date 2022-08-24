@@ -77,6 +77,12 @@ function PageSideNav(props: PageSideNavProps) {
           to={AppRoutes.getPath("AllUsersPage")}>
           <ListItemText>Users</ListItemText>
         </ListItem>
+        <ListItem
+          button
+          component={ReactRouterLink}
+          to={AppRoutes.getPath("PastItinerariesPage")}>
+          <ListItemText>Past Itineraries</ListItemText>
+        </ListItem>
       </List>
     </Drawer>
   )

@@ -17,6 +17,7 @@ import BudgetEstimatePage from "./pages/dashboard/BudgetEstimatePage"
 import RetreatBudgetPage from "./pages/dashboard/BudgetPage"
 import FlightsPage from "./pages/dashboard/FlightsPage"
 import HotelProfilePage from "./pages/dashboard/HotelProfilePage"
+import ItineraryInspirationPage from "./pages/dashboard/ItineraryInspirationPage"
 import ItineraryPage from "./pages/dashboard/ItineraryPage"
 import LandingPageGenerator from "./pages/dashboard/LandingPageGenerator"
 import LodgingContractPage from "./pages/dashboard/LodgingContractPage"
@@ -90,7 +91,9 @@ export class AppRoutes {
 
     RetreatBudgetPage: "/r/:retreatIdx/budget",
     RetreatBudgetEstimatePage: "/r/:retreatIdx/budget/estimate",
+
     RetreatItineraryPage: "/r/:retreatIdx/itinerary",
+    RetreatItineraryInspirationPage: "/r/:retreatIdx/itinerary/inspiration",
 
     // Not in sidebar yet
     AttendeeSiteHome: `${Constants.attendeeSitePathPrefix}/:retreatName`,
@@ -304,10 +307,17 @@ export default function Stack() {
               <Route exact path={AppRoutes.getPath("RetreatBudgetPage")}>
                 <RetreatBudgetPage />
               </Route>
+
               {/* Itinerary */}
               <Route exact path={AppRoutes.getPath("RetreatItineraryPage")}>
                 <ItineraryPage />
               </Route>
+              <Route
+                exact
+                path={AppRoutes.getPath("RetreatItineraryInspirationPage")}>
+                <ItineraryInspirationPage />
+              </Route>
+
               <Route path={"*"} component={NotFound404Page} />
             </Switch>
           </PageContainer>

@@ -5,6 +5,8 @@ import {
   AdminDestinationModel,
   AdminHotelDetailsModel,
   AdminHotelModel,
+  AdminPastItineraryLocationModel,
+  AdminPastItineraryModel,
   AdminRetreatAttendeeModel,
   AdminRetreatListModel,
   AdminRetreatListType,
@@ -32,8 +34,10 @@ import {
   GET_HOTELS_SEARCH_SUCCESS,
   GET_HOTEL_DETAILS_SUCCESS,
   GET_HOTEL_GROUP_SUCCESS,
+  GET_LOCATIONS_SUCCESS,
   GET_LODGING_TAGS_SUCCESS,
   GET_LOGIN_TOKEN_SUCCESS,
+  GET_PAST_ITINERARIES_SUCCESS,
   GET_RETREATS_LIST_SUCCESS,
   GET_RETREAT_ATTENDEES_SUCCESS,
   GET_RETREAT_DETAILS_FAILURE,
@@ -47,6 +51,7 @@ import {
   GET_USERS_SUCCESS,
   PATCH_HOTEL_GROUP_SUCCESS,
   PATCH_HOTEL_SUCCESS,
+  PATCH_PAST_ITINERARY_SUCCESS,
   PATCH_RETREAT_ATTENDEE_SUCCESS,
   PATCH_RETREAT_DETAILS_FAILURE,
   PATCH_RETREAT_DETAILS_REQUEST,
@@ -58,6 +63,8 @@ import {
   POST_HOTEL_GROUP_SUCCESS,
   POST_HOTEL_SUCCESS,
   POST_HOTEL_TEMPLATE_PROPOSAL_SUCCESS,
+  POST_LOCATION_SUCCESS,
+  POST_PAST_ITINERARY_SUCCESS,
   POST_RETREAT_ATTENDEE_SUCCESS,
   POST_RETREAT_HOTEL_PROPOSAL_SUCCESS,
   POST_RETREAT_NOTES_SUCCESS,
@@ -120,6 +127,12 @@ export type AdminState = {
   tasks: {
     [id: number]: RetreatTask | undefined
   }
+  past_itineraries: {
+    [id: number]: AdminPastItineraryModel | undefined
+  }
+  past_itinerary_locations: {
+    [id: number]: AdminPastItineraryLocationModel | undefined
+  }
   lodgingTags: {
     [id: number]: LodgingTagModel
   }
@@ -141,7 +154,6 @@ const initialState: AdminState = {
   },
   retreatsDetails: {},
   destinations: {},
-  allDestinations: undefined,
   hotelsByDestination: {},
   hotelsBySearch: {},
   hotels: {},
@@ -155,6 +167,8 @@ const initialState: AdminState = {
   usersByRetreat: {},
   userLoginTokens: {},
   tasks: {},
+  past_itineraries: {},
+  past_itinerary_locations: {},
   lodgingTags: {},
   googlePlaces: {},
   hotelsDataGridHasNext: false,
@@ -476,6 +490,61 @@ export default function AdminReducer(
         allDestinations: allDestinationsArray
           .sort((a, b) => (a.location > b.location ? 0 : 1))
           .map((dest) => dest.id),
+      }
+    case GET_PAST_ITINERARIES_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itineraries: AdminPastItineraryModel[]
+      }
+      return {
+        ...state,
+        past_itineraries: {
+          ...state.past_itineraries,
+          ...payload.past_itineraries.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+      }
+    case POST_LOCATION_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary_location: AdminPastItineraryLocationModel
+      }
+      return {
+        ...state,
+        past_itinerary_locations: {
+          ...state.past_itinerary_locations,
+          [payload.past_itinerary_location.id]: payload.past_itinerary_location,
+        },
+      }
+    case GET_LOCATIONS_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary_locations: AdminPastItineraryLocationModel[]
+      }
+      return {
+        ...state,
+        past_itinerary_locations: {
+          ...state.past_itinerary_locations,
+          ...payload.past_itinerary_locations.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+      }
+    case POST_PAST_ITINERARY_SUCCESS:
+    case PATCH_PAST_ITINERARY_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary: AdminPastItineraryModel
+      }
+      return {
+        ...state,
+        past_itineraries: {
+          ...state.past_itineraries,
+          [payload.past_itinerary.id]: payload.past_itinerary,
+        },
       }
     case GET_LODGING_TAGS_SUCCESS:
       let lodgingTags = (

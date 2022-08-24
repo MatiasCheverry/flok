@@ -174,7 +174,7 @@ let navItems: NavItem[] = [
   {
     title: "Itinerary",
     icon: MapRounded,
-    activeRoutes: [],
+    activeRoutes: ["RetreatItineraryPage"],
     redirect: (retreat, retreatIdx) =>
       retreat.itinerary_final_draft_link
         ? {url: retreat.itinerary_final_draft_link, external: true}
@@ -184,6 +184,32 @@ let navItems: NavItem[] = [
             }),
           },
   },
+  // TODO ADD BACK ONCE ITINERARY INSPIRATION LAUNCHED
+  // {
+  //   title: "Itinerary",
+  //   icon: MapRounded,
+  //   activeRoutes: [],
+  //   redirect: redirectFlok("RetreatItineraryInspirationPage"),
+  //   navSubItems: [
+  //     {
+  //       title: "Inspiration",
+  //       activeRoutes: ["RetreatItineraryInspirationPage"],
+  //       redirect: redirectFlok("RetreatItineraryInspirationPage"),
+  //     },
+  //     {
+  //       title: "Draft Itinerary",
+  //       activeRoutes: [],
+  //       redirect: (retreat, retreatIdx) =>
+  //         retreat.itinerary_final_draft_link
+  //           ? {url: retreat.itinerary_final_draft_link, external: true}
+  //           : {
+  //               url: AppRoutes.getPath("RetreatItineraryPage", {
+  //                 retreatIdx: retreatIdx.toString(),
+  //               }),
+  //             },
+  //     },
+  //   ],
+  // },
   {
     title: "Budget",
     icon: LocalAtm,

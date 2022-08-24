@@ -7,7 +7,10 @@ import {useLocation} from "react-router-dom"
 import {RootState} from "../store"
 import {
   getDestinations,
+  getHotelDetails,
   getHotelsSearch,
+  getPastItineraries,
+  getPastItineraryLocations,
   getRetreatAttendees,
   getRetreatDetails,
   getRetreatsList,
@@ -144,9 +147,13 @@ export function useRetreatAttendees(retreatId: number) {
 
 export function getTextFieldErrorProps(
   formik: any,
-  field: string
-): TextFieldProps {
-  let isError = formik.errors && !!formik.errors[field]
+  field: string,
+  requiredTouched?: boolean
+): Pick<TextFieldProps, "error" | "helperText"> {
+  let isError =
+    formik.errors &&
+    !!formik.errors[field] &&
+    (!requiredTouched || formik.touched[field])
   return {
     error: isError,
     helperText: isError && formik.errors && formik.errors[field],
@@ -215,6 +222,71 @@ export function useRetreatList() {
   return retreatList
 }
 
+export function useLocations() {
+  let dispatch = useDispatch()
+  let all_locations = useSelector(
+    (state: RootState) => state.admin.past_itinerary_locations
+  )
+  let [loadingLocations, setLoadingLocations] = useState(false)
+
+  useEffect(() => {
+    async function loadLocations() {
+      setLoadingLocations(true)
+      await dispatch(getPastItineraryLocations())
+      setLoadingLocations(false)
+    }
+    if (!Object.keys(all_locations).length) {
+      loadLocations()
+    }
+  }, [dispatch, all_locations])
+
+  return [all_locations, loadingLocations] as const
+}
+
+export function useItineraries() {
+  let dispatch = useDispatch()
+  let pastItineraries = useSelector(
+    (state: RootState) => state.admin.past_itineraries
+  )
+  let [loadingPastItineraries, setLoadingPastItineraries] = useState(false)
+  let [loaded, setLoaded] = useState(false)
+  useEffect(() => {
+    async function loadItineraries() {
+      setLoaded(true)
+      setLoadingPastItineraries(true)
+      await dispatch(getPastItineraries())
+      setLoadingPastItineraries(false)
+    }
+    if (!Object.keys(pastItineraries).length && !loaded) {
+      loadItineraries()
+    }
+  }, [dispatch, pastItineraries, loaded, setLoaded])
+
+  return [pastItineraries, loadingPastItineraries] as const
+}
+
+export function useHotelById(hotelId: number) {
+  let dispatch = useDispatch()
+  let selectedHotel = useSelector((state: RootState) => {
+    if (hotelId) {
+      return state.admin.hotelsDetails[hotelId]
+    }
+  })
+  let [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    async function loadHotel(id: number) {
+      setLoading(true)
+      await dispatch(getHotelDetails(id))
+      setLoading(false)
+    }
+    if (!selectedHotel && hotelId) {
+      loadHotel(hotelId)
+    }
+  }, [dispatch, selectedHotel, hotelId])
+
+  return [selectedHotel, loading] as const
+}
 // Hook
 export type ScriptLoadingState = "loading" | "idle" | "ready" | "error"
 export function useScript(src: string): [boolean, ScriptLoadingState] {

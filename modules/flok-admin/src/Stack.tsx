@@ -4,6 +4,8 @@ import HomePage from "./pages/HomePage"
 import HotelPage from "./pages/HotelPage"
 import HotelsListPage from "./pages/HotelsListPage"
 import HotelsPage from "./pages/HotelsPage"
+import PastItinerariesPage from "./pages/PastItinerariesPage"
+import PastItineraryPage from "./pages/PastItineraryPage"
 import RetreatAttendeePage from "./pages/RetreatAttendeePage"
 import RetreatAttendeesPage from "./pages/RetreatAttendeesPage"
 import RetreatFlightsPage from "./pages/RetreatFlightsPage"
@@ -91,6 +93,16 @@ export class AppRoutes {
       name: "HotelPage",
       component: <HotelPage />,
       path: "/hotels/:hotelId",
+    },
+    {
+      name: "PastItinerariesPage",
+      component: <PastItinerariesPage />,
+      path: "/past-itineraries",
+    },
+    {
+      name: "PastItineraryPage",
+      component: <PastItineraryPage />,
+      path: "/past-itineraries/:itineraryId",
     },
     {
       name: "AllUsersPage",

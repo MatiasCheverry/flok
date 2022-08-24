@@ -3,6 +3,8 @@ import {
   AdminDestinationModel,
   AdminHotelDetailsModel,
   AdminLodgingProposalUpdateModel,
+  AdminPastItineraryLocationModel,
+  AdminPastItineraryModel,
   AdminRetreatAttendeeModel,
   AdminRetreatAttendeeUpdateModel,
   AdminRetreatListType,
@@ -733,7 +735,7 @@ export const POST_DESTINATION_SUCCESS = "POST_DESTINATION_SUCCESS"
 export const POST_DESTINATION_FAILURE = "POST_DESTINATION_FAILURE"
 
 export function postDestination(values: Partial<AdminDestinationModel>) {
-  let endpoint = `/v1.0/admin/destinations`
+  let endpoint = "/v1.0/admin/destinations"
   return createApiAction({
     endpoint,
     method: "POST",
@@ -742,6 +744,127 @@ export function postDestination(values: Partial<AdminDestinationModel>) {
       {type: POST_DESTINATION_REQUEST},
       {type: POST_DESTINATION_SUCCESS},
       {type: POST_DESTINATION_FAILURE},
+    ],
+  })
+}
+
+export const GET_LOCATIONS_REQUEST = "GET_LOCATIONS_REQUEST"
+export const GET_LOCATIONS_SUCCESS = "GET_LOCATIONS_SUCCESS"
+export const GET_LOCATIONS_FAILURE = "GET_LOCATIONS_FAILURE"
+
+export function getPastItineraryLocations() {
+  let endpoint = "/v1.0/admin/past-itineraries-locations"
+
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_LOCATIONS_REQUEST,
+      GET_LOCATIONS_SUCCESS,
+      GET_LOCATIONS_FAILURE,
+    ],
+  })
+}
+
+export const POST_LOCATION_REQUEST = "POST_LOCATION_REQUEST"
+export const POST_LOCATION_SUCCESS = "POST_LOCATION_SUCCESS"
+export const POST_LOCATION_FAILURE = "POST_LOCATION_FAILURE"
+
+export function postLocation(values: Partial<AdminPastItineraryLocationModel>) {
+  let endpoint = "/v1.0/admin/past-itineraries-locations"
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_LOCATION_REQUEST},
+      {type: POST_LOCATION_SUCCESS},
+      {type: POST_LOCATION_FAILURE},
+    ],
+  })
+}
+
+export const DELETE_LOCATION_REQUEST = "DELETE_LOCATION_REQUEST"
+export const DELETE_LOCATION_SUCCESS = "DELETE_LOCATION_SUCCESS"
+export const DELETE_LOCATION_FAILURE = "DELETE_LOCATION_FAILURE"
+
+export function deleteLocation(locationId: number) {
+  let endpoint = `/v1.0/admin/past-itineraries-locations/${locationId}`
+  return createApiAction({
+    endpoint,
+    method: "DELETE",
+    types: [
+      {type: DELETE_LOCATION_REQUEST},
+      {type: DELETE_LOCATION_SUCCESS},
+      {type: DELETE_LOCATION_FAILURE},
+    ],
+  })
+}
+
+export const GET_PAST_ITINERARIES_REQUEST = "GET_PAST_ITINERARIES_REQUEST"
+export const GET_PAST_ITINERARIES_SUCCESS = "GET_PAST_ITINERARIES_SUCCESS"
+export const GET_PAST_ITINERARIES_FAILURE = "GET_PAST_ITINERARIES_FAILURE"
+
+export function getPastItineraries() {
+  let endpoint = "/v1.0/admin/past-itineraries"
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_PAST_ITINERARIES_REQUEST,
+      GET_PAST_ITINERARIES_SUCCESS,
+      GET_PAST_ITINERARIES_FAILURE,
+    ],
+  })
+}
+
+export type PastItineraryPostModel = Pick<
+  AdminPastItineraryModel,
+  | "name"
+  | "end_date"
+  | "start_date"
+  | "hotel_id"
+  | "itinerary_link"
+  | "location_ids"
+  | "nights"
+  | "spotlight_img_id"
+  | "team_size"
+>
+
+export const POST_PAST_ITINERARY_REQUEST = "POST_PAST_ITINERARY_REQUEST"
+export const POST_PAST_ITINERARY_SUCCESS = "POST_PAST_ITINERARY_SUCCESS"
+export const POST_PAST_ITINERARY_FAILURE = "POST_PAST_ITINERARY_FAILURE"
+
+export function postPastItinerary(values: PastItineraryPostModel) {
+  let endpoint = "/v1.0/admin/past-itineraries"
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_PAST_ITINERARY_REQUEST},
+      {type: POST_PAST_ITINERARY_SUCCESS},
+      {type: POST_PAST_ITINERARY_FAILURE},
+    ],
+  })
+}
+export const PATCH_PAST_ITINERARY_REQUEST = "PATCH_PAST_ITINERARY_REQUEST"
+export const PATCH_PAST_ITINERARY_SUCCESS = "PATCH_PAST_ITINERARY_SUCCESS"
+export const PATCH_PAST_ITINERARY_FAILURE = "PATCH_PAST_ITINERARY_FAILURE"
+
+export function patchPastItinerary(
+  itineraryId: number,
+  itinerary: Partial<PastItineraryPostModel>
+) {
+  let endpoint = `/v1.0/admin/past-itineraries/${itineraryId}`
+  return createApiAction({
+    endpoint,
+    body: JSON.stringify(nullifyEmptyString(itinerary)),
+    method: "PATCH",
+    types: [
+      {type: PATCH_PAST_ITINERARY_REQUEST, meta: {itineraryId}},
+      {type: PATCH_PAST_ITINERARY_SUCCESS, meta: {itineraryId}},
+      {type: PATCH_PAST_ITINERARY_FAILURE, meta: {itineraryId}},
     ],
   })
 }

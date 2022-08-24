@@ -265,6 +265,30 @@ export type AdminRetreatAttendeeModel = {
   hotel_check_out?: string // iso date string
 }
 
+export type AdminPastItineraryModel = {
+  id: number
+  name: string
+  start_date: string
+  end_date: string
+  hotel_id: number
+  nights: number
+  team_size: number
+  itinerary_link: string
+  spotlight_img_id: number
+  spotlight_img: AdminImageModel
+  location_ids: number[]
+}
+
+export type AdminPastItineraryLocationModel = {
+  id: number
+  name: string
+}
+
+export type AdminPastItineraryToLocationModel = {
+  itinerary_id: number
+  location_id: number
+}
+
 export type AdminRetreatAttendeeUpdateModel = Partial<AdminRetreatAttendeeModel>
 
 export type RetreatAttendeeInfoStatusType = "CREATED" | "INFO_ENTERED"

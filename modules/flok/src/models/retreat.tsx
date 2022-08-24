@@ -1,4 +1,4 @@
-import {ImageModel} from "."
+import { ImageModel } from "."
 
 export type RetreatSelectedHotelProposalState =
   | "SELECTED"
