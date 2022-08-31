@@ -153,7 +153,6 @@ function RetreatRfpPage() {
         })
       )) as unknown as ApiAction
       if (!response.error) {
-        console.log("s")
         let patchResponse = (await dispatch(
           patchRetreat(retreat.id, {
             request_for_proposal_id: response.payload.request_for_proposal.id,

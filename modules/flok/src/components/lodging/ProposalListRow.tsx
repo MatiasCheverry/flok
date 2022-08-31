@@ -1,11 +1,17 @@
-import { Button, Chip, makeStyles, Paper, Tooltip } from "@material-ui/core"
-import { Info } from "@material-ui/icons"
-import React from "react"
-import { Link as ReactRouterLink } from "react-router-dom"
-import { DestinationModel, HotelModel } from "../../models/lodging"
-import { HotelLodgingProposal } from "../../models/retreat"
-import { formatCurrency } from "../../utils"
-import { DestinationUtils, HotelUtils } from "../../utils/lodgingUtils"
+import {
+  Button,
+  Checkbox,
+  Chip,
+  makeStyles,
+  Paper,
+  Tooltip,
+} from "@material-ui/core"
+import {Info} from "@material-ui/icons"
+import {Link as ReactRouterLink} from "react-router-dom"
+import {DestinationModel, HotelModel} from "../../models/lodging"
+import {HotelLodgingProposal} from "../../models/retreat"
+import {formatCurrency} from "../../utils"
+import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import AppTypography from "../base/AppTypography"
 
@@ -91,6 +97,14 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     marginRight: theme.spacing(1),
   },
+  comparisonCheckBox: {
+    alignSelf: "center",
+    padding: "8px 22px",
+    marginLeft: "auto",
+    marginRight: theme.spacing(1),
+    height: 50,
+    width: 50,
+  },
 }))
 
 type ProposalListRowProps = {
@@ -101,6 +115,11 @@ type ProposalListRowProps = {
   proposalUrl?: string
   unavailable?: boolean
   requested?: boolean
+  comparing?: boolean
+  hotelsToCompare?: {
+    [guid: string]: boolean
+  }
+  updateHotelsToCompare?: (guid: string, value: boolean) => void
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
   let classes = useStyles(props)
@@ -219,33 +238,56 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           )}
         </div>
       </div>
-      <Button
-        className={classes.viewProposalButton}
-        disabled={unavailable || props.requested}
-        variant={unavailable ? "contained" : "outlined"}
-        color="primary"
-        {...(openInTab && proposalUrl
-          ? {
-              component: "a",
-              href: proposalUrl,
-              target: "_blank",
+      {props.comparing && !props.unavailable ? (
+        <Checkbox
+          className={classes.comparisonCheckBox}
+          checked={
+            props.hotelsToCompare && props.hotelsToCompare[props.hotel.guid]
+              ? true
+              : false
+          }
+          color="primary"
+          onChange={(e, checked) => {
+            if (props.updateHotelsToCompare && props.hotelsToCompare) {
+              if (
+                !checked ||
+                Object.entries(props.hotelsToCompare)
+                  .filter((entry) => entry[1])
+                  .map((entry) => entry[0]).length < 4
+              ) {
+                props.updateHotelsToCompare(props.hotel.guid, checked)
+              }
             }
-          : proposalUrl
-          ? {
-              component: ReactRouterLink,
-              to: proposalUrl,
-            }
-          : {})}>
-        <AppTypography variant="inherit" noWrap>
-          {!props.requested
-            ? unavailable
-              ? "No Availability"
-              : `View Proposal${
-                  proposals!.length > 1 ? `s (${proposals!.length})` : ""
-                }`
-            : "Requested"}
-        </AppTypography>
-      </Button>
+          }}></Checkbox>
+      ) : (
+        <Button
+          className={classes.viewProposalButton}
+          disabled={unavailable || props.requested}
+          variant={unavailable ? "contained" : "outlined"}
+          color="primary"
+          {...(openInTab && proposalUrl
+            ? {
+                component: "a",
+                href: proposalUrl,
+                target: "_blank",
+              }
+            : proposalUrl
+            ? {
+                component: ReactRouterLink,
+                to: proposalUrl,
+              }
+            : {})}>
+          <AppTypography variant="inherit" noWrap>
+            {!props.requested
+              ? unavailable
+                ? "No Availability"
+                : `View Proposal${
+                    proposals!.length > 1 ? `s (${proposals!.length})` : ""
+                  }`
+              : "Requested"}
+          </AppTypography>
+        </Button>
+      )}
     </Paper>
   )
 }

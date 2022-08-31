@@ -1,11 +1,23 @@
-import {Box, makeStyles} from "@material-ui/core"
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  Fab,
+  Hidden,
+  makeStyles,
+  Tooltip,
+} from "@material-ui/core"
+import {Compare} from "@material-ui/icons"
 import {useEffect, useMemo, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RouteComponentProps, withRouter} from "react-router-dom"
 import AppMoreInfoIcon from "../../components/base/AppMoreInfoIcon"
 import AppTypography from "../../components/base/AppTypography"
+import ProposalComparision from "../../components/lodging/ProposalComparison"
 import ProposalListRow from "../../components/lodging/ProposalListRow"
 import {checkIfGroupHasHotelsReady} from "../../components/lodging/ProposalsListPageBody"
+import RetreatAccountHeader from "../../components/lodging/RetreatAccountHeader"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
 import PageHeader from "../../components/page/PageHeader"
@@ -44,6 +56,31 @@ let useStyles = makeStyles((theme) => ({
     "& > *:not(:first-child)": {
       marginTop: theme.spacing(1),
     },
+  },
+  fab: {
+    position: "absolute",
+    bottom: theme.spacing(4),
+    left: "50%",
+    transform: "translate(-50%, 0)",
+    zIndex: 10000,
+    "&:disabled": {
+      opacity: 1,
+      backgroundColor: theme.palette.grey[200],
+    },
+  },
+  dialogContent: {
+    backgroundColor: theme.palette.background.default,
+  },
+  headerWrapper: {
+    display: "flex",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  headerRight: {
+    display: "flex",
+    gap: theme.spacing(2),
+    alignItems: "center",
   },
 }))
 
@@ -90,7 +127,6 @@ function ProposalsListPage(props: ProposalsListPageProps) {
         hotel.state !== "PENDING"
       ) {
         setShowOld(false)
-        console.log(hotel)
         break
       }
     }
@@ -169,9 +205,55 @@ function ProposalsListPage(props: ProposalsListPageProps) {
     setUnavailableSelectedHotels(unavailableHotels)
   }, [selectedHotels, setUnavailableSelectedHotels, retreat, hotelsById])
 
+  let [comparing, setComparing] = useState(false)
+  let [hotelsToCompare, setHotelsToCompare] = useState<{
+    [guid: string]: boolean
+  }>({})
+  let [showComparison, setShowComparison] = useState(false)
+  let guidToIdMap = useSelector((state: RootState) => {
+    return state.lodging.hotelsGuidMapping
+  })
+
+  let hotelsToCompareArray = Object.entries(hotelsToCompare)
+    .filter((entry) => entry[1])
+    .map((entry) => entry[0])
+
   return (
     <PageContainer>
       <PageBody>
+        {comparing && !showComparison && (
+          <Fab
+            className={classes.fab}
+            disabled={hotelsToCompareArray.length < 2}
+            onClick={() => {
+              setShowComparison(true)
+            }}
+            variant="extended"
+            color="primary">
+            <Compare />
+            &nbsp; Compare ({hotelsToCompareArray.length}/4)
+          </Fab>
+        )}
+        <Dialog
+          fullWidth
+          maxWidth="xl"
+          open={showComparison}
+          onClose={() => {
+            setHotelsToCompare({})
+            setComparing(false)
+            setShowComparison(false)
+          }}>
+          <DialogContent className={classes.dialogContent}>
+            {retreat && retreat !== ResourceNotFound && (
+              <ProposalComparision
+                retreat={retreat}
+                hotels={hotelsToCompareArray.map(
+                  (guid) => hotelsById[guidToIdMap[guid] as number]
+                )}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
         {retreat === ResourceNotFound ? (
           <Box
             height={"100%"}
@@ -182,11 +264,28 @@ function ProposalsListPage(props: ProposalsListPageProps) {
           </Box>
         ) : (
           <div className={classes.root}>
-            <PageHeader
-              header={`Proposals`}
-              subheader="Review proposals from hotels with negotiated prices from our team."
-              retreat={retreat ? retreat : undefined}
-            />
+            <div className={classes.headerWrapper}>
+              <PageHeader
+                header={`Proposals`}
+                subheader="Review proposals from hotels with negotiated prices from our team."
+              />
+              <div className={classes.headerRight}>
+                <Tooltip
+                  title={comparing ? "Cancel Comparison" : "Compare Proposals"}>
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => {
+                      setComparing((comparing) => !comparing)
+                    }}>
+                    {comparing ? "Cancel" : "Compare"}
+                  </Button>
+                </Tooltip>
+                <Hidden smDown>
+                  <>{retreat && <RetreatAccountHeader retreat={retreat} />}</>
+                </Hidden>
+              </div>
+            </div>
             {selectedHotels.filter((hotel) => hotel.state !== "PENDING")
               .length === 0 ? (
               loadingRetreat || loadingHotels || loadingDestinations ? (
@@ -232,6 +331,16 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                           return (
                             destination && (
                               <ProposalListRow
+                                hotelsToCompare={hotelsToCompare}
+                                updateHotelsToCompare={(
+                                  guid: string,
+                                  value: boolean
+                                ) => {
+                                  setHotelsToCompare((hotelsToCompare) => {
+                                    return {...hotelsToCompare, [guid]: value}
+                                  })
+                                }}
+                                comparing={comparing}
                                 hotel={hotel}
                                 destination={destination}
                                 proposals={proposals}
@@ -275,6 +384,16 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                     return (
                       destination && (
                         <ProposalListRow
+                          hotelsToCompare={hotelsToCompare}
+                          updateHotelsToCompare={(
+                            guid: string,
+                            value: boolean
+                          ) => {
+                            setHotelsToCompare((hotelsToCompare) => {
+                              return {...hotelsToCompare, [guid]: value}
+                            })
+                          }}
+                          comparing={comparing}
                           hotel={hotel}
                           destination={destination}
                           proposals={proposals}
@@ -309,6 +428,16 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                         let proposals = selectedHotel.hotel_proposals || []
                         return (
                           <ProposalListRow
+                            hotelsToCompare={hotelsToCompare}
+                            updateHotelsToCompare={(
+                              guid: string,
+                              value: boolean
+                            ) => {
+                              setHotelsToCompare((hotelsToCompare) => {
+                                return {...hotelsToCompare, [guid]: value}
+                              })
+                            }}
+                            comparing={comparing}
                             hotel={hotel}
                             destination={destination}
                             proposals={proposals}
