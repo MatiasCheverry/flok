@@ -211,11 +211,15 @@ export default function FlightsPage() {
                 field: "first_name",
                 headerName: "First name",
                 width: 130,
+                minWidth: 130,
+                flex: 1,
               },
               {
                 field: "last_name",
                 headerName: "Last name",
                 width: 130,
+                minWidth: 130,
+                flex: 1,
               },
               {
                 field: "arrival",
@@ -235,6 +239,8 @@ export default function FlightsPage() {
                       ].arr_datetime
                     : undefined
                 },
+                minWidth: 160,
+                flex: 1.23,
                 valueFormatter: (params) => {
                   return !isNaN(new Date(params.value as string).getTime())
                     ? dateFormat(new Date(params.value as string))
@@ -245,6 +251,8 @@ export default function FlightsPage() {
                 field: "departure",
                 headerName: "Flight Departure",
                 width: 160,
+                minWidth: 160,
+                flex: 1.23,
                 valueGetter: (params) => {
                   let attendee = params.row
                   return attendee.travel &&
@@ -265,6 +273,8 @@ export default function FlightsPage() {
                 field: "cost",
                 headerName: "Cost",
                 width: 130,
+                minWidth: 130,
+                flex: 1,
                 valueGetter: (params) => params.row.travel?.cost,
                 valueFormatter: (params) => {
                   if (params.value) {
@@ -276,6 +286,8 @@ export default function FlightsPage() {
                 field: "flight_status",
                 headerName: "Status",
                 width: 130,
+                minWidth: 130,
+                flex: 1,
                 renderCell: (params) => {
                   if (params.value === "BOOKED") {
                     return (

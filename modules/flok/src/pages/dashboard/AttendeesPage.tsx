@@ -434,41 +434,53 @@ function AttendeesPage() {
                 field: "first_name",
                 headerName: "First name",
                 width: 130,
+                minWidth: 130,
+                flex: 0.86,
               },
               {
                 field: "last_name",
                 headerName: "Last name",
                 width: 130,
+                minWidth: 130,
+                flex: 0.86,
               },
               {
                 field: "email_address",
                 headerName: "Email",
                 width: 150,
+                minWidth: 150,
+                flex: 1,
               },
               {
                 field: "hotel_check_in",
                 headerName: "Hotel Check In",
-                width: 150,
+                width: 170,
                 valueGetter: (params) => {
                   if (params.value) {
                     return dateFormat(params.value as string)
                   }
                 },
+                minWidth: 165,
+                flex: 1.13,
               },
               {
                 field: "hotel_check_out",
                 headerName: "Hotel Check Out",
-                width: 165,
+                width: 170,
                 valueGetter: (params) => {
                   if (params.value) {
                     return dateFormat(params.value as string)
                   }
                 },
+                minWidth: 165,
+                flex: 1.13,
               },
               {
                 field: "info_status",
                 headerName: "Status",
                 width: 150,
+                minWidth: 150,
+                flex: 1,
                 renderCell: (params) => {
                   if (params.value === "INFO_ENTERED") {
                     return (
@@ -492,7 +504,9 @@ function AttendeesPage() {
               {
                 field: "actions",
                 headerName: "",
-                width: 20,
+                width: 50,
+                minWidth: 50,
+                flex: 0.33,
                 sortable: false,
                 renderCell: (params) => {
                   return (
