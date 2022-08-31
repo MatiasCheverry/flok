@@ -445,12 +445,6 @@ function RetreatHotelSearchPage() {
     },
   ]
 
-  useEffect(() => {
-    if (!showFilters) {
-      setPageQuery(null)
-    }
-  }, [setPageQuery, showFilters])
-
   if (loadingDestinations || (!hotels[0] && loadingHotels)) {
     return <LoadingPage />
   }
@@ -583,11 +577,13 @@ function RetreatHotelSearchPage() {
               fullWidth
               onClose={() => {
                 setShowFilters(false)
+                setPageQuery(null)
               }}>
               <div className={classes.filterHeader}>
                 <IconButton
                   onClick={() => {
                     setShowFilters(false)
+                    setPageQuery(null)
                   }}>
                   <Close />
                 </IconButton>

@@ -139,6 +139,9 @@ let useStyles = makeStyles((theme) => ({
     flexDirection: "column",
     padding: theme.spacing(1.5),
     height: 400,
+    width: "100%",
+    marginLeft: theme.spacing(2),
+    marginTop: theme.spacing(2),
   },
 }))
 
