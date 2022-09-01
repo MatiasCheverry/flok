@@ -1,4 +1,4 @@
-import {Box, makeStyles, Typography} from "@material-ui/core"
+import {Box, IconButton, makeStyles, Typography} from "@material-ui/core"
 import {
   Apartment,
   CheckCircle,
@@ -6,11 +6,12 @@ import {
   Flight,
   People,
   Room,
+  Settings,
 } from "@material-ui/icons"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
+import {Link as ReactRouterLink} from "react-router-dom"
 import AppTypography from "../../components/base/AppTypography"
-import EditRetreatButtonModal from "../../components/forms/EditRetreatButtonModal"
 import AppOverviewCard, {
   AppOverviewCardList,
 } from "../../components/overview/AppOverviewCard"
@@ -18,6 +19,7 @@ import AppTodoList from "../../components/overview/AppTaskList"
 import PageBody from "../../components/page/PageBody"
 import config, {MAX_TASKS} from "../../config"
 import {RetreatAttendeeModel, RetreatToTask} from "../../models/retreat"
+import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
 import {putRetreatTask} from "../../store/actions/retreat"
@@ -190,7 +192,14 @@ export default function RetreatHomePage() {
           <div className={classes.retreatNameLine}>
             <Typography variant="body1">{getRetreatName(retreat)}</Typography>
             &nbsp;
-            <EditRetreatButtonModal retreat={retreat} />
+            <IconButton
+              size="small"
+              component={ReactRouterLink}
+              to={AppRoutes.getPath("RetreatSettingsPage", {
+                retreatIdx: retreatIdx.toString(),
+              })}>
+              <Settings />
+            </IconButton>
           </div>
           <Typography variant="body1">{datesOverview}</Typography>
         </div>

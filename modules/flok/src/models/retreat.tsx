@@ -1,4 +1,4 @@
-import { ImageModel } from "."
+import {ImageModel} from "."
 
 export type RetreatSelectedHotelProposalState =
   | "SELECTED"
@@ -175,6 +175,9 @@ export type RetreatModel = {
 
   // hotel groups
   group_ids: number[]
+
+  // RMC users
+  users: number[]
 }
 
 export type RetreatTripModel = {

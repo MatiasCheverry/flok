@@ -12,6 +12,7 @@ import {
   RetreatTripModel,
   RFPModel,
 } from "../../models/retreat"
+import {UserModel} from "../../models/user"
 import {closeSnackbar, enqueueSnackbar} from "../../notistack-lib/actions"
 import {apiNotification} from "../../notistack-lib/utils"
 import {ApiAction, createApiAction} from "./api"
@@ -878,6 +879,59 @@ export function postAttendeeRegRequest(
       {type: POST_ATTENDEE_REG_REQUEST},
       {type: POST_ATTENDEE_REG_SUCCESS},
       {type: POST_ATTENDEE_REG_FAILURE},
+    ],
+  })
+}
+
+export const GET_USER_REQUEST = "GET_USER_REQUEST"
+export const GET_USER_SUCCESS = "GET_USER_SUCCESS"
+export const GET_USER_FAILURE = "GET_USER_FAILURE"
+export function getUser(userId: number) {
+  let endpoint = `/v1.0/users/${userId}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_USER_REQUEST},
+      {type: GET_USER_SUCCESS},
+      {type: GET_USER_FAILURE},
+    ],
+  })
+}
+
+export const POST_USER_REQUEST = "POST_USER_REQUEST"
+export const POST_USER_SUCCESS = "POST_USER_SUCCESS"
+export const POST_USER_FAILURE = "POST_USER_FAILURE"
+type PostUserModel = Pick<UserModel, "first_name" | "last_name" | "email"> & {
+  retreat_id: number
+}
+export function postUser(values: PostUserModel, retreatId: number) {
+  let endpoint = `/v1.0/users`
+  return createApiAction({
+    method: "POST",
+    endpoint,
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_USER_REQUEST},
+      {type: POST_USER_SUCCESS, meta: {retreatId}},
+      {type: POST_USER_FAILURE},
+    ],
+  })
+}
+
+export const DELETE_USER_REQUEST = "DELETE_USER_REQUEST"
+export const DELETE_USER_SUCCESS = "DELETE_USER_SUCCESS"
+export const DELETE_USER_FAILURE = "DELETE_USER_FAILURE"
+
+export function deleteUser(userId: number, retreatId: number) {
+  let endpoint = `/v1.0/retreats/${retreatId}/users/${userId}`
+  return createApiAction({
+    method: "DELETE",
+    endpoint,
+    types: [
+      {type: DELETE_USER_REQUEST, meta: {userId, retreatId}},
+      {type: DELETE_USER_SUCCESS, meta: {userId, retreatId}},
+      {type: DELETE_USER_FAILURE, meta: {userId, retreatId}},
     ],
   })
 }

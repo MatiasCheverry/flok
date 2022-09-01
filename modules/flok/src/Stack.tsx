@@ -33,6 +33,7 @@ import HomeRoutingPage from "./pages/HomeRoutingPage"
 import NotFound404Page from "./pages/misc/NotFound404Page"
 import ProtectedRoute from "./pages/misc/ProtectedRoute"
 import RetreatProvider from "./pages/misc/RetreatProvider"
+import RetreatSettingsPage from "./pages/misc/RetreatSettingsPage"
 import PretripHomePage from "./pages/pretrip/PretripHomePage"
 import PretripProposalPage from "./pages/pretrip/PretripProposalPage"
 import PretripProposalsPage from "./pages/pretrip/PretripProposalsPage"
@@ -74,6 +75,7 @@ export class AppRoutes {
     RetreatAttendeeRegResponsePage:
       "/r/:retreatIdx/attendees/:attendeeId/registration",
     RetreatAttendeesRegFormBuilderPage: "/r/:retreatIdx/attendees/registration",
+    RetreatSettingsPage: "/r/:retreatIdx/settings",
 
     // AttendeelLanding page
     LandingPageGeneratorHome: "/r/:retreatIdx/attendees/landing",
@@ -231,6 +233,9 @@ export default function Stack() {
             <Switch>
               <Route exact path={AppRoutes.getPath("RetreatHomePage")}>
                 <RetreatHomePage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatSettingsPage")}>
+                <RetreatSettingsPage />
               </Route>
 
               {/* Lodging */}

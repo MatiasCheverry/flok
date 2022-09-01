@@ -34,7 +34,7 @@ import {useDispatch} from "react-redux"
 import {withRouter} from "react-router-dom"
 import SiteGoLiveButton from "../../components/attendee-site/SiteGoLiveButton"
 import AppCsvXlsxUpload from "../../components/base/AppCsvXlsxUpload"
-import AttendeeDeleteDropDown from "../../components/lodging/AttendeeDeleteDropdown"
+import DataGridDeleteDropDown from "../../components/lodging/DataGridDeleteDropdown"
 import PageBody from "../../components/page/PageBody"
 import {AttendeeBatchUploadApiResponse} from "../../models/api"
 import {RetreatAttendeeModel} from "../../models/retreat"
@@ -510,7 +510,7 @@ function AttendeesPage() {
                 sortable: false,
                 renderCell: (params) => {
                   return (
-                    <AttendeeDeleteDropDown
+                    <DataGridDeleteDropDown
                       onDelete={() => {
                         dispatch(
                           deleteRetreatAttendees(retreat.id, params.row.id)

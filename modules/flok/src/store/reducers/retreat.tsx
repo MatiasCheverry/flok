@@ -21,10 +21,12 @@ import {
   RetreatTripModel,
   RFPModel,
 } from "../../models/retreat"
+import {UserModel} from "../../models/user"
 import {ApiAction} from "../actions/api"
 import {
   DELETE_PAGE_SUCCESS,
   DELETE_RETREAT_ATTENDEES_SUCCESS,
+  DELETE_USER_SUCCESS,
   GET_ATTENDEE_SUCCESS,
   GET_BLOCK_SUCCESS,
   GET_HOTEL_GROUP_SUCCESS,
@@ -39,6 +41,7 @@ import {
   GET_RFP_SUCCESS,
   GET_TRIPS_SUCCESS,
   GET_TRIP_SUCCESS,
+  GET_USER_SUCCESS,
   GET_WEBSITE_BY_ATTENDEE_SUCCESS,
   GET_WEBSITE_SUCCESS,
   INSTANTIATE_ATTENDEE_TRIPS_SUCCESS,
@@ -58,6 +61,7 @@ import {
   POST_RETREAT_ATTENDEES_SUCCESS,
   POST_RFP_SUCCESS,
   POST_SELECTED_HOTEL_SUCCESS,
+  POST_USER_SUCCESS,
   PUT_RETREAT_PREFERENCES_SUCCESS,
   PUT_RETREAT_TASK_SUCCESS,
 } from "../actions/retreat"
@@ -88,6 +92,9 @@ export type RetreatState = {
   presetImages: {
     BANNER: PresetImageModel[]
   }
+  users: {
+    [id: number]: UserModel | undefined
+  }
   RFPs: {
     [id: number]: RFPModel | undefined
   }
@@ -108,6 +115,7 @@ const initialState: RetreatState = {
   presetImages: {
     BANNER: [],
   },
+  users: {},
   RFPs: {},
   hotelGroups: {},
 }
@@ -383,6 +391,75 @@ export default function retreatReducer(
         }
       }
       return newPresetState
+    case GET_USER_SUCCESS:
+      payload = (action as unknown as ApiAction).payload as {
+        user: UserModel
+      }
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          [payload.user.id]: payload.user,
+        },
+      }
+    case POST_USER_SUCCESS:
+      payload = (action as unknown as ApiAction).payload as {
+        user: UserModel
+      }
+      retreatId = (action as unknown as {meta: {retreatId: number}}).meta
+        .retreatId
+
+      let allRetreats = {...state.retreats}
+      let currentRetreat = allRetreats[retreatId]
+      if (currentRetreat !== "RESOURCE_NOT_FOUND") {
+        currentRetreat.users = [...currentRetreat.users, payload.user.id]
+      }
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          [payload.user.id]: payload.user,
+        },
+        retreats: {
+          [retreatId]: currentRetreat,
+        },
+      }
+    case DELETE_USER_SUCCESS:
+      let userId = (
+        action as unknown as {meta: {userId: number; retreatId: number}}
+      ).meta.userId
+      let updatedUser = {...state.users[userId]}
+      let currentRetreatId = (
+        action as unknown as {meta: {userId: number; retreatId: number}}
+      ).meta.retreatId
+
+      let indexOfRetreatId =
+        updatedUser && updatedUser.retreat_ids
+          ? updatedUser.retreat_ids.indexOf(currentRetreatId)
+          : -1
+      if (indexOfRetreatId !== -1 && updatedUser.retreat_ids) {
+        updatedUser.retreat_ids.splice(indexOfRetreatId, 1)
+      }
+      let retreats = {...state.retreats}
+      let updatedRetreat = retreats[currentRetreatId]
+      if (updatedRetreat !== "RESOURCE_NOT_FOUND") {
+        let indexOfUserId = updatedRetreat.users.indexOf(userId)
+        if (indexOfUserId !== -1) {
+          updatedRetreat.users.splice(indexOfUserId, 1)
+        }
+      }
+      return {
+        ...state,
+        users: {
+          ...state.users,
+          [userId]: updatedUser as UserModel,
+        },
+        retreats: {
+          ...state.retreats,
+          [currentRetreatId]: updatedRetreat,
+        },
+      }
+
     case POST_RFP_SUCCESS:
     case GET_RFP_SUCCESS:
       payload = (action as ApiAction).payload as {

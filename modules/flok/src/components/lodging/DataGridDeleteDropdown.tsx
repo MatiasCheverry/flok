@@ -2,7 +2,7 @@ import {Fade, IconButton, Menu, MenuItem} from "@material-ui/core"
 import {Delete, MoreVert} from "@material-ui/icons"
 import {useState} from "react"
 
-function AttendeeDeleteDropDown(props: {onDelete: () => void}) {
+function DataGridDeleteDropDown(props: {onDelete: () => void; text?: string}) {
   const [anchorEl, setAnchorEl] = useState<Element | null>(null)
   const menuOpen = Boolean(anchorEl)
   const handleCloseMenu = () => {
@@ -19,7 +19,7 @@ function AttendeeDeleteDropDown(props: {onDelete: () => void}) {
         TransitionComponent={Fade}>
         <MenuItem onClick={props.onDelete}>
           <Delete fontSize="small" />
-          &nbsp; Delete Attendee
+          &nbsp; {props.text ?? "Delete Attendee"}
         </MenuItem>
       </Menu>
       <IconButton
@@ -34,4 +34,4 @@ function AttendeeDeleteDropDown(props: {onDelete: () => void}) {
     </div>
   )
 }
-export default AttendeeDeleteDropDown
+export default DataGridDeleteDropDown
