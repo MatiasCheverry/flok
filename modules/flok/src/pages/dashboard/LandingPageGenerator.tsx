@@ -24,7 +24,7 @@ import EditWebsiteForm from "../../components/attendee-site/EditWebsiteForm"
 import LandingPageEditForm from "../../components/attendee-site/LandingPageEditForm"
 import LandingPageGeneratorNavTool from "../../components/attendee-site/LandingPageGeneratorNavTool"
 import PageWebsiteLink from "../../components/attendee-site/PageWebsiteLink"
-import SiteGoLiveButton from "../../components/attendee-site/SiteGoLiveButton"
+import AppHeaderWithSettings from "../../components/base/AppHeaderWithSettings"
 import AppConfirmationModal from "../../components/base/ConfirmationModal"
 import PageBody from "../../components/page/PageBody"
 import {AppRoutes} from "../../Stack"
@@ -243,13 +243,23 @@ export default function LandingPageGenerator() {
 
       <Box>
         <div className={classes.root}>
-          <div className={classes.header}>
-            <Typography variant="h1">{retreat.company_name} Website</Typography>
-            <SiteGoLiveButton
-              retreatId={retreat.id}
-              isLive={retreat.registration_live}
-            />
-          </div>
+          <AppHeaderWithSettings
+            primaryHeader="Attendees"
+            secondaryHeader="Website"
+            terciaryHeader="Create your dream landing page for your retreat attendees"
+            onClickSettings={() => {
+              if (page) {
+                dispatch(
+                  push(
+                    AppRoutes.getPath("LandingPageGeneratorConfig", {
+                      retreatIdx: retreatIdx.toString(),
+                      currentPageId: page.id.toString(),
+                    })
+                  )
+                )
+              }
+            }}
+          />
           <div className={classes.navToolbarWrapper}>
             {page && (
               <LandingPageGeneratorNavTool

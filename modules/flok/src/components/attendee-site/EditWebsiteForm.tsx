@@ -201,16 +201,15 @@ type UploadImageProps = {
   tooltipText?: string
   handleClear?: () => void
 }
-
+export const splitFileName = function (str: string) {
+  let popped = str.split("\\").pop()
+  if (popped) {
+    return popped.split("/").pop()
+  }
+}
 export function UploadImage(props: UploadImageProps) {
   const [loading, setLoading] = useState(false)
   let dispatch = useDispatch()
-  var splitFileName = function (str: string) {
-    let popped = str.split("\\").pop()
-    if (popped) {
-      return popped.split("/").pop()
-    }
-  }
 
   let classes = useImageStyles()
   return (
@@ -247,8 +246,9 @@ export function UploadImage(props: UploadImageProps) {
                     mode: "cors",
                   })
                     .then((res) => res.json())
-                    .then((resdata) => {
-                      props.handleChange(resdata.image)
+                    .then(async (resdata) => {
+                      await props.handleChange(resdata.image)
+
                       setLoading(false)
                     })
                     .catch((error) => {

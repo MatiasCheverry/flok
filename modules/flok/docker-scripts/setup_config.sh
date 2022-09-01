@@ -36,5 +36,13 @@ fi
 
 [[ ! -z "$MAX_TASKS" ]] && echo "window.appConfig.max_tasks=\"$MAX_TASKS\"" >> /usr/share/nginx/html/config.js
 
+# Sample Data
+[[ ! -z "$DEMO_TRIP_ARRIVAL" ]] && echo "window.appConfig.demo_trip_arrival=\"$DEMO_TRIP_ARRIVAL\"" >> /usr/share/nginx/html/config.js
+[[ ! -z "$DEMO_TRIP_DEPARTURE" ]] && echo "window.appConfig.demo_trip_departure=\"$DEMO_TRIP_DEPARTURE\"" >> /usr/share/nginx/html/config.js
+
+# Email Templates
+[[ ! -z "$DEFAULT_FLIGHTS_EMAIL_TEMPLATE" ]] && echo "window.appConfig.default_flights_email_template=\"$DEFAULT_FLIGHTS_EMAIL_TEMPLATE\"" >> /usr/share/nginx/html/config.js
+[[ ! -z "$DEFAULT_REGISTRATION_EMAIL_TEMPLATE" ]] && echo "window.appConfig.default_registration_email_template=\"$DEFAULT_REGISTRATION_EMAIL_TEMPLATE\"" >> /usr/share/nginx/html/config.js
+
 echo "Final config.js file"
 cat /usr/share/nginx/html/config.js

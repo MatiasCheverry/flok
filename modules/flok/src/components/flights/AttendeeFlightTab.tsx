@@ -1,9 +1,17 @@
-import {Button, Chip, makeStyles, Typography} from "@material-ui/core"
+import {
+  Button,
+  Chip,
+  makeStyles,
+  Paper,
+  Popper,
+  Typography,
+} from "@material-ui/core"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RetreatAttendeeModel} from "../../models/retreat"
 import {RootState} from "../../store"
 import {getTrip, instantiateAttendeeTrips} from "../../store/actions/retreat"
+import {splitFileName} from "../attendee-site/EditWebsiteForm"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import EditAttendeeTravelModal from "./EditAttendeeTravelModal"
 import EditFlightModal from "./EditFlightModal"
@@ -11,6 +19,9 @@ import FlightCardContainer from "./FlightCardContainer"
 
 type AttendeeFlightTabProps = {
   attendee: RetreatAttendeeModel
+  hideHeader?: true
+  receiptRestricted?: boolean
+  demo?: boolean
 }
 let useStyles = makeStyles((theme) => ({
   flightCardContainer: {
@@ -27,7 +38,6 @@ let useStyles = makeStyles((theme) => ({
   },
   headerLine: {
     display: "flex",
-    justifyContent: "space-between",
     alignItems: "center",
   },
   editButton: {},
@@ -50,7 +60,7 @@ let useStyles = makeStyles((theme) => ({
     justifyContent: "space-between",
     backgroundColor: theme.palette.common.white,
     borderRadius: theme.shape.borderRadius,
-    width: "65%",
+    width: "100%",
     paddingTop: theme.spacing(2),
     paddingBottom: theme.spacing(2),
     paddingLeft: theme.spacing(1),
@@ -94,6 +104,31 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: theme.spacing(2),
     lineHeight: "25px",
   },
+  linkStyle: {
+    backgroundColor: "transparent",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "underline",
+    display: "inline",
+    margin: 0,
+    padding: 0,
+    color: "#0000EE", //To match default color of a link
+  },
+  receiptsPaper: {
+    padding: theme.spacing(2),
+  },
+  receiptsList: {
+    listStyleType: "none",
+    gap: theme.spacing(1),
+    display: "flex",
+    flexDirection: "column",
+  },
+  receiptLI: {
+    maxWidth: 400,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
 }))
 
 function AttendeeFlightTab(props: AttendeeFlightTabProps) {
@@ -111,6 +146,9 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
       return state.retreat.trips[travel?.dep_trip.id]
     }
   })
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const popperOpen = Boolean(anchorEl)
+  const id = popperOpen ? "simple-popper" : undefined
 
   const renderFlightStatusChip = (val: "BOOKED" | "OPT_OUT" | "PENDING") => {
     if (val === "BOOKED") {
@@ -172,6 +210,7 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
         <div>
           {arrivalFlights && (
             <EditFlightModal
+              demo={props.demo}
               open={openEditArrival}
               setOpen={setOpenEditArrival}
               type="Arrival"
@@ -180,6 +219,7 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
           )}
           {departureFlights && (
             <EditFlightModal
+              demo={props.demo}
               open={openEditDeparture}
               setOpen={setOpenEditDeparture}
               type="Departure"
@@ -188,18 +228,22 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
           )}
           {attendee.travel && (
             <EditAttendeeTravelModal
+              demo={props.demo}
+              receiptRestricted={props.receiptRestricted}
+              attendee={attendee}
               open={openEditAttendeeTravelModal}
               flightStatus={attendee.flight_status}
               flightCost={attendee.travel.cost}
-              attendeeId={attendee.id}
               handleClose={() => {
                 setOpenEditAttendeeTravelModal(false)
               }}
             />
           )}
-          <Typography variant="h3" className={classes.header}>
-            {attendee.first_name + " " + attendee.last_name}'s Flights
-          </Typography>
+          {!props.hideHeader && (
+            <Typography variant="h3" className={classes.header}>
+              {attendee.first_name + " " + attendee.last_name}'s Flights
+            </Typography>
+          )}
           {attendee.travel && (
             <>
               <div className={classes.headerLine}>
@@ -236,6 +280,45 @@ function AttendeeFlightTab(props: AttendeeFlightTabProps) {
                         : "N/A"}
                     </Typography>
                   </div>
+                  <div className={classes.flightInfoSection}>
+                    <Typography className={classes.flightInfoHeader}>
+                      Receipts
+                    </Typography>
+                    <div
+                      className={classes.linkStyle}
+                      onMouseEnter={(event) => {
+                        setAnchorEl(anchorEl ? null : event.currentTarget)
+                      }}
+                      onMouseLeave={() => {
+                        setAnchorEl(null)
+                      }}>
+                      <Typography className={classes.flightCost}>
+                        {attendee.receipts.length}
+                      </Typography>
+                      <Popper id={id} open={popperOpen} anchorEl={anchorEl}>
+                        <Paper className={classes.receiptsPaper}>
+                          {attendee.receipts.length === 0 ? (
+                            <Typography>
+                              Click edit in the top left to add receipts
+                            </Typography>
+                          ) : (
+                            <>
+                              <ul className={classes.receiptsList}>
+                                {attendee.receipts.map((receipt) => (
+                                  <li className={classes.receiptLI}>
+                                    <a href={receipt.file_url}>
+                                      {splitFileName(receipt.file_url)}
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </>
+                          )}
+                        </Paper>
+                      </Popper>
+                    </div>
+                  </div>
+                  {/* </Tooltip> */}
                 </div>
               </div>
             </>

@@ -1,6 +1,7 @@
 import {makeStyles} from "@material-ui/core"
 import {Alert} from "@material-ui/lab"
-import {useEffect} from "react"
+import {push} from "connected-react-router"
+import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {useRouteMatch} from "react-router-dom"
 import AttendeeSiteFooter from "../../components/attendee-site/AttendeeSiteFooter"
@@ -17,7 +18,7 @@ import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
 import {postAttendeeRegRequest} from "../../store/actions/retreat"
 import {getUserHome} from "../../store/actions/user"
-import {replaceDashes} from "../../utils"
+import {replaceDashes, useQuery} from "../../utils"
 import {ImageUtils} from "../../utils/imageUtils"
 import {
   useAttendeeLandingWebsiteName,
@@ -74,15 +75,59 @@ export default function AttendeeSiteFormPage() {
   )
   const titleTag = document.getElementById("titleTag")
   titleTag!.innerHTML = `${website?.name} | Attendee Registration`
+
+  let [loadingUser, setLoadingUser] = useState(false)
+  let loginStatus = useSelector((state: RootState) => state.user.loginStatus)
   useEffect(() => {
-    dispatch(getUserHome())
-  }, [dispatch])
+    async function gatherUser() {
+      if (loginStatus === "UNKNOWN" || !user.user) {
+        setLoadingUser(true)
+        await dispatch(getUserHome())
+        setLoadingUser(false)
+      }
+    }
+    gatherUser()
+  }, [dispatch, loginStatus, user.user])
+
+  let [attendeeViewQuery] = useQuery("view")
   if (user.loginStatus === "LOGGED_OUT" && website) {
     return (
       <RedirectPage
         pageName="AttendeeSignUpPage"
         pathParams={{retreatName: website.name}}
       />
+    )
+  }
+
+  let isRmc =
+    retreat &&
+    retreat !== ResourceNotFound &&
+    user.user?.retreat_ids &&
+    user.user.retreat_ids.indexOf(retreat.id) !== -1
+
+  if (
+    !loadingUser &&
+    ((retreat &&
+      retreat !== ResourceNotFound &&
+      !retreat.registration_live &&
+      !isRmc) ||
+      (isRmc &&
+        attendeeViewQuery === "attendee" &&
+        retreat &&
+        retreat !== ResourceNotFound &&
+        !retreat.registration_live))
+  ) {
+    dispatch(
+      push(
+        AppRoutes.getPath(
+          "AttendeeSitePage",
+          {
+            retreatName: retreatName,
+            pageName: "home",
+          },
+          !attendeeViewQuery ? {} : {view: "attendee"}
+        )
+      )
     )
   }
   return websiteLoading || retreatLoading || !retreat ? (
@@ -101,10 +146,7 @@ export default function AttendeeSiteFormPage() {
           }
           pageIds={website.page_ids}
           retreatName={retreatName}
-          homeRoute={AppRoutes.getPath("AttendeeSiteHome", {
-            retreatName: retreatName,
-          })}
-          selectedPage={"form-page"}
+          selectedPage={"registration"}
           registrationLink={AppRoutes.getPath("AttendeeSiteFormPage")}
         />
         <div className={classes.overallPage}>

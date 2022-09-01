@@ -79,11 +79,11 @@ let useStyles = makeStyles((theme) => ({
   },
 }))
 
-function currencyFormat(num: Number) {
+export function currencyFormat(num: Number) {
   return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
 
-function dateFormat(date: Date | undefined) {
+export function dateFormat(date: Date | undefined) {
   if (date === undefined) {
     return ""
   }
@@ -131,20 +131,20 @@ export default function FlightsPage() {
 
   let dispatch = useDispatch()
 
-  let [loading, setLoading] = useState(false)
+  let [loadingTrips, setLoadingTrips] = useState(false)
 
   useEffect(() => {
     async function loadTrips() {
-      setLoading(true)
+      setLoadingTrips(true)
       await dispatch(
         getTrips(Object.keys(missingTrips).map((id) => parseInt(id)))
       )
-      setLoading(false)
+      setLoadingTrips(false)
     }
-    if (Object.keys(missingTrips).length && !loading) {
+    if (Object.keys(missingTrips).length && !loadingTrips) {
       loadTrips()
     }
-  }, [dispatch, missingTrips, loading])
+  }, [dispatch, missingTrips, loadingTrips])
 
   return (
     <PageBody appBar>

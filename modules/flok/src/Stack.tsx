@@ -1,4 +1,5 @@
 import {Route, Switch} from "react-router-dom"
+import AttendeeSiteFlightsPage from "./components/attendee-site/AttendeeSiteFlightsPage"
 import RetreatHotelSearchPage from "./components/lodging/RetreatHotelSearchPage"
 import RetreatRfpPage from "./components/lodging/RetreatRfpPage"
 import PageContainer from "./components/page/PageContainer"
@@ -15,6 +16,8 @@ import AttendeesRegFormBuilderPage from "./pages/dashboard/AttendeeRegFormBuilde
 import AttendeesPage from "./pages/dashboard/AttendeesPage"
 import BudgetEstimatePage from "./pages/dashboard/BudgetEstimatePage"
 import RetreatBudgetPage from "./pages/dashboard/BudgetPage"
+import EditEmailTemplate from "./pages/dashboard/EditEmailTemplate"
+import FlightsOptionsPage from "./pages/dashboard/FlightsOptionsPage"
 import FlightsPage from "./pages/dashboard/FlightsPage"
 import HotelProfilePage from "./pages/dashboard/HotelProfilePage"
 import ItineraryInspirationPage from "./pages/dashboard/ItineraryInspirationPage"
@@ -75,6 +78,8 @@ export class AppRoutes {
     RetreatAttendeeRegResponsePage:
       "/r/:retreatIdx/attendees/:attendeeId/registration",
     RetreatAttendeesRegFormBuilderPage: "/r/:retreatIdx/attendees/registration",
+    RetreatAttendeesRegFormBuilderConfig:
+      "/r/:retreatIdx/attendees/registration/config",
     RetreatSettingsPage: "/r/:retreatIdx/settings",
 
     // AttendeelLanding page
@@ -90,6 +95,8 @@ export class AppRoutes {
       "/r/:retreatIdx/attendees/landing/:currentPageId/config/add-page",
 
     RetreatFlightsPage: "/r/:retreatIdx/flights",
+    RetreatFlightsOptionsPage: "/r/:retreatIdx/attendees/flights",
+    RetreatFlightsOptionsConfig: "/r/:retreatIdx/attendees/flights/config",
 
     RetreatBudgetPage: "/r/:retreatIdx/budget",
     RetreatBudgetEstimatePage: "/r/:retreatIdx/budget/estimate",
@@ -102,6 +109,7 @@ export class AppRoutes {
     AttendeeSitePage: `${Constants.attendeeSitePathPrefix}/:retreatName/:pageName`,
     AttendeeSiteFormPage: `${Constants.attendeeSitePathPrefix}/:retreatName/registration`,
     AttendeeSignUpPage: `${Constants.attendeeSitePathPrefix}/:retreatName/sign-up`,
+    AttendeeSiteFlightsPage: `${Constants.attendeeSitePathPrefix}/:retreatName/flights`,
 
     // PRETRIP DEMO
     PretripHomePage: "/r/demo",
@@ -114,6 +122,9 @@ export class AppRoutes {
     DeprecatedRetreatPreferencesFormPage: "/r/:retreatGuid/preferences",
     DeprecatedProposalsListPage: "/r/:retreatGuid/proposals",
     DeprecatedProposalPage: "/r/:retreatGuid/proposals/:hotelGuid",
+
+    // Email
+    EmailTemplatePage: "/r/:retreatIdx/email-templates/:templateName",
   }
 
   static getPath(
@@ -190,6 +201,9 @@ export default function Stack() {
           <Route path={[AppRoutes.getPath("AttendeeSignUpPage")]} exact>
             <AttendeeCreateAccountPage />
           </Route>
+          <Route path={[AppRoutes.getPath("AttendeeSiteFlightsPage")]} exact>
+            <AttendeeSiteFlightsPage />
+          </Route>
           <Route
             path={[
               AppRoutes.getPath("AttendeeSiteHome"),
@@ -234,6 +248,12 @@ export default function Stack() {
               <Route exact path={AppRoutes.getPath("RetreatHomePage")}>
                 <RetreatHomePage />
               </Route>
+              {/* Email */}
+              <Route exact path={AppRoutes.getPath("EmailTemplatePage")}>
+                <EditEmailTemplate />
+              </Route>
+
+              {/* Settings */}
               <Route exact path={AppRoutes.getPath("RetreatSettingsPage")}>
                 <RetreatSettingsPage />
               </Route>
@@ -273,7 +293,10 @@ export default function Stack() {
               </Route>
               <Route
                 exact
-                path={AppRoutes.getPath("RetreatAttendeesRegFormBuilderPage")}>
+                path={[
+                  AppRoutes.getPath("RetreatAttendeesRegFormBuilderPage"),
+                  AppRoutes.getPath("RetreatAttendeesRegFormBuilderConfig"),
+                ]}>
                 <AttendeesRegFormBuilderPage />
               </Route>
               <Route exact path={AppRoutes.getPath("RetreatAttendeePage")}>
@@ -296,6 +319,14 @@ export default function Stack() {
                   AppRoutes.getPath("LandingPageGeneratorHome"),
                 ]}>
                 <LandingPageGenerator />
+              </Route>
+              <Route
+                exact
+                path={[
+                  AppRoutes.getPath("RetreatFlightsOptionsPage"),
+                  AppRoutes.getPath("RetreatFlightsOptionsConfig"),
+                ]}>
+                <FlightsOptionsPage />
               </Route>
 
               {/* Flights */}

@@ -6,6 +6,7 @@ import {
   Link,
   makeStyles,
   Tooltip,
+  Typography,
   useMediaQuery,
 } from "@material-ui/core"
 import {Menu} from "@material-ui/icons"
@@ -18,8 +19,9 @@ import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getUserHome} from "../../store/actions/user"
 import {FlokTheme} from "../../theme"
-import {titleToNavigation} from "../../utils"
+import {titleToNavigation, useQuery} from "../../utils"
 import {useAttendeeLandingPage} from "../../utils/retreatUtils"
+import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import AppUserSettings from "../base/AppUserSettings"
 
 let useStyles = makeStyles((theme) => ({
@@ -111,13 +113,46 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     marginRight: "auto",
   },
+  navigationLink: {
+    color: theme.palette.grey[900],
+    [theme.breakpoints.down("sm")]: {
+      minWidth: 200,
+      height: "45px",
+      fontSize: "1.3rem",
+      fontWeight: theme.typography.fontWeightBold,
+      marginLeft: theme.spacing(2),
+    },
+  },
+  flightsNavDiv: {
+    paddingRight: theme.spacing(2),
+    display: "flex",
+  },
+  overallDiv: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  adminHeader: {
+    background: theme.palette.primary.main,
+    display: "flex",
+    paddingTop: theme.spacing(1),
+    paddingBottom: theme.spacing(1),
+  },
+  adminHeaderText: {
+    color: theme.palette.common.white,
+    marginLeft: "auto",
+    marginRight: "auto",
+    fontSize: "0.75rem",
+  },
+  adminHeaderTextLink: {
+    color: theme.palette.common.white,
+    textDecoration: "underline",
+  },
 }))
 type RetreatWebsiteHeaderProps = {
   logo: string
   pageIds: number[]
   retreatName: string
   selectedPage: string
-  homeRoute: string
   registrationLink?: string
   registrationPage?: true
   retreat: RetreatModel
@@ -126,6 +161,7 @@ type RetreatWebsiteHeaderProps = {
 function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
   let dispatch = useDispatch()
   let classes = useStyles()
+  let [attendeeViewQuery] = useQuery("view")
 
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
@@ -136,100 +172,96 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
   let showRegisterNowButton = props.retreat.registration_live
     ? true
     : user?.retreat_ids
-    ? user.retreat_ids.includes(props.retreat.id)
+    ? user.retreat_ids.includes(props.retreat.id) &&
+      attendeeViewQuery !== "attendee"
     : false
   useEffect(() => {
     if (loginStatus === "UNKNOWN" || !user) {
       dispatch(getUserHome())
     }
   }, [dispatch, loginStatus, user])
-  return (
-    <div className={classes.header}>
-      <div className={classes.imgWrapper}>
-        <a href={props.homeRoute}>
-          <img src={props.logo} className={classes.logo} alt="logo"></img>
-        </a>
-      </div>
 
-      {!isSmallScreen ? (
-        <>
-          <div className={classes.navLinkContainer}>
-            {props.pageIds.map((pageId) => {
-              return (
-                <RetreatWebsiteHeaderLink
-                  retreatName={props.retreatName}
-                  pageId={pageId}
-                  selectedPage={props.selectedPage}
-                />
-              )
+  let isRmc =
+    user?.retreat_ids && user.retreat_ids.indexOf(props.retreat.id) !== -1
+  return (
+    <div className={classes.overallDiv}>
+      {isRmc && (
+        <header className={classes.adminHeader}>
+          <Typography className={classes.adminHeaderText}>
+            Viewing as an {attendeeViewQuery ? "attendee" : "admin"} switch to{" "}
+            <Link
+              component={ReactRouterLink}
+              className={classes.adminHeaderTextLink}
+              to={AppRoutes.getPath(
+                "AttendeeSitePage",
+                {
+                  retreatName: props.retreatName,
+                  pageName: props.selectedPage,
+                },
+                attendeeViewQuery ? {} : {view: "attendee"}
+              )}>
+              {!attendeeViewQuery ? "attendee" : "admin"}
+            </Link>
+            ?
+          </Typography>
+        </header>
+      )}
+      <div className={classes.header}>
+        <div className={classes.imgWrapper}>
+          <Link
+            to={AppRoutes.getPath("AttendeeSiteHome", {
+              retreatName: props.retreatName,
             })}
-          </div>
-          <div className={classes.registerWrapper}>
-            {props.registrationPage && user ? (
-              <AppUserSettings
-                user={user}
-                collapsable
-                onLogoutSuccess={() =>
-                  dispatch(
-                    push(
-                      AppRoutes.getPath("AttendeeSiteHome", {
-                        retreatName: props.retreatName,
-                      })
-                    )
-                  )
-                }
-              />
-            ) : (
-              <RegisterNowButton
-                to={
-                  showRegisterNowButton
-                    ? AppRoutes.getPath("AttendeeSiteFormPage", {
-                        retreatName: props.retreatName,
-                      })
-                    : undefined
-                }
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <>
-          <IconButton onClick={() => setDrawerOpen(true)}>
-            <Menu />
-          </IconButton>
-          <Drawer
-            anchor={"right"}
-            open={drawerOpen}
-            onClose={() => {
-              setDrawerOpen(false)
-            }}
-            className={classes.drawer}>
-            <div className={classes.mobileNavLinkContainer}>
+            component={ReactRouterLink}>
+            <img src={props.logo} className={classes.logo} alt="logo"></img>
+          </Link>
+        </div>
+
+        {!isSmallScreen ? (
+          <>
+            <div className={classes.navLinkContainer}>
               {props.pageIds.map((pageId) => {
                 return (
                   <RetreatWebsiteHeaderLink
+                    viewQuery={attendeeViewQuery}
                     retreatName={props.retreatName}
                     pageId={pageId}
                     selectedPage={props.selectedPage}
                   />
                 )
               })}
-            </div>
-            <div className={classes.registerButton}>
-              <RegisterNowButton
-                to={
-                  showRegisterNowButton
-                    ? AppRoutes.getPath("AttendeeSiteFormPage", {
+              {(props.retreat.flights_live ||
+                (isRmc && attendeeViewQuery !== "attendee")) && (
+                <div className={classes.flightsNavDiv}>
+                  <Link
+                    underline={
+                      "flights" === props.selectedPage ? "always" : "none"
+                    }
+                    component={ReactRouterLink}
+                    to={AppRoutes.getPath(
+                      "AttendeeSitePage",
+                      {
                         retreatName: props.retreatName,
-                      })
-                    : undefined
-                }
-              />
+                        pageName: "flights",
+                      },
+                      !attendeeViewQuery ? {} : {view: "attendee"}
+                    )}
+                    className={classes.navigationLink}>
+                    Flights
+                  </Link>
+                  {!props.retreat.flights_live &&
+                    user?.retreat_ids &&
+                    user.retreat_ids.indexOf(props.retreat.id) !== -1 && (
+                      <AppMoreInfoIcon tooltipText="This page is not viewable by attendees until flights goes live" />
+                    )}
+                </div>
+              )}
             </div>
-            {loginStatus === "LOGGED_IN" && user && (
-              <div className={classes.userHeaderSideNavWrapper}>
+            <div className={classes.registerWrapper}>
+              {props.registrationPage && user ? (
                 <AppUserSettings
                   user={user}
+                  collapsable
                   onLogoutSuccess={() =>
                     dispatch(
                       push(
@@ -240,11 +272,89 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                     )
                   }
                 />
+              ) : (
+                <RegisterNowButton
+                  to={
+                    showRegisterNowButton
+                      ? AppRoutes.getPath("AttendeeSiteFormPage", {
+                          retreatName: props.retreatName,
+                        })
+                      : undefined
+                  }
+                />
+              )}
+            </div>
+          </>
+        ) : (
+          <>
+            <IconButton onClick={() => setDrawerOpen(true)}>
+              <Menu />
+            </IconButton>
+            <Drawer
+              anchor={"right"}
+              open={drawerOpen}
+              onClose={() => {
+                setDrawerOpen(false)
+              }}
+              className={classes.drawer}>
+              <div className={classes.mobileNavLinkContainer}>
+                {props.pageIds.map((pageId) => {
+                  return (
+                    <RetreatWebsiteHeaderLink
+                      viewQuery={attendeeViewQuery}
+                      retreatName={props.retreatName}
+                      pageId={pageId}
+                      selectedPage={props.selectedPage}
+                    />
+                  )
+                })}
+                {(props.retreat.flights_live ||
+                  (isRmc && attendeeViewQuery !== "attendee")) && (
+                  <Link
+                    underline={
+                      "flights" === props.selectedPage ? "always" : "none"
+                    }
+                    component={ReactRouterLink}
+                    to={AppRoutes.getPath("AttendeeSitePage", {
+                      retreatName: props.retreatName,
+                      pageName: "flights",
+                    })}
+                    className={classes.navigationLink}>
+                    Flights
+                  </Link>
+                )}
               </div>
-            )}
-          </Drawer>
-        </>
-      )}
+              <div className={classes.registerButton}>
+                <RegisterNowButton
+                  to={
+                    showRegisterNowButton
+                      ? AppRoutes.getPath("AttendeeSiteFormPage", {
+                          retreatName: props.retreatName,
+                        })
+                      : undefined
+                  }
+                />
+              </div>
+              {loginStatus === "LOGGED_IN" && user && (
+                <div className={classes.userHeaderSideNavWrapper}>
+                  <AppUserSettings
+                    user={user}
+                    onLogoutSuccess={() =>
+                      dispatch(
+                        push(
+                          AppRoutes.getPath("AttendeeSiteHome", {
+                            retreatName: props.retreatName,
+                          })
+                        )
+                      )
+                    }
+                  />
+                </div>
+              )}
+            </Drawer>
+          </>
+        )}
+      </div>
     </div>
   )
 }
@@ -267,6 +377,7 @@ type RetreatWebsiteHeaderLinkProps = {
   retreatName: string
   pageId: number
   selectedPage: string
+  viewQuery: string | null
 }
 function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
   let classes = useLinkStyles()
@@ -279,10 +390,15 @@ function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
           ? "always"
           : "none"
       }
-      href={AppRoutes.getPath("AttendeeSitePage", {
-        retreatName: props.retreatName,
-        pageName: titleToNavigation(page?.title ?? "home"),
-      })}
+      component={ReactRouterLink}
+      to={AppRoutes.getPath(
+        "AttendeeSitePage",
+        {
+          retreatName: props.retreatName,
+          pageName: titleToNavigation(page?.title ?? "home"),
+        },
+        !props.viewQuery ? {} : {view: "attendee"}
+      )}
       className={classes.navigationLink}>
       {page?.title}
     </Link>

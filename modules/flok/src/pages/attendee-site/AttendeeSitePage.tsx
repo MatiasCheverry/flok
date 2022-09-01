@@ -72,9 +72,6 @@ export default function AttendeeSite() {
           }
           pageIds={website.page_ids}
           retreatName={retreatName}
-          homeRoute={AppRoutes.getPath("AttendeeSiteHome", {
-            retreatName: retreatName,
-          })}
           selectedPage={pageName ?? "home"}
           registrationLink={AppRoutes.getPath("AttendeeSiteFormPage")}
         />
@@ -110,7 +107,7 @@ let useBlockRendererStyles = makeStyles((theme) => ({
 type WYSIWYGBlockRendererProps = {
   blockId: number
 }
-function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
+export function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
   let block = useAttendeeLandingPageBlock(props.blockId)
   let classes = useBlockRendererStyles()
   return block?.content ? (

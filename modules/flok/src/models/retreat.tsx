@@ -1,4 +1,5 @@
 import {ImageModel} from "."
+import config from "../config"
 
 export type RetreatSelectedHotelProposalState =
   | "SELECTED"
@@ -176,6 +177,15 @@ export type RetreatModel = {
   // hotel groups
   group_ids: number[]
 
+  // flights page
+  flights_live?: boolean
+  flights_page_id?: number
+  hide_group_flights?: boolean
+  require_flight_receipts?: boolean
+
+  //  Email templates
+  registration_email_template_id?: number
+  flights_email_template_id?: number
   // RMC users
   users: number[]
 }
@@ -224,6 +234,11 @@ export type RetreatTripLeg = {
   duration?: number // number of minutes
 }
 
+export type FileModel = {
+  id: number
+  file_url: string
+}
+
 export type RetreatTravelModel = {
   id: number
   cost: number
@@ -250,6 +265,7 @@ export type RetreatAttendeeModel = {
   hotel_check_out?: string | null // iso date string
   retreat_id: number
   registration_form_response_id?: number
+  receipts: FileModel[]
 }
 
 export const SampleLockedAttendees: RetreatAttendeeModel[] = [
@@ -260,6 +276,9 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
     first_name: "Eli",
     last_name: "Manning",
     id: 1,
+    receipts: [
+      {id: 0, file_url: "http://www.africau.edu/images/default/sample.pdf"},
+    ],
     notes: "Says they are vegan but not really",
     city: "New York",
     flight_status: "BOOKED",
@@ -269,7 +288,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
       id: 1,
       cost: 450,
       arr_trip: {
-        id: 1,
+        id: config.get("demo_trip_arrival"),
         cost: 250,
         trip_legs: [
           {
@@ -279,12 +298,12 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
             dep_datetime: "2022-04-07T13:33:14.195Z",
             arr_airport: "LAX",
             arr_datetime: "2022-04-06T13:33:14.195Z",
-            flight_num: "967",
+            flight_num: "1018",
           },
         ],
       },
       dep_trip: {
-        id: 2,
+        id: config.get("demo_trip_departure"),
         cost: 250,
         trip_legs: [
           {
@@ -304,6 +323,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   {
     dietary_prefs: "Vegan",
     retreat_id: 1,
+    receipts: [],
     info_status: "CREATED",
     first_name: "Tiki",
     last_name: "Barber",
@@ -319,6 +339,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   {
     dietary_prefs: "Paleo",
     retreat_id: 1,
+    receipts: [],
     info_status: "INFO_ENTERED",
     first_name: "Jeremy",
     last_name: "Shockey",
@@ -336,10 +357,10 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
             trip_id: 11,
             airline: "Jet Blue",
             dep_airport: "LGA",
-            dep_datetime: "2022-04-05T18:31:27.963Z",
+            dep_datetime: "2022-04-07T18:31:27.963Z",
             arr_airport: "LAX",
             arr_datetime: "2022-04-06T15:25:14.195Z",
-            flight_num: "967",
+            flight_num: "8088",
           },
         ],
       },
@@ -371,6 +392,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
     first_name: "Kevin",
     last_name: "Boss",
     id: 67,
+    receipts: [],
     travel: {
       id: 323,
       cost: 325,
@@ -382,10 +404,10 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
             trip_id: 311,
             airline: "Jet Blue",
             dep_airport: "LGA",
-            dep_datetime: "2022-04-05T18:31:27.963Z",
+            dep_datetime: "2022-04-07T18:31:27.963Z",
             arr_airport: "LAX",
             arr_datetime: "2022-04-06T13:33:14.195Z",
-            flight_num: "967",
+            flight_num: "1018",
           },
         ],
       },
@@ -412,6 +434,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Kosher",
+    receipts: [],
     retreat_id: 1,
     info_status: "CREATED",
     first_name: "Plaxico",
@@ -425,6 +448,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Paleo",
+    receipts: [],
     retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Amani",
@@ -438,6 +462,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegan",
+    receipts: [],
     retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Ahmad",
@@ -451,6 +476,7 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Vegetarian",
+    receipts: [],
     retreat_id: 1,
     info_status: "CREATED",
     first_name: "Brandon",
@@ -464,10 +490,11 @@ export const SampleLockedAttendees: RetreatAttendeeModel[] = [
   },
   {
     dietary_prefs: "Paleo",
+    receipts: [],
     retreat_id: 1,
     info_status: "INFO_ENTERED",
     first_name: "Mario",
-    last_name: "Manning",
+    last_name: "Manningham",
     id: 130,
     travel: undefined,
     notes: "",
@@ -496,4 +523,10 @@ export type HotelGroup = {
   id: number
   title: string
   retreat_id: number
+}
+
+export type EmailTemplateModel = {
+  id: number
+  subject: string
+  body: string
 }

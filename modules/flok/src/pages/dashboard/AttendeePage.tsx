@@ -39,6 +39,7 @@ import {RootState} from "../../store"
 import {getAttendee, patchAttendee} from "../../store/actions/retreat"
 import {FlokTheme} from "../../theme"
 import {getTextFieldErrorProps} from "../../utils"
+import {useRetreat} from "../misc/RetreatProvider"
 
 let useStyles = makeStyles((theme) => ({
   section: {
@@ -105,6 +106,12 @@ let useStyles = makeStyles((theme) => ({
     flex: "1 1 auto",
     height: 0,
   },
+  flightsWrapper: {
+    width: "75%",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+  },
 }))
 
 function AttendeePage() {
@@ -118,6 +125,7 @@ function AttendeePage() {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
+  let [retreat] = useRetreat()
 
   const isFlights =
     route.path === AppRoutes.getPath("RetreatAttendeeFlightsPage")
@@ -187,7 +195,7 @@ function AttendeePage() {
             color="inherit"
             className={classes.tab}
             to={
-              isFlights
+              isFlights && !retreat.attendees_v2_released
                 ? AppRoutes.getPath("RetreatFlightsPage", {
                     retreatIdx: retreatIdx.toString(),
                   })
@@ -198,7 +206,9 @@ function AttendeePage() {
             <Icon>
               <ArrowBackIos />
             </Icon>
-            {isFlights ? "All Flights" : "All Attendees"}
+            {isFlights && !retreat.attendees_v2_released
+              ? "All Flights"
+              : "All Attendees"}
           </Link>
           <Tab
             className={classes.tab}
@@ -416,7 +426,11 @@ function AttendeePage() {
             path={AppRoutes.getPath("RetreatAttendeeFlightsPage")}
             render={() => (
               <div className={classes.fullPageTab}>
-                {attendee && <AttendeeFlightTab attendee={attendee} />}
+                {attendee && (
+                  <div className={classes.flightsWrapper}>
+                    <AttendeeFlightTab attendee={attendee} />
+                  </div>
+                )}
               </div>
             )}
             exact

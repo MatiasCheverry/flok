@@ -11,6 +11,7 @@ import {useFormik} from "formik"
 import {useState} from "react"
 import {useDispatch} from "react-redux"
 import {RetreatTripLeg, RetreatTripModel} from "../../models/retreat"
+import {enqueueSnackbar} from "../../notistack-lib/actions"
 import {patchTrip} from "../../store/actions/retreat"
 import EditFlightForm from "./EditFlightForm"
 import FlightCard from "./FlightCard"
@@ -20,6 +21,7 @@ type EditFlightModalProps = {
   setOpen: (value: boolean) => void
   type: string
   flights: RetreatTripModel
+  demo?: boolean
 }
 let useStyles = makeStyles((theme) => ({
   line: {
@@ -32,10 +34,13 @@ let useStyles = makeStyles((theme) => ({
   },
   cardLine: {
     display: "flex",
+    alignItems: "center",
   },
   editButton: {
     height: "35px",
-    top: "10px",
+    [theme.breakpoints.down("sm")]: {
+      marginLeft: theme.spacing(1.5),
+    },
   },
   tripLegRow: {
     display: "flex",
@@ -68,13 +73,25 @@ function EditFlightModal(props: EditFlightModalProps) {
       trip_legs: flights?.trip_legs ?? [],
     },
     onSubmit: (values) => {
-      let updatedValues = values.trip_legs.map((leg: RetreatTripLeg) => {
-        delete leg.duration
-        return leg
-      })
-      setOpen(false)
-      dispatch(patchTrip(flights.id, {trip_legs: updatedValues}))
-      setSelectedFlight(undefined)
+      if (!props.demo) {
+        let updatedValues = values.trip_legs.map((leg: RetreatTripLeg) => {
+          delete leg.duration
+          return leg
+        })
+        setOpen(false)
+        dispatch(patchTrip(flights.id, {trip_legs: updatedValues}))
+        setSelectedFlight(undefined)
+      } else {
+        dispatch(
+          enqueueSnackbar({
+            message: "cannot update demo",
+            options: {
+              variant: "warning",
+            },
+          })
+        )
+        setOpen(false)
+      }
     },
     enableReinitialize: true,
   })
