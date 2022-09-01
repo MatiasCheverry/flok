@@ -155,14 +155,36 @@ export default function AttendeeSiteFormPage() {
               <FormProvider formId={retreat.attendees_registration_form_id}>
                 {attendee && attendee.registration_form_response_id ? (
                   <>
-                    <Alert color="success" className={classes.successAlert}>
-                      Congrats! You've successfully registered for this event.
-                      <br />
-                      <br />
-                      Check out your registration submission below. Please reach
-                      out to the Flok team if you need to update any of the
-                      following responses.
-                    </Alert>
+                    {/* Customizable hack for Cro Metrics. Don't repeat this */}
+                    {attendee.retreat_id === 1791 ? (
+                      <Alert color="success" className={classes.successAlert}>
+                        Thank you {attendee.first_name} for registering for the
+                        2022 Cro Metrics All Hands! We can't wait to see you in
+                        Douglasville, Georgia.
+                        <br />
+                        <br />
+                        If you indicated that you are flying, someone from the
+                        Planning Team will be reaching out to help book your
+                        flight. Please have your travel information handy such
+                        as frequent flyer or known traveler account numbers.
+                        <br />
+                        <br />
+                        Be sure to join the #flok-crometrics-all channel for
+                        more updates and to get hyped up about the event.
+                        <br />
+                        <br />
+                        Get ready for Cro Metrics, IRL.
+                      </Alert>
+                    ) : (
+                      <Alert color="success" className={classes.successAlert}>
+                        Congrats! You've successfully registered for this event.
+                        <br />
+                        <br />
+                        Check out your registration submission below. Please
+                        reach out to the Flok team if you need to update any of
+                        the following responses.
+                      </Alert>
+                    )}
                     <FormResponseViewer
                       formResponseId={attendee.registration_form_response_id}
                     />
