@@ -83,7 +83,7 @@ function AttendeesRegFormBuilderPage(props: AttendeesRegFormBuilderProps) {
               className={classes.editEmailButton}
               href={AppRoutes.getPath("EmailTemplatePage", {
                 retreatIdx: retreatIdx.toString(),
-                templateName: "Registration",
+                templateName: "registration",
               })}>
               <Email fontSize="small" /> Edit Email Template
             </Button>

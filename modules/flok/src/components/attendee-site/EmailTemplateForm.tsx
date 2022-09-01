@@ -10,12 +10,11 @@ import {
   TextField,
   Tooltip,
 } from "@material-ui/core"
-import {Add, Send} from "@material-ui/icons"
+import {Add} from "@material-ui/icons"
 import {useFormik} from "formik"
 import _ from "lodash"
 import {useEffect, useRef, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {enqueueSnackbar} from "../../notistack-lib/actions"
 import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
 import {
@@ -23,7 +22,6 @@ import {
   patchEmailTemplate,
   patchRetreat,
   postEmailTemplate,
-  postSendSampleEmailTemplate,
 } from "../../store/actions/retreat"
 import AppImage from "../base/AppImage"
 
@@ -69,6 +67,7 @@ let useStyles = makeStyles((theme) => ({
     border: "none",
   },
   sendGridButton: {
+    cursor: "not-allowed",
     borderRadius: 6,
     marginLeft: "auto",
     marginRight: "auto",
@@ -247,7 +246,8 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
             <Button
               className={classes.sendGridButton}
               variant="contained"
-              color="primary">
+              color="primary"
+              disableRipple>
               {props.typeInfo.buttonText ?? "Register Now!"}
             </Button>
           </Tooltip>
@@ -255,7 +255,8 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
           <Button
             className={classes.sendGridButton}
             variant="contained"
-            color="primary">
+            color="primary"
+            disableRipple>
             {props.typeInfo.buttonText ?? "Register Now!"}
           </Button>
         )}
@@ -280,7 +281,7 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
                 firstHalf + "{{attendee.first_name}}" + secondHalf
               )
             }}>
-            Insert First Name
+            Insert Attendee First Name
           </MenuItem>
           <MenuItem
             onClick={() => {
@@ -296,7 +297,7 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
                 firstHalf + "{{attendee.last_name}}" + secondHalf
               )
             }}>
-            Insert Last Name
+            Insert Attendee Last Name
           </MenuItem>
         </Menu>
         {(focusBody || variableMenuOpen || focusFab) && (
@@ -330,7 +331,7 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
           disabled={_.isEqual(formik.values, formik.initialValues)}>
           Save
         </Button>
-        <Tooltip
+        {/* <Tooltip
           title={`Email will be sent to ${
             user ? user.email : "currently logged in user"
           }`}>
@@ -360,7 +361,7 @@ export default function EmailTemplateForm(props: AppEmailTemplateFormProps) {
             Send to Myself &nbsp;
             <Send fontSize="small" />
           </Button>
-        </Tooltip>
+        </Tooltip> */}
       </div>
     </form>
   )
