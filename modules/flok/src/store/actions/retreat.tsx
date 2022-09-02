@@ -830,14 +830,14 @@ export function postSelectedHotel(
   state: RetreatSelectedHotelProposalState,
   retreatId: number,
   hotelId: number,
-  rfpId: number
+  rfpId?: number
 ) {
   let endpoint = `/v1.0/retreats/${retreatId}/hotels/${hotelId}`
   return createApiAction(
     {
       method: "POST",
       endpoint,
-      body: JSON.stringify({state: state, rfp_id: rfpId}),
+      body: JSON.stringify({state: state, ...(rfpId && {rfp_id: rfpId})}),
       types: [
         {type: POST_SELECTED_HOTEL_REQUEST},
         {type: POST_SELECTED_HOTEL_SUCCESS},

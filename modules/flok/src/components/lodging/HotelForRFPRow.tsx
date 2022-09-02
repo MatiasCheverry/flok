@@ -223,18 +223,14 @@ function HotelForRFPRow(props: ProposalListRowProps) {
         color="primary"
         disabled={props.selected || props.outOfRequests}
         onClick={() => {
-          if (retreat.request_for_proposal_id) {
-            dispatch(
-              postSelectedHotel(
-                "REQUESTED",
-                retreat.id,
-                hotel.id,
-                retreat.request_for_proposal_id
-              )
+          dispatch(
+            postSelectedHotel(
+              "REQUESTED",
+              retreat.id,
+              hotel.id,
+              retreat.request_for_proposal_id
             )
-          } else {
-            props.setModalOpen()
-          }
+          )
         }}>
         <AppTypography variant="inherit" noWrap>
           {props.selected
