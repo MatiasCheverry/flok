@@ -42,6 +42,7 @@ import {useFormQuestionOption} from "../../utils/formUtils"
 import AppLoadingScreen from "../base/AppLoadingScreen"
 import AppTypography from "../base/AppTypography"
 import {useFormQuestion} from "./FormQuestionProvider"
+import FormQuestionRules from "./FormQuestionRules"
 import {FormQuestionHeader} from "./Headers"
 
 let useQuestionStyles = makeStyles((theme) => ({
@@ -80,7 +81,12 @@ let useQuestionStyles = makeStyles((theme) => ({
       marginLeft: theme.spacing(1),
     },
     "& > *:first-child": {
+      display: "flex",
+      alignItems: "center",
       marginRight: "auto",
+      "& > *:nth-child(2)": {
+        marginLeft: theme.spacing(1),
+      },
     },
   },
   dragIndicator: {
@@ -166,18 +172,21 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
           )}
         {editActive && (
           <div className={classes.formQuestionActions}>
-            <FormControl>
-              <FormControlLabel
-                disabled={question.non_editable}
-                checked={requiredFormik.values.required}
-                onChange={async (e, checked) => {
-                  await requiredFormik.setFieldValue("required", checked)
-                  requiredFormik.submitForm()
-                }}
-                control={<Switch color="primary" />}
-                label="Required?"
-              />
-            </FormControl>
+            <div>
+              <FormControl>
+                <FormControlLabel
+                  disabled={question.non_editable}
+                  checked={requiredFormik.values.required}
+                  onChange={async (e, checked) => {
+                    await requiredFormik.setFieldValue("required", checked)
+                    requiredFormik.submitForm()
+                  }}
+                  control={<Switch color="primary" />}
+                  label="Required?"
+                />
+              </FormControl>
+              <FormQuestionRules questionId={question.id} />
+            </div>
             <TextField
               variant="outlined"
               select
@@ -235,6 +244,7 @@ type RegFormViewerQuestionProps = {
   value: string
   onChange: (newVal: string) => void
   onLoad: (question: FormQuestionModel) => void
+  onUnload: (question: FormQuestionModel) => void
   readOnly?: boolean
 }
 
@@ -247,6 +257,7 @@ export function RegFormViewerQuestion(props: RegFormViewerQuestionProps) {
 
   useEffect(() => {
     props.onLoad(question)
+    return () => props.onUnload(question)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (

@@ -7,22 +7,27 @@ import {
 import {
   FormModel,
   FormQuestionModel,
+  FormQuestionRuleModel,
   FormQuestionSelectOptionModel,
   FormResponseModel,
 } from "../../models/form"
 import {ApiAction} from "../actions/api"
 import {
   DELETE_FORM_QUESTION_OPTION_SUCCESS,
+  DELETE_FORM_QUESTION_RULE_SUCCESS,
   DELETE_FORM_QUESTION_SUCCESS,
   GET_FORM_QUESTION_OPTION_SUCCESS,
+  GET_FORM_QUESTION_RULE_SUCCESS,
   GET_FORM_QUESTION_SUCCESS,
   GET_FORM_RESPONSES_SUCCESS,
   GET_FORM_RESPONSE_SUCCESS,
   GET_FORM_SUCCESS,
   PATCH_FORM_QUESTION_OPTION_SUCCESS,
+  PATCH_FORM_QUESTION_RULE_SUCCESS,
   PATCH_FORM_QUESTION_SUCCESS,
   PATCH_FORM_SUCCESS,
   POST_FORM_QUESTION_OPTION_SUCCESS,
+  POST_FORM_QUESTION_RULE_SUCCESS,
   POST_FORM_QUESTION_SUCCESS,
   POST_FORM_RESPONSE_SUCCESS,
   POST_QUESTION_REORDER_SUCCESS,
@@ -38,6 +43,9 @@ export type FormState = {
   questionOptions: {
     [id: number]: FormQuestionSelectOptionModel | undefined
   }
+  questionRules: {
+    [id: number]: FormQuestionRuleModel | undefined
+  }
   formResponses: {
     [id: number]: FormResponseModel
   }
@@ -47,6 +55,7 @@ const initialState: FormState = {
   forms: {},
   formQuestions: {},
   questionOptions: {},
+  questionRules: {},
   formResponses: {},
 }
 
@@ -54,10 +63,10 @@ export default function formReducer(
   state: FormState = initialState,
   action: Action
 ): FormState {
-  var payload
   var newFormQuestions
   var newForms
   var newQuestionOptions
+  var newQuestionRules
   switch (action.type) {
     case GET_FORM_SUCCESS:
     case PATCH_FORM_SUCCESS:
@@ -129,6 +138,40 @@ export default function formReducer(
         questionOptions: newQuestionOptions,
         formQuestions: newFormQuestions,
       }
+    case GET_FORM_QUESTION_RULE_SUCCESS:
+    case POST_FORM_QUESTION_RULE_SUCCESS:
+    case PATCH_FORM_QUESTION_RULE_SUCCESS:
+      let rule = (
+        (action as ApiAction).payload as {
+          form_question_rule: FormQuestionRuleModel
+        }
+      ).form_question_rule
+      return {
+        ...state,
+        questionRules: {...state.questionRules, [rule.id]: rule},
+      }
+    case DELETE_FORM_QUESTION_RULE_SUCCESS:
+      let ruleId = (action as unknown as {meta: {ruleId: number}}).meta.ruleId
+      newQuestionRules = {...state.questionRules}
+      newFormQuestions = Object.keys(state.formQuestions).reduce(
+        (prev, currKey: string) => {
+          let currId = currKey as unknown as number
+          let currQuestion = state.formQuestions[currId]
+          if (currQuestion && currQuestion.form_question_rules) {
+            currQuestion = {...currQuestion}
+            currQuestion.form_question_rules =
+              currQuestion.form_question_rules.filter((id) => id !== ruleId)
+          }
+          return {...prev, [currId]: currQuestion}
+        },
+        {}
+      )
+      return {
+        ...state,
+        questionRules: newQuestionRules,
+        formQuestions: newFormQuestions,
+      }
+
     case GET_FORM_RESPONSE_SUCCESS:
     case POST_FORM_RESPONSE_SUCCESS:
       let formResponse = (

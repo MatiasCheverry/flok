@@ -2,12 +2,29 @@ import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RootState} from "../store"
 import {
+  getForm,
   getFormQuestion,
   getFormQuestionOption,
+  getFormQuestionRule,
   getFormResponse,
 } from "../store/actions/form"
 
-export function useForm(formId: number) {}
+export function useForm(formId: number) {
+  let dispatch = useDispatch()
+  let [loading, setLoading] = useState(false)
+  let form = useSelector((state: RootState) => state.form.forms[formId])
+  useEffect(() => {
+    async function loadQuestion() {
+      setLoading(true)
+      await dispatch(getForm(formId))
+      setLoading(false)
+    }
+    if (!form) {
+      loadQuestion()
+    }
+  }, [form, dispatch, formId])
+  return [form, loading] as const
+}
 
 export function useFormQuestion(questionId: number) {
   let dispatch = useDispatch()
@@ -45,6 +62,23 @@ export function useFormQuestionOption(optionId: number) {
     }
   }, [option, optionId, dispatch])
   return [option, loadingOption] as const
+}
+
+export function useFormQuestionRule(ruleId: number) {
+  let dispatch = useDispatch()
+  let [loadingRule, setLoadingRule] = useState(false)
+  let rule = useSelector((state: RootState) => state.form.questionRules[ruleId])
+  useEffect(() => {
+    async function loadRule() {
+      setLoadingRule(true)
+      await dispatch(getFormQuestionRule(ruleId))
+      setLoadingRule(false)
+    }
+    if (!rule) {
+      loadRule()
+    }
+  }, [rule, ruleId, dispatch])
+  return [rule, loadingRule] as const
 }
 
 export function useFormResponse(formResponseId: number) {

@@ -3,6 +3,7 @@ import {
   FormCreationTypeEnum,
   FormModel,
   FormQuestionModel,
+  FormQuestionRuleModel,
   FormQuestionSelectOptionModel,
   FormResponsePostModel,
   FormResponseType,
@@ -261,6 +262,107 @@ export function deleteFormQuestionOption(optionId: number) {
   })
 }
 
+export const GET_FORM_QUESTION_RULE_REQUEST = "GET_FORM_QUESTION_RULE_REQUEST"
+export const GET_FORM_QUESTION_RULE_SUCCESS = "GET_FORM_QUESTION_RULE_SUCCESS"
+export const GET_FORM_QUESTION_RULE_FAILURE = "GET_FORM_QUESTION_RULE_FAILURE"
+
+export function getFormQuestionRule(ruleId: number) {
+  let endpoint = `/v1.0/question-rules/${ruleId}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      GET_FORM_QUESTION_RULE_REQUEST,
+      GET_FORM_QUESTION_RULE_SUCCESS,
+      GET_FORM_QUESTION_RULE_FAILURE,
+    ],
+  })
+}
+
+export const POST_FORM_QUESTION_RULE_REQUEST = "POST_FORM_QUESTION_RULE_REQUEST"
+export const POST_FORM_QUESTION_RULE_SUCCESS = "POST_FORM_QUESTION_RULE_SUCCESS"
+export const POST_FORM_QUESTION_RULE_FAILURE = "POST_FORM_QUESTION_RULE_FAILURE"
+
+export function postFormQuestionRule(
+  questionRule: Pick<
+    FormQuestionRuleModel,
+    | "form_question_id"
+    | "depends_on_form_question_id"
+    | "depends_on_select_option_id"
+  >
+) {
+  let endpoint = "/v1.0/question-rules"
+  return async (dispatch: ThunkDispatch<any, any, any>) => {
+    let postResponse = (await dispatch(
+      createApiAction({
+        method: "POST",
+        body: JSON.stringify(questionRule),
+        endpoint,
+        types: [
+          POST_FORM_QUESTION_RULE_REQUEST,
+          POST_FORM_QUESTION_RULE_SUCCESS,
+          POST_FORM_QUESTION_RULE_FAILURE,
+        ],
+      })
+    )) as unknown as ApiAction
+    if (!postResponse.error) {
+      dispatch(getFormQuestion(questionRule.form_question_id))
+    }
+    return postResponse
+  }
+}
+
+export const PATCH_FORM_QUESTION_RULE_REQUEST =
+  "PATCH_FORM_QUESTION_RULE_REQUEST"
+export const PATCH_FORM_QUESTION_RULE_SUCCESS =
+  "PATCH_FORM_QUESTION_RULE_SUCCESS"
+export const PATCH_FORM_QUESTION_RULE_FAILURE =
+  "PATCH_FORM_QUESTION_RULE_FAILURE"
+
+export function patchFormQuestionRule(
+  ruleId: number,
+  questionRule: Partial<
+    Pick<
+      FormQuestionRuleModel,
+      | "depends_on_form_question_id"
+      | "depends_on_select_option_id"
+      | "form_question_id"
+    >
+  >
+) {
+  let endpoint = `/v1.0/question-rules/${ruleId}`
+  return createApiAction({
+    method: "PATCH",
+    body: JSON.stringify(questionRule),
+    endpoint,
+    types: [
+      PATCH_FORM_QUESTION_RULE_REQUEST,
+      PATCH_FORM_QUESTION_RULE_SUCCESS,
+      PATCH_FORM_QUESTION_RULE_FAILURE,
+    ],
+  })
+}
+
+export const DELETE_FORM_QUESTION_RULE_REQUEST =
+  "DELETE_FORM_QUESTION_RULE_REQUEST"
+export const DELETE_FORM_QUESTION_RULE_SUCCESS =
+  "DELETE_FORM_QUESTION_RULE_SUCCESS"
+export const DELETE_FORM_QUESTION_RULE_FAILURE =
+  "DELETE_FORM_QUESTION_RULE_FAILURE"
+
+export function deleteFormQuestionRule(ruleId: number) {
+  let endpoint = `/v1.0/question-rules/${ruleId}`
+  return createApiAction({
+    method: "DELETE",
+    endpoint,
+    types: [
+      {type: DELETE_FORM_QUESTION_RULE_REQUEST, meta: {ruleId}},
+      {type: DELETE_FORM_QUESTION_RULE_SUCCESS, meta: {ruleId}},
+      {type: DELETE_FORM_QUESTION_RULE_FAILURE, meta: {ruleId}},
+    ],
+  })
+}
+
 export const POST_FORM_RESPONSE_REQUEST = "POST_FORM_RESPONSE_REQUEST"
 export const POST_FORM_RESPONSE_SUCCESS = "POST_FORM_RESPONSE_SUCCESS"
 export const POST_FORM_RESPONSE_FAILURE = "POST_FORM_RESPONSE_FAILURE"
@@ -305,6 +407,7 @@ export function getFormResponse(formResponseId: number) {
     ],
   })
 }
+
 export const POST_QUESTION_REORDER_REQUEST = "POST_QUESTION_REORDER_REQUEST"
 export const POST_QUESTION_REORDER_SUCCESS = "POST_QUESTION_REORDER_SUCCESS"
 export const POST_QUESTION_REORDER_FAILURE = "POST_QUESTION_REORDER_FAILURE"
