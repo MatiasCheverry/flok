@@ -116,7 +116,7 @@ let useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5),
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
-    backgroundColor: theme.palette.grey[300], // matching chip default background color
+    backgroundColor: theme.palette.primary.main,
   },
   hotelName: {
     color: theme.palette.common.black,
@@ -157,7 +157,7 @@ function HotelForRFPRow(props: ProposalListRowProps) {
         <div className={classes.cardBody}>
           <div className={classes.headerContainer}>
             <AppTypography variant="body2" color="textSecondary" uppercase>
-              {DestinationUtils.getLocationName(destination, true, hotel)}
+              {DestinationUtils.getHotelLocationName(hotel, true)}
             </AppTypography>
             <Link
               to={props.hotelLinkTo}
@@ -205,13 +205,6 @@ function HotelForRFPRow(props: ProposalListRowProps) {
                 </div>
               )
             })}
-            {hotel.is_flok_recommended && (
-              <div className={classes.lodgingTag}>
-                <AppTypography fontWeight="bold">
-                  Flok Recommended
-                </AppTypography>
-              </div>
-            )}
           </div>
         </div>
       </div>

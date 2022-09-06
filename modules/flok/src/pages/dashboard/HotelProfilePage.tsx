@@ -125,7 +125,7 @@ let useStyles = makeStyles((theme) => ({
     padding: theme.spacing(0.5),
     paddingLeft: theme.spacing(1),
     paddingRight: theme.spacing(1),
-    backgroundColor: theme.palette.grey[300], // matching chip default background color
+    backgroundColor: theme.palette.primary.main,
   },
   lodgingTagsWrapper: {
     display: "flex",

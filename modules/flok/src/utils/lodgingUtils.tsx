@@ -86,6 +86,15 @@ export class DestinationUtils {
     USA: "🇺🇸",
     MX: "🇲🇽",
     ESP: "🇪🇸",
+    "United States": "🇺🇸",
+    Mexico: "🇲🇽",
+    Spain: "🇪🇸",
+    "United Kingdom": "🇬🇧",
+    France: "🇫🇷",
+    Italy: "🇮🇹",
+    Ireland: "🇮🇪",
+    Greece: "🇬🇷",
+    Panama: "🇵🇦",
   }
   static EMOJIS_BY_LOCATION: {[key: string]: string} = {}
 
@@ -119,6 +128,7 @@ export class DestinationUtils {
     }
     return locationStr
   }
+  // deprecated
   static getLocationName(
     destination: DestinationModel,
     includeEmoji: boolean = false,
@@ -140,6 +150,21 @@ export class DestinationUtils {
       }
     }
     return locationStr
+  }
+
+  static getHotelLocationName(
+    hotel: HotelModel,
+    includeEmoji: boolean = false
+  ) {
+    return `${hotel.city ? hotel.city + "," : ""} ${
+      hotel.country === "United States" ? hotel.state : hotel.country
+    }${
+      includeEmoji &&
+      hotel.country &&
+      DestinationUtils.EMOJIS_BY_COUNTRY[hotel.country]
+        ? " " + DestinationUtils.EMOJIS_BY_COUNTRY[hotel.country]
+        : ""
+    }`
   }
 }
 

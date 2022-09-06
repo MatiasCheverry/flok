@@ -40,6 +40,9 @@ export type HotelModel = {
   lodging_tags: LodgingTagModel[]
   price: "$" | "$$" | "$$$" | "$$$$"
   lodging_tags_filter_dict: {[id: number]: boolean}
+  city?: string
+  state?: string
+  country?: string
 }
 
 export type LodgingTagModel = {
