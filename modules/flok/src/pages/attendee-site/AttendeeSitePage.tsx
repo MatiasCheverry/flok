@@ -57,6 +57,10 @@ export default function AttendeeSite() {
   )
   const titleTag = document.getElementById("titleTag")
   titleTag!.innerHTML = `${website?.name} | ${page?.title}`
+  if (retreat && retreat !== ResourceNotFound && retreat.id === 1791) {
+    window.location.replace("https://croallhands2022.com/")
+    return <LoadingPage />
+  }
   return websiteLoading || pageLoading || retreatLoading ? (
     <LoadingPage />
   ) : !page || !website || !retreat || retreat === ResourceNotFound ? (
