@@ -18,6 +18,7 @@ import {
   useAttendeeLandingWebsiteName,
   useMyAttendee,
   useRetreat,
+  useRetreatAttendees,
 } from "../../utils/retreatUtils"
 import AttendeeFlightTab from "../flights/AttendeeFlightTab"
 import AppTabPanel from "../page/AppTabPanel"
@@ -100,12 +101,14 @@ export default function AttendeeSiteFlightsPage() {
   let dispatch = useDispatch()
   let user = useSelector((state: RootState) => state.user.user)
   let loginStatus = useSelector((state: RootState) => state.user.loginStatus)
-  let [loadingUser, setLoadingUser] = useState(false)
+  let [loadingUser, setLoadingUser] = useState(true)
   useEffect(() => {
     async function gatherUser() {
       if (loginStatus === "UNKNOWN" || !user) {
         setLoadingUser(true)
         await dispatch(getUserHome())
+        setLoadingUser(false)
+      } else {
         setLoadingUser(false)
       }
     }
@@ -120,6 +123,48 @@ export default function AttendeeSiteFlightsPage() {
 
   let demo =
     isRmc && retreat && retreat !== ResourceNotFound && !retreat?.flights_live
+
+  let [attendeeTravelInfo] = useRetreatAttendees(
+    retreat && retreat !== ResourceNotFound ? retreat.id : -1
+  )
+  function compareLists(list1: number[], list2: number[]) {
+    let shared = false
+    list1.forEach((num) => {
+      if (shared === true) {
+        return
+      } else if (list2.indexOf(num) !== -1) {
+        shared = true
+      }
+    })
+    return shared
+  }
+  let isAttendee =
+    user &&
+    compareLists(
+      user.attendee_ids,
+      attendeeTravelInfo.map((attendee) => attendee.id)
+    )
+
+  if (!loadingUser && loginStatus !== "LOGGED_IN") {
+    dispatch(
+      push(
+        AppRoutes.getPath(
+          "SigninPage",
+          {
+            retreatName: retreatName,
+          },
+          {
+            next: encodeURIComponent(
+              AppRoutes.getPath("AttendeeSiteFlightsPage", {
+                retreatName: retreatName,
+              })
+            ),
+            "login-type": "attendee",
+          }
+        )
+      )
+    )
+  }
   if (
     !loadingUser &&
     ((retreat &&
@@ -145,7 +190,6 @@ export default function AttendeeSiteFlightsPage() {
       )
     )
   }
-
   return websiteLoading || retreatLoading || !retreat || loadingUser ? (
     <LoadingPage />
   ) : !website || retreat === ResourceNotFound ? (
@@ -181,7 +225,7 @@ export default function AttendeeSiteFlightsPage() {
               indicatorColor="primary">
               <Tab value="instructions" label="Flight Instructions" />
               <Tab value="my-flight" label="My Flight" />
-              {!retreat.hide_group_flights && (
+              {!retreat.hide_group_flights && (isRmc || isAttendee) && (
                 <Tab value="group" label="Group Flights" />
               )}
             </Tabs>
@@ -200,7 +244,7 @@ export default function AttendeeSiteFlightsPage() {
               )}
             </div>
           </AppTabPanel>
-          {!retreat.hide_group_flights && (
+          {!retreat.hide_group_flights && (isRmc || isAttendee) && (
             <AppTabPanel show={tabValue === "group"}>
               <div className={classes.dataGridWrapper}>
                 <AttendeeFlightsDataGrid
