@@ -80,6 +80,7 @@ export type FormQuestionResponsePostModel = Pick<
 
 export type FormQuestionSnapshotModel = FormQuestionModel & {
   select_options_snapshot: FormQuestionSelectOptionModel[]
+  form_question_rules_snapshot?: FormQuestionRuleModel[]
 }
 
 export type FormQuestionRuleModel = {

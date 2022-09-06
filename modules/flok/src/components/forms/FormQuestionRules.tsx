@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@material-ui/core"
 import {Add, Delete, Edit} from "@material-ui/icons"
+import clsx from "clsx"
 import {useFormik} from "formik"
 import {ReactNode, useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
@@ -97,14 +98,18 @@ export function FormQuestionRulesModal(props: FormQuestionRulesModalProps) {
           <DialogTitle>
             Question Rules
             <Typography variant="body1">
-              Only show this question if the following conditions are met.
+              This question will only be shown if{" "}
+              <AppTypography variant="inherit" fontWeight="bold">
+                all
+              </AppTypography>{" "}
+              the following conditions are met.
             </Typography>
           </DialogTitle>
           <DialogContent>
             {question.form_question_rules.map((ruleId, index) => (
               <EditQuestionRule ruleId={ruleId} index={index + 1} />
             ))}
-            {newRuleActive ? (
+            {newRuleActive || !question.form_question_rules.length ? (
               <NewQuestionRule
                 questionId={props.questionId}
                 onDelete={() => setNewRuleActive(false)}
@@ -253,10 +258,20 @@ function EditQuestionRule(props: {ruleId: number; index: number}) {
 
 /** Question Rule Selector Components */
 let useQuestionRuleSelectorStyles = makeStyles((theme) => ({
-  root: {display: "flex", alignItems: "center"},
+  root: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   ruleNumber: {width: "4ch"},
   titleContainer: {maxWidth: 200},
-  select: {width: 200},
+  select: {
+    minWidth: 200,
+    flex: 1,
+    marginLeft: theme.spacing(1),
+    marginRight: theme.spacing(1),
+  },
+  hidden: {opacity: 0},
 }))
 type FormQuestionRuleSelectorProps = {
   index?: number | ReactNode
@@ -322,6 +337,7 @@ function FormQuestionRuleSelector(props: FormQuestionRuleSelectorProps) {
             {...textFieldProps}
             className={classes.select}
             value={props.dependsOnQuestionId}
+            label="Question"
             onChange={(e) =>
               props.onUpdateQuestionId(parseInt(e.target.value))
             }>
@@ -350,20 +366,25 @@ function FormQuestionRuleSelector(props: FormQuestionRuleSelectorProps) {
               }),
             ]}
           </TextField>
-          {question ? (
-            <TextField
-              {...textFieldProps}
-              className={classes.select}
-              value={props.dependsOnOptionId}
-              onChange={(e) =>
-                props.onUpdateOptionId(parseInt(e.target.value))
-              }>
-              {props.dependsOnOptionId === -1 && (
+          <Typography variant="body1">is</Typography>
+          <TextField
+            {...textFieldProps}
+            label="Answer"
+            className={classes.select}
+            disabled={!question}
+            value={props.dependsOnOptionId}
+            onChange={(e) => props.onUpdateOptionId(parseInt(e.target.value))}>
+            {!question ? (
+              <MenuItem value={-1}>Select a question first</MenuItem>
+            ) : (
+              props.dependsOnOptionId === -1 && (
                 <MenuItem value={-1} disabled>
                   Select an option
                 </MenuItem>
-              )}
-              {question.select_options.map((id) => {
+              )
+            )}
+            {question &&
+              question.select_options.map((id) => {
                 let selectOption = questionOptions[id]
                 return (
                   <MenuItem value={id} key={id}>
@@ -373,17 +394,13 @@ function FormQuestionRuleSelector(props: FormQuestionRuleSelectorProps) {
                   </MenuItem>
                 )
               })}
-            </TextField>
-          ) : (
-            <></>
-          )}
-          {props.onDeleteRule ? (
-            <IconButton onClick={props.onDeleteRule}>
-              <Delete />
-            </IconButton>
-          ) : (
-            <></>
-          )}
+          </TextField>
+          <IconButton
+            disabled={!props.onDeleteRule}
+            onClick={props.onDeleteRule}
+            className={clsx(!props.onDeleteRule ? classes.hidden : undefined)}>
+            <Delete />
+          </IconButton>
         </>
       )}
     </div>

@@ -155,11 +155,11 @@ export default function FormViewer(props: FormViewerProps) {
       {}
     ),
     onSubmit: (values) => {
-      let answers: FormQuestionResponsePostModel[] = Object.keys(values).map(
+      let answers: FormQuestionResponsePostModel[] = form.questions.map(
         (questionId) => {
           return {
-            answer: values[questionId],
-            form_question_id: parseInt(questionId),
+            answer: values[questionId.toString()] ?? "",
+            form_question_id: questionId,
           }
         }
       )

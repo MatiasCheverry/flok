@@ -47,7 +47,7 @@ export type FormState = {
     [id: number]: FormQuestionRuleModel | undefined
   }
   formResponses: {
-    [id: number]: FormResponseModel
+    [id: number]: FormResponseModel | undefined
   }
 }
 

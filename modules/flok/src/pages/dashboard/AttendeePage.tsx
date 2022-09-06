@@ -323,18 +323,20 @@ function AttendeePage() {
                       multiple
                       id="preferences_dates_flexible_months"
                       options={Array.from(
-                        new Set([
-                          ...Array.from(DIETARY_OPTIONS).map((a) =>
-                            a.toLocaleLowerCase()
-                          ),
-                          ...(formik.values.dietary_prefs
-                            ? formik.values.dietary_prefs.split(",")
-                            : []
-                          ).map((a) => a.toLocaleLowerCase()),
-                          ...(newOption && newOption.length > 1
-                            ? [`Add \`${newOption.toLocaleLowerCase()}\``]
-                            : []),
-                        ])
+                        new Set(
+                          [
+                            ...Array.from(DIETARY_OPTIONS).map((a) =>
+                              a.toLocaleLowerCase()
+                            ),
+                            ...(formik.values.dietary_prefs
+                              ? formik.values.dietary_prefs.split(",")
+                              : []
+                            ).map((a) => a.toLocaleLowerCase()),
+                            ...(newOption && newOption.length > 1
+                              ? [`Add \`${newOption.toLocaleLowerCase()}\``]
+                              : []),
+                          ].filter((value) => value)
+                        )
                       )}
                       getOptionLabel={(option) => {
                         return (
@@ -452,12 +454,19 @@ function AttendeePage() {
 export default AttendeePage
 
 const DIETARY_OPTIONS = new Set([
-  "Gluten Free",
-  "Peanut Free",
-  "Dairy Free",
   "Vegetarian",
   "Vegan",
-  "Kosher",
+  "Kosher style",
+  "Kosher certified",
+  "Nut allergy",
+  "Fish/shellfish allergy",
+  "Gluten free",
+  "Keto",
+  "Dairy free",
+  "Halal",
+  "Pescatarian",
+  "Diabetic",
+  "Mediterranean",
 ])
 const RetreatAttendeeInfoStatusOptions: {
   value: AttendeeInfoStatus

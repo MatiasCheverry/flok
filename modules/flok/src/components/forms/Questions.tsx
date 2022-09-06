@@ -14,9 +14,9 @@ import {
   Radio,
   Switch,
   TextField,
-  Tooltip,
 } from "@material-ui/core"
 import {Add, CalendarToday, Delete, DragIndicator} from "@material-ui/icons"
+import {Alert} from "@material-ui/lab"
 import clsx from "clsx"
 import {useFormik} from "formik"
 import React, {useEffect, useState} from "react"
@@ -99,6 +99,9 @@ let useQuestionStyles = makeStyles((theme) => ({
   dragIndicatorWrapper: {
     display: "flex",
   },
+  alert: {
+    marginBottom: theme.spacing(1),
+  },
 }))
 
 type RegFormBuilderQuestionProps = {
@@ -124,119 +127,121 @@ export function RegFormBuilderQuestion(props: RegFormBuilderQuestionProps) {
     },
   })
   return (
-    <Tooltip
-      open={question.non_editable ? undefined : false}
-      title="Some fields of Flok's required questions are not editable"
-      placement="top-start">
+    <div
+      className={classes.root}
+      onClick={() => setEditActive(true)}
+      onFocus={() => setEditActive(true)}
+      onBlur={(e) => {
+        if (
+          e.relatedTarget == null ||
+          e.currentTarget == null ||
+          !e.currentTarget.contains(e.relatedTarget as Node)
+        ) {
+          setEditActive(false)
+        }
+      }}
+      tabIndex={0}>
       <div
-        className={classes.root}
-        onClick={() => setEditActive(true)}
-        onFocus={() => setEditActive(true)}
-        onBlur={(e) => {
-          if (
-            e.relatedTarget == null ||
-            e.currentTarget == null ||
-            !e.currentTarget.contains(e.relatedTarget as Node)
-          ) {
-            setEditActive(false)
-          }
-        }}
-        tabIndex={0}>
+        className={clsx(
+          classes.dragIndicatorDiv,
+          editActive || props.isDragging ? "draggable" : undefined
+        )}>
         <div
-          className={clsx(
-            classes.dragIndicatorDiv,
-            editActive || props.isDragging ? "draggable" : undefined
-          )}>
-          <div
-            {...props.dragHandleProps}
-            className={classes.dragIndicatorWrapper}>
-            <DragIndicator fontSize="small" className={classes.dragIndicator} />
-          </div>
+          {...props.dragHandleProps}
+          className={classes.dragIndicatorWrapper}>
+          <DragIndicator fontSize="small" className={classes.dragIndicator} />
         </div>
-        <div className={classes.questionHeaderContainer}>
-          <div className={classes.questionTitleSubtitle}>
-            <FormQuestionHeader
-              required={requiredFormik.values.required}
-              title={question.title}
-              description={question.description ?? ""}
-              questionId={question.id}
-              editable={question.non_editable ? "descriptionOnly" : "both"}
-              editActive={editActive}
-            />
-          </div>
-        </div>
-        <RegFormBuilderQuestionSwitch question={question} />
-        {editActive &&
-          (question.type === "DATE" || question.type === "DATETIME") && (
-            <RegFormBuilderDateMinMax question={question} />
-          )}
-        {editActive && (
-          <div className={classes.formQuestionActions}>
-            <div>
-              <FormControl>
-                <FormControlLabel
-                  disabled={question.non_editable}
-                  checked={requiredFormik.values.required}
-                  onChange={async (e, checked) => {
-                    await requiredFormik.setFieldValue("required", checked)
-                    requiredFormik.submitForm()
-                  }}
-                  control={<Switch color="primary" />}
-                  label="Required?"
-                />
-              </FormControl>
-              <FormQuestionRules questionId={question.id} />
-            </div>
-            <TextField
-              variant="outlined"
-              select
-              disabled={question.non_editable}
-              size="small"
-              onChange={async (e) => {
-                let type = e.target.value as FormQuestionType
-                if (type !== question.type) {
-                  setPatchTypeLoading(true)
-                  await dispatch(patchFormQuestion(question.id, {type}))
-                  setPatchTypeLoading(false)
-                }
-              }}
-              value={
-                patchTypeLoading ? "loading" : question.type || "SHORT_ANSWER"
-              }
-              SelectProps={{
-                MenuProps: {disablePortal: true},
-                native: false,
-              }}>
-              {patchTypeLoading ? (
-                <MenuItem value="loading">
-                  &nbsp;&nbsp;&nbsp;
-                  <CircularProgress size="15px" />
-                  &nbsp;&nbsp;&nbsp;
-                </MenuItem>
-              ) : (
-                FormQuestionTypeValues.map((type) => (
-                  <MenuItem value={type} key={type}>
-                    {FormQuestionTypeName[type] ?? type}
-                  </MenuItem>
-                ))
-              )}
-            </TextField>
-            <div style={{display: "flex", alignItems: "center"}}>
-              <IconButton
-                size="small"
-                disabled={deleteLoading || question.non_editable}
-                onClick={async () => {
-                  setDeleteLoading(true)
-                  await dispatch(deleteFormQuestion(question.id))
-                  setDeleteLoading(false)
-                }}>
-                {deleteLoading ? <CircularProgress size={25} /> : <Delete />}
-              </IconButton>
-            </div>
-          </div>
-        )}
       </div>
-    </Tooltip>
+      {editActive && question.non_editable ? (
+        <Alert severity="warning" className={classes.alert}>
+          Some fields in Flok required questions aren't editable
+        </Alert>
+      ) : (
+        <></>
+      )}
+      <div className={classes.questionHeaderContainer}>
+        <div className={classes.questionTitleSubtitle}>
+          <FormQuestionHeader
+            required={requiredFormik.values.required}
+            title={question.title}
+            description={question.description ?? ""}
+            questionId={question.id}
+            editable={question.non_editable ? "descriptionOnly" : "both"}
+            editActive={editActive}
+          />
+        </div>
+      </div>
+      <RegFormBuilderQuestionSwitch question={question} />
+      {editActive &&
+        (question.type === "DATE" || question.type === "DATETIME") && (
+          <RegFormBuilderDateMinMax question={question} />
+        )}
+      {editActive && (
+        <div className={classes.formQuestionActions}>
+          <div>
+            <FormControl>
+              <FormControlLabel
+                disabled={question.non_editable}
+                checked={requiredFormik.values.required}
+                onChange={async (e, checked) => {
+                  await requiredFormik.setFieldValue("required", checked)
+                  requiredFormik.submitForm()
+                }}
+                control={<Switch color="primary" />}
+                label="Required?"
+              />
+            </FormControl>
+            <FormQuestionRules questionId={question.id} />
+          </div>
+          <TextField
+            variant="outlined"
+            select
+            disabled={question.non_editable}
+            size="small"
+            onChange={async (e) => {
+              let type = e.target.value as FormQuestionType
+              if (type !== question.type) {
+                setPatchTypeLoading(true)
+                await dispatch(patchFormQuestion(question.id, {type}))
+                setPatchTypeLoading(false)
+              }
+            }}
+            value={
+              patchTypeLoading ? "loading" : question.type || "SHORT_ANSWER"
+            }
+            SelectProps={{
+              MenuProps: {disablePortal: true},
+              native: false,
+            }}>
+            {patchTypeLoading ? (
+              <MenuItem value="loading">
+                &nbsp;&nbsp;&nbsp;
+                <CircularProgress size="15px" />
+                &nbsp;&nbsp;&nbsp;
+              </MenuItem>
+            ) : (
+              FormQuestionTypeValues.map((type) => (
+                <MenuItem value={type} key={type}>
+                  {FormQuestionTypeName[type] ?? type}
+                </MenuItem>
+              ))
+            )}
+          </TextField>
+          <div style={{display: "flex", alignItems: "center"}}>
+            <IconButton
+              size="small"
+              disabled={deleteLoading || question.non_editable}
+              onClick={async () => {
+                setDeleteLoading(true)
+                await dispatch(deleteFormQuestion(question.id))
+                setDeleteLoading(false)
+              }}>
+              {deleteLoading ? <CircularProgress size={25} /> : <Delete />}
+            </IconButton>
+          </div>
+        </div>
+      )}
+    </div>
   )
 }
 
