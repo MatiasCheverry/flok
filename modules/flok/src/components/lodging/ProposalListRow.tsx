@@ -7,9 +7,11 @@ import {
   Tooltip,
 } from "@material-ui/core"
 import {Info} from "@material-ui/icons"
+import {useDispatch} from "react-redux"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
 import {HotelLodgingProposal} from "../../models/retreat"
+import {deleteSelectedHotel} from "../../store/actions/lodging"
 import {formatCurrency} from "../../utils"
 import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
@@ -92,11 +94,21 @@ let useStyles = makeStyles((theme) => ({
     },
   },
   viewProposalButton: {
+    // alignSelf: "center",
+    padding: "8px 22px",
+    // marginLeft: "auto",
+    marginRight: theme.spacing(1),
+  },
+  viewProposalButtonGroup: {
     alignSelf: "center",
     padding: "8px 22px",
     marginLeft: "auto",
     marginRight: theme.spacing(1),
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(1),
   },
+
   comparisonCheckBox: {
     alignSelf: "center",
     padding: "8px 22px",
@@ -120,12 +132,14 @@ type ProposalListRowProps = {
     [guid: string]: boolean
   }
   updateHotelsToCompare?: (guid: string, value: boolean) => void
+  retreatId?: number
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
   let classes = useStyles(props)
   let {hotel, proposals, destination, openInTab, proposalUrl, unavailable} = {
     ...props,
   }
+  let dispatch = useDispatch()
 
   function getLowestCompare(vals: HotelLodgingProposal[]) {
     if (vals.length > 0) {
@@ -238,7 +252,7 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           )}
         </div>
       </div>
-      {props.comparing && !props.unavailable ? (
+      {props.comparing && !props.unavailable && !props.requested ? (
         <Checkbox
           className={classes.comparisonCheckBox}
           checked={
@@ -260,33 +274,48 @@ export default function ProposalListRow(props: ProposalListRowProps) {
             }
           }}></Checkbox>
       ) : (
-        <Button
-          className={classes.viewProposalButton}
-          disabled={unavailable || props.requested}
-          variant={unavailable ? "contained" : "outlined"}
-          color="primary"
-          {...(openInTab && proposalUrl
-            ? {
-                component: "a",
-                href: proposalUrl,
-                target: "_blank",
-              }
-            : proposalUrl
-            ? {
-                component: ReactRouterLink,
-                to: proposalUrl,
-              }
-            : {})}>
-          <AppTypography variant="inherit" noWrap>
-            {!props.requested
-              ? unavailable
-                ? "No Availability"
-                : `View Proposal${
-                    proposals!.length > 1 ? `s (${proposals!.length})` : ""
-                  }`
-              : "Requested"}
-          </AppTypography>
-        </Button>
+        <div className={classes.viewProposalButtonGroup}>
+          <Button
+            className={classes.viewProposalButton}
+            disabled={unavailable || props.requested}
+            variant={unavailable ? "contained" : "outlined"}
+            color="primary"
+            {...(openInTab && proposalUrl
+              ? {
+                  component: "a",
+                  href: proposalUrl,
+                  target: "_blank",
+                }
+              : proposalUrl
+              ? {
+                  component: ReactRouterLink,
+                  to: proposalUrl,
+                }
+              : {})}>
+            <AppTypography variant="inherit" noWrap>
+              {!props.requested
+                ? unavailable
+                  ? "No Availability"
+                  : `View Proposal${
+                      proposals!.length > 1 ? `s (${proposals!.length})` : ""
+                    }`
+                : "Requested"}
+            </AppTypography>
+          </Button>
+          {props.requested && proposals.length === 0 && props.retreatId && (
+            <Button
+              color="primary"
+              variant="outlined"
+              className={classes.viewProposalButton}
+              onClick={() => {
+                if (props.retreatId) {
+                  dispatch(deleteSelectedHotel(props.retreatId, props.hotel.id))
+                }
+              }}>
+              Cancel
+            </Button>
+          )}
+        </div>
       )}
     </Paper>
   )

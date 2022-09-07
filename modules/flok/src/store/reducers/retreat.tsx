@@ -25,6 +25,7 @@ import {
 } from "../../models/retreat"
 import {UserModel} from "../../models/user"
 import {ApiAction} from "../actions/api"
+import {DELETE_SELECTED_HOTEL_SUCCESS} from "../actions/lodging"
 import {
   DELETE_PAGE_SUCCESS,
   DELETE_RECEIPT_TO_ATTENDEE_SUCCESS,
@@ -147,6 +148,7 @@ export default function retreatReducer(
     case POST_REGISTRATION_LIVE_SUCCESS:
     case POST_FLIGHTS_LIVE_SUCCESS:
     case PATCH_RETREAT_SUCCESS:
+    case DELETE_SELECTED_HOTEL_SUCCESS:
       retreat = ((action as ApiAction).payload as {retreat: RetreatModel})
         .retreat
       retreatId = retreat.id

@@ -330,6 +330,7 @@ export default function ProposalsListPageBody(
                       return (
                         destination && (
                           <ProposalListRow
+                            retreatId={retreat.id}
                             hotelsToCompare={hotelsToCompare}
                             updateHotelsToCompare={(
                               guid: string,
@@ -340,6 +341,7 @@ export default function ProposalsListPageBody(
                               })
                             }}
                             comparing={comparing}
+                            requested={selectedHotel.state === "REQUESTED"}
                             hotel={hotel}
                             destination={destination}
                             proposals={proposals}
@@ -382,6 +384,7 @@ export default function ProposalsListPageBody(
                 return (
                   destination && (
                     <ProposalListRow
+                      retreatId={retreat.id}
                       hotelsToCompare={hotelsToCompare}
                       updateHotelsToCompare={(guid: string, value: boolean) => {
                         setHotelsToCompare((hotelsToCompare) => {
@@ -423,6 +426,8 @@ export default function ProposalsListPageBody(
                     let proposals = selectedHotel.hotel_proposals || []
                     return (
                       <ProposalListRow
+                        retreatId={retreat.id}
+                        requested={selectedHotel.state === "REQUESTED"}
                         hotelsToCompare={hotelsToCompare}
                         updateHotelsToCompare={(
                           guid: string,
@@ -465,6 +470,8 @@ export default function ProposalsListPageBody(
             let destination = destinations[hotel.destination_id]
             return destination ? (
               <ProposalListRow
+                retreatId={retreat.id}
+                requested={selectedHotel.state === "REQUESTED"}
                 comparing={comparing}
                 unavailable
                 hotel={hotel}

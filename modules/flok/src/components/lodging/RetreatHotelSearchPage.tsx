@@ -12,6 +12,7 @@ import {
   IconButton,
   Link,
   makeStyles,
+  Mark,
   Paper,
   Slider,
   TextField,
@@ -103,15 +104,20 @@ let useStyles = makeStyles((theme) => ({
     display: "flex",
     gap: theme.spacing(12),
   },
-  slider: {
+  roomsSlider: {
     marginTop: theme.spacing(5),
+    marginLeft: "auto",
+    marginRight: "auto",
+    width: "80%",
+  },
+  distanceSlider: {
+    marginTop: theme.spacing(2),
     marginLeft: "auto",
     marginRight: "auto",
     width: "80%",
   },
   hotelTagsWrapper: {
     maxWidth: 300,
-    overflow: "scroll",
     display: "flex",
     flexDirection: "column",
   },
@@ -184,6 +190,9 @@ let useStyles = makeStyles((theme) => ({
   },
   tagsFilter: {
     width: "50%",
+  },
+  marks: {
+    display: "none",
   },
 }))
 
@@ -258,7 +267,7 @@ function RetreatHotelSearchPage() {
     (hotel) => hotel.created_by === "USER"
   ).length
 
-  let maxNumberOfRequests = 10
+  let maxNumberOfRequests = 25
 
   useEffect(() => {
     if (maxDistanceFromAirportQuery) {
@@ -386,7 +395,13 @@ function RetreatHotelSearchPage() {
     dispatch,
     pageQuery,
   ])
-
+  function valuetext(value: number) {
+    if (value >= 60) {
+      return `${value / 60} hr`
+    } else {
+      return `${value} min`
+    }
+  }
   function isValidLocations(
     locationListQuery: string[],
     googlePlaces: {[place_id: string]: GooglePlace}
@@ -434,11 +449,33 @@ function RetreatHotelSearchPage() {
       label: "3 Hours+",
     },
   ]
-  const roomNumberMarks = [
+  const roomNumberMarks: Mark[] = [
     {
       value: 0,
       label: "0",
     },
+    {value: 10},
+    {value: 20},
+    {value: 30},
+    {value: 40},
+    {value: 50},
+    {value: 60},
+    {value: 70},
+    {value: 80},
+    {value: 90},
+    {value: 100},
+    {value: 150},
+    {value: 200},
+    {value: 250},
+    {value: 300},
+    {value: 350},
+    {value: 400},
+    {value: 450},
+    {value: 500},
+    {value: 600},
+    {value: 700},
+    {value: 800},
+    {value: 900},
     {
       value: 1000,
       label: "1000 +",
@@ -508,7 +545,7 @@ function RetreatHotelSearchPage() {
           <div
             className={classes.filterBar}
             onClick={() => {
-              setShowFilters((filters) => !filters)
+              setShowFilters((filters) => true)
             }}>
             <div className={classes.chipContainer}>
               {locationList[0] ? (
@@ -666,8 +703,9 @@ function RetreatHotelSearchPage() {
                     Number of Rooms
                   </Typography>
                   <Slider
-                    className={classes.slider}
-                    step={100}
+                    className={classes.roomsSlider}
+                    step={null}
+                    classes={{mark: classes.marks}}
                     marks={roomNumberMarks}
                     min={0}
                     max={1000}
@@ -689,15 +727,20 @@ function RetreatHotelSearchPage() {
                     Maximum Distance From the Airport
                   </Typography>
                   <Slider
-                    className={classes.slider}
+                    valueLabelFormat={valuetext}
+                    className={classes.distanceSlider}
                     step={15}
                     marks={distanceFromAirportMarks}
                     min={15}
                     max={180}
-                    valueLabelDisplay="on"
                     value={maxDistanceFromAirport}
                     onChange={(event, newValue: number | number[]) => {
-                      setMaxDistanceFromAirportQuery(newValue.toString())
+                      if (newValue !== 180) {
+                        setMaxDistanceFromAirportQuery(newValue.toString())
+                      } else {
+                        setMaxDistanceFromAirportQuery(null)
+                        setMaxDistanceFromAirport(180)
+                      }
                     }}></Slider>
                 </div>
                 <Divider className={classes.filterDivider} />
@@ -794,6 +837,12 @@ function RetreatHotelSearchPage() {
                     hotel={hotel}
                     destination={destination}
                     selected={!!selectedHotelsMap[hotel.id]}
+                    deleteId={
+                      selectedHotelsMap[hotel.id]?.created_by === "USER" &&
+                      selectedHotelsMap[hotel.id].hotel_proposals?.length === 0
+                        ? selectedHotelsMap[hotel.id].hotel_id
+                        : undefined
+                    }
                   />
                 </div>
               )

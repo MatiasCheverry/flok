@@ -3,6 +3,7 @@ import {useDispatch} from "react-redux"
 import {Link as RouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
 import {useRetreat} from "../../pages/misc/RetreatProvider"
+import {deleteSelectedHotel} from "../../store/actions/lodging"
 import {postSelectedHotel} from "../../store/actions/retreat"
 import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
@@ -124,6 +125,19 @@ let useStyles = makeStyles((theme) => ({
       textDecoration: "none",
     },
   },
+  buttonsDiv: {
+    alignSelf: "center",
+    marginTop: "auto",
+    marginLeft: "auto",
+    marginBottom: theme.spacing(1),
+    marginRight: theme.spacing(1),
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(1),
+  },
+  routerLink: {
+    textDecoration: "none",
+  },
 }))
 
 type ProposalListRowProps = {
@@ -133,6 +147,7 @@ type ProposalListRowProps = {
   setModalOpen: () => void
   hotelLinkTo: string
   outOfRequests: boolean
+  deleteId?: number
 }
 function HotelForRFPRow(props: ProposalListRowProps) {
   let {hotel, destination} = {
@@ -143,97 +158,116 @@ function HotelForRFPRow(props: ProposalListRowProps) {
 
   let classes = useStyles()
   return (
-    <Paper elevation={0} className={classes.card}>
-      <div className={classes.imgAndBodyContainer}>
-        <div className={classes.imgContainer}>
-          <Link to={props.hotelLinkTo} component={RouterLink}>
-            <img
-              src={hotel.spotlight_img.image_url}
-              alt={`${hotel.name} spotlight`}
-            />
-          </Link>
-        </div>
-
-        <div className={classes.cardBody}>
-          <div className={classes.headerContainer}>
-            <AppTypography variant="body2" color="textSecondary" uppercase>
-              {DestinationUtils.getHotelLocationName(hotel, true)}
-            </AppTypography>
-            <Link
-              to={props.hotelLinkTo}
-              className={classes.hotelName}
-              component={RouterLink}>
-              <AppTypography variant="h4">{hotel.name}</AppTypography>
+    <RouterLink to={props.hotelLinkTo} className={classes.routerLink}>
+      <Paper elevation={0} className={classes.card}>
+        <div className={classes.imgAndBodyContainer}>
+          <div className={classes.imgContainer}>
+            <Link to={props.hotelLinkTo} component={RouterLink}>
+              <img
+                src={hotel.spotlight_img.image_url}
+                alt={`${hotel.name} spotlight`}
+              />
             </Link>
           </div>
-          <div className={classes.attributeTagsContainer}>
-            {hotel.airport_travel_time && (
-              <div className={classes.attributeTag}>
-                <AppTypography variant="body2" noWrap uppercase>
-                  Airport distance{" "}
-                  <AppMoreInfoIcon
-                    tooltipText={`This travel time is calculated to the nearest major airport${
-                      hotel.airport ? `(${hotel.airport})` : ""
-                    }. There may be smaller regional airports closer to ${DestinationUtils.getLocationName(
-                      destination,
-                      false,
-                      hotel
-                    )}.`}
-                  />
-                </AppTypography>
-                <AppTypography variant="body1" fontWeight="bold">
-                  {HotelUtils.getAirportTravelTime(hotel.airport_travel_time)}
-                </AppTypography>
-              </div>
-            )}
-            {hotel.num_rooms && (
-              <div className={classes.attributeTag}>
-                <AppTypography variant="body2" noWrap uppercase>
-                  Number of Rooms
-                </AppTypography>
-                <AppTypography variant="body1" fontWeight="bold">
-                  {hotel.num_rooms}
-                </AppTypography>
-              </div>
-            )}
-          </div>
-          <div className={classes.lodgingTagsContainer}>
-            {hotel.lodging_tags.map((tag) => {
-              return (
-                <div className={classes.lodgingTag}>
-                  <AppTypography fontWeight="bold">{tag.name}</AppTypography>
+
+          <div className={classes.cardBody}>
+            <div className={classes.headerContainer}>
+              <AppTypography variant="body2" color="textSecondary" uppercase>
+                {DestinationUtils.getHotelLocationName(hotel, true)}
+              </AppTypography>
+              <Link
+                to={props.hotelLinkTo}
+                className={classes.hotelName}
+                component={RouterLink}>
+                <AppTypography variant="h4">{hotel.name}</AppTypography>
+              </Link>
+            </div>
+            <div className={classes.attributeTagsContainer}>
+              {hotel.airport_travel_time && (
+                <div className={classes.attributeTag}>
+                  <AppTypography variant="body2" noWrap uppercase>
+                    Airport distance{" "}
+                    <AppMoreInfoIcon
+                      tooltipText={`This travel time is calculated to the nearest major airport${
+                        hotel.airport ? `(${hotel.airport})` : ""
+                      }. There may be smaller regional airports closer to ${DestinationUtils.getLocationName(
+                        destination,
+                        false,
+                        hotel
+                      )}.`}
+                    />
+                  </AppTypography>
+                  <AppTypography variant="body1" fontWeight="bold">
+                    {HotelUtils.getAirportTravelTime(hotel.airport_travel_time)}
+                  </AppTypography>
                 </div>
-              )
-            })}
+              )}
+              {hotel.num_rooms && (
+                <div className={classes.attributeTag}>
+                  <AppTypography variant="body2" noWrap uppercase>
+                    Number of Rooms
+                  </AppTypography>
+                  <AppTypography variant="body1" fontWeight="bold">
+                    {hotel.num_rooms}
+                  </AppTypography>
+                </div>
+              )}
+            </div>
+            <div className={classes.lodgingTagsContainer}>
+              {hotel.lodging_tags.map((tag) => {
+                return (
+                  <div className={classes.lodgingTag}>
+                    <AppTypography fontWeight="bold">{tag.name}</AppTypography>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </div>
-      </div>
-
-      <Button
-        className={classes.viewProposalButton}
-        variant={"outlined"}
-        size="small"
-        color="primary"
-        disabled={props.selected || props.outOfRequests}
-        onClick={() => {
-          dispatch(
-            postSelectedHotel(
-              "REQUESTED",
-              retreat.id,
-              hotel.id,
-              retreat.request_for_proposal_id
-            )
-          )
-        }}>
-        <AppTypography variant="inherit" noWrap>
-          {props.selected
-            ? "Requested"
-            : props.outOfRequests
-            ? "No Requests Remaining"
-            : "Request Proposal"}
-        </AppTypography>
-      </Button>
-    </Paper>
+        <div className={classes.buttonsDiv} id="buttond">
+          {props.deleteId && (
+            <Button
+              id="button"
+              variant={"outlined"}
+              size="small"
+              color="primary"
+              onClick={(e) => {
+                e.preventDefault()
+                if (props.deleteId) {
+                  dispatch(deleteSelectedHotel(retreat.id, props.deleteId))
+                }
+              }}>
+              Cancel
+            </Button>
+          )}
+          <Button
+            id="button"
+            variant={"outlined"}
+            size="small"
+            color="primary"
+            disabled={props.selected || props.outOfRequests}
+            onClick={(e) => {
+              e.preventDefault()
+              dispatch(
+                postSelectedHotel(
+                  "REQUESTED",
+                  retreat.id,
+                  hotel.id,
+                  retreat.request_for_proposal_id
+                )
+              )
+            }}>
+            <AppTypography variant="inherit" noWrap>
+              {props.selected
+                ? "Requested"
+                : props.outOfRequests
+                ? "No Requests Remaining"
+                : "Request Proposal"}
+            </AppTypography>
+          </Button>
+        </div>
+      </Paper>
+    </RouterLink>
   )
 }
 export default HotelForRFPRow

@@ -102,3 +102,20 @@ export function addGooglePlace(place: {
   let action = {...place, type: ADD_GOOGLE_PLACE}
   return action
 }
+
+export const DELETE_SELECTED_HOTEL_REQUEST = "DELETE_SELECTED_HOTEL_REQUEST"
+export const DELETE_SELECTED_HOTEL_SUCCESS = "DELETE_SELECTED_HOTEL_SUCCESS"
+export const DELETE_SELECTED_HOTEL_FAILURE = "DELETE_SELECTED_HOTEL_FAILURE"
+
+export function deleteSelectedHotel(retreatId: number, hotelId: number) {
+  let endpoint = `/v1.0/admin/retreats/${retreatId}/hotels/${hotelId}`
+  return createApiAction({
+    endpoint,
+    method: "DELETE",
+    types: [
+      DELETE_SELECTED_HOTEL_REQUEST,
+      DELETE_SELECTED_HOTEL_SUCCESS,
+      {type: DELETE_SELECTED_HOTEL_FAILURE},
+    ],
+  })
+}
