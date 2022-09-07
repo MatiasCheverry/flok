@@ -93,12 +93,6 @@ let useStyles = makeStyles((theme) => ({
       marginBottom: theme.spacing(0.5),
     },
   },
-  viewProposalButton: {
-    // alignSelf: "center",
-    padding: "8px 22px",
-    // marginLeft: "auto",
-    marginRight: theme.spacing(1),
-  },
   viewProposalButtonGroup: {
     alignSelf: "center",
     padding: "8px 22px",
@@ -276,7 +270,6 @@ export default function ProposalListRow(props: ProposalListRowProps) {
       ) : (
         <div className={classes.viewProposalButtonGroup}>
           <Button
-            className={classes.viewProposalButton}
             disabled={unavailable || props.requested}
             variant={unavailable ? "contained" : "outlined"}
             color="primary"
@@ -306,7 +299,6 @@ export default function ProposalListRow(props: ProposalListRowProps) {
             <Button
               color="primary"
               variant="outlined"
-              className={classes.viewProposalButton}
               onClick={() => {
                 if (props.retreatId) {
                   dispatch(deleteSelectedHotel(props.retreatId, props.hotel.id))

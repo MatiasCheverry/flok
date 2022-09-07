@@ -64,145 +64,326 @@ export default function GooglePlacesAutoComplete(
 
   let FLOK_FAVORITE_DESTINATIONS = [
     {
-      description: "Danbury, CT, USA",
+      description: "Austin, TX, USA",
+      matched_substrings: [{length: 3, offset: 0}],
+      place_id: "ChIJLwPMoJm1RIYRetVp1EtGm10",
+      reference: "ChIJLwPMoJm1RIYRetVp1EtGm10",
+      structured_formatting: {
+        main_text: "Austin",
+        main_text_matched_substrings: [{length: 3, offset: 0}],
+        secondary_text: "TX, USA",
+      },
+      terms: [
+        {offset: 0, value: "Austin"},
+        {offset: 8, value: "TX"},
+        {offset: 12, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Palm Springs, CA, USA",
+      matched_substrings: [{length: 7, offset: 0}],
+      place_id: "ChIJs-Xb_9Qa24ARfHntwodp5aE",
+      reference: "ChIJs-Xb_9Qa24ARfHntwodp5aE",
+      structured_formatting: {
+        main_text: "Palm Springs",
+        main_text_matched_substrings: [{length: 7, offset: 0}],
+        secondary_text: "CA, USA",
+      },
+      terms: [
+        {offset: 0, value: "Palm Springs"},
+        {offset: 14, value: "CA"},
+        {offset: 18, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Miami, FL, USA",
+      matched_substrings: [{length: 5, offset: 0}],
+      place_id: "ChIJEcHIDqKw2YgRZU-t3XHylv8",
+      reference: "ChIJEcHIDqKw2YgRZU-t3XHylv8",
+      structured_formatting: {
+        main_text: "Miami",
+        main_text_matched_substrings: [{length: 5, offset: 0}],
+        secondary_text: "FL, USA",
+      },
+      terms: [
+        {offset: 0, value: "Miami"},
+        {offset: 7, value: "FL"},
+        {offset: 11, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "San Diego, CA, USA",
+      matched_substrings: [{length: 6, offset: 0}],
+      place_id: "ChIJSx6SrQ9T2YARed8V_f0hOg0",
+      reference: "ChIJSx6SrQ9T2YARed8V_f0hOg0",
+      structured_formatting: {
+        main_text: "San Diego",
+        main_text_matched_substrings: [{length: 6, offset: 0}],
+        secondary_text: "CA, USA",
+      },
+      terms: [
+        {offset: 0, value: "San Diego"},
+        {offset: 11, value: "CA"},
+        {offset: 15, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Denver, CO, USA",
+      matched_substrings: [{length: 6, offset: 0}],
+      place_id: "ChIJzxcfI6qAa4cR1jaKJ_j0jhE",
+      reference: "ChIJzxcfI6qAa4cR1jaKJ_j0jhE",
+      structured_formatting: {
+        main_text: "Denver",
+        main_text_matched_substrings: [{length: 6, offset: 0}],
+        secondary_text: "CO, USA",
+      },
+      terms: [
+        {offset: 0, value: "Denver"},
+        {offset: 8, value: "CO"},
+        {offset: 12, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Park City, UT, USA",
+      matched_substrings: [{length: 9, offset: 0}],
+      place_id: "ChIJ_QNjLGMPUocRlFc3Jd_Ecdg",
+      reference: "ChIJ_QNjLGMPUocRlFc3Jd_Ecdg",
+      structured_formatting: {
+        main_text: "Park City",
+        main_text_matched_substrings: [{length: 9, offset: 0}],
+        secondary_text: "UT, USA",
+      },
+      terms: [
+        {offset: 0, value: "Park City"},
+        {offset: 11, value: "UT"},
+        {offset: 15, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "San Francisco, CA, USA",
+      matched_substrings: [{length: 8, offset: 0}],
+      place_id: "ChIJIQBpAG2ahYAR_6128GcTUEo",
+      reference: "ChIJIQBpAG2ahYAR_6128GcTUEo",
+      structured_formatting: {
+        main_text: "San Francisco",
+        main_text_matched_substrings: [{length: 8, offset: 0}],
+        secondary_text: "CA, USA",
+      },
+      terms: [
+        {offset: 0, value: "San Francisco"},
+        {offset: 15, value: "CA"},
+        {offset: 19, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Nashville, TN, USA",
+      matched_substrings: [{length: 4, offset: 0}],
+      place_id: "ChIJPZDrEzLsZIgRoNrpodC5P30",
+      reference: "ChIJPZDrEzLsZIgRoNrpodC5P30",
+      structured_formatting: {
+        main_text: "Nashville",
+        main_text_matched_substrings: [{length: 4, offset: 0}],
+        secondary_text: "TN, USA",
+      },
+      terms: [
+        {offset: 0, value: "Nashville"},
+        {offset: 11, value: "TN"},
+        {offset: 15, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Portland, OR, USA",
+      matched_substrings: [{length: 8, offset: 0}],
+      place_id: "ChIJJ3SpfQsLlVQRkYXR9ua5Nhw",
+      reference: "ChIJJ3SpfQsLlVQRkYXR9ua5Nhw",
+      structured_formatting: {
+        main_text: "Portland",
+        main_text_matched_substrings: [{length: 8, offset: 0}],
+        secondary_text: "OR, USA",
+      },
+      terms: [
+        {offset: 0, value: "Portland"},
+        {offset: 10, value: "OR"},
+        {offset: 14, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Las Vegas, NV, USA",
+      matched_substrings: [{length: 6, offset: 0}],
+      place_id: "ChIJ0X31pIK3voARo3mz1ebVzDo",
+      reference: "ChIJ0X31pIK3voARo3mz1ebVzDo",
+      structured_formatting: {
+        main_text: "Las Vegas",
+        main_text_matched_substrings: [{length: 6, offset: 0}],
+        secondary_text: "NV, USA",
+      },
+      terms: [
+        {offset: 0, value: "Las Vegas"},
+        {offset: 11, value: "NV"},
+        {offset: 15, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "New Orleans, LA, USA",
+      matched_substrings: [{length: 7, offset: 0}],
+      place_id: "ChIJZYIRslSkIIYRtNMiXuhbBts",
+      reference: "ChIJZYIRslSkIIYRtNMiXuhbBts",
+      structured_formatting: {
+        main_text: "New Orleans",
+        main_text_matched_substrings: [{length: 7, offset: 0}],
+        secondary_text: "LA, USA",
+      },
+      terms: [
+        {offset: 0, value: "New Orleans"},
+        {offset: 13, value: "LA"},
+        {offset: 17, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Scottsdale, AZ, USA",
+      matched_substrings: [{length: 10, offset: 0}],
+      place_id: "ChIJlyx3p9kIK4cRGOaPGBLk0iY",
+      reference: "ChIJlyx3p9kIK4cRGOaPGBLk0iY",
+      structured_formatting: {
+        main_text: "Scottsdale",
+        main_text_matched_substrings: [{length: 10, offset: 0}],
+        secondary_text: "AZ, USA",
+      },
+      terms: [
+        {offset: 0, value: "Scottsdale"},
+        {offset: 12, value: "AZ"},
+        {offset: 16, value: "USA"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Barcelona, Spain",
+      matched_substrings: [{length: 5, offset: 0}],
+      place_id: "ChIJ5TCOcRaYpBIRCmZHTz37sEQ",
+      reference: "ChIJ5TCOcRaYpBIRCmZHTz37sEQ",
+      structured_formatting: {
+        main_text: "Barcelona",
+        main_text_matched_substrings: [{length: 5, offset: 0}],
+        secondary_text: "Spain",
+      },
+      terms: [
+        {offset: 0, value: "Barcelona"},
+        {offset: 11, value: "Spain"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Montego Bay, Jamaica",
+      matched_substrings: [{length: 7, offset: 0}],
+      place_id: "ChIJseJ3_V0q2o4RZlfMWtua1vw",
+      reference: "ChIJseJ3_V0q2o4RZlfMWtua1vw",
+      structured_formatting: {
+        main_text: "Montego Bay",
+        main_text_matched_substrings: [{length: 7, offset: 0}],
+        secondary_text: "Jamaica",
+      },
+      terms: [
+        {offset: 0, value: "Montego Bay"},
+        {offset: 13, value: "Jamaica"},
+      ],
+      types: ["locality", "political", "geocode"],
+    },
+    {
+      description: "Playa del Carmen, Quintana Roo, Mexico",
       matched_substrings: [
         {
-          length: 1,
+          length: 9,
           offset: 0,
         },
       ],
-      place_id: "ChIJ75gTLYRV3YkR7dNTBAuOwaE",
-      reference: "ChIJ75gTLYRV3YkR7dNTBAuOwaE",
+      place_id: "ChIJYU4t0iNDTo8R3EqrO3gLweg",
+      reference: "ChIJYU4t0iNDTo8R3EqrO3gLweg",
       structured_formatting: {
-        main_text: "Danbury",
+        main_text: "Playa del Carmen",
         main_text_matched_substrings: [
           {
-            length: 1,
+            length: 9,
             offset: 0,
           },
         ],
-        secondary_text: "CT, USA",
+        secondary_text: "Quintana Roo, Mexico",
       },
       terms: [
         {
           offset: 0,
-          value: "Danbury",
+          value: "Playa del Carmen",
         },
         {
-          offset: 9,
-          value: "CT",
+          offset: 18,
+          value: "Quintana Roo",
         },
         {
-          offset: 13,
-          value: "USA",
+          offset: 32,
+          value: "Mexico",
         },
       ],
       types: ["locality", "political", "geocode"],
     },
     {
-      description: "New York, NY, USA",
-      matched_substrings: [
-        {
-          length: 3,
-          offset: 0,
-        },
-      ],
-      place_id: "ChIJOwg_06VPwokRYv534QaPC8g",
-      reference: "ChIJOwg_06VPwokRYv534QaPC8g",
+      description: "Cancún, Quintana Roo, Mexico",
+      matched_substrings: [{length: 4, offset: 0}],
+      place_id: "ChIJ21P2rgUrTI8Ris1fYjy3Ms4",
+      reference: "ChIJ21P2rgUrTI8Ris1fYjy3Ms4",
       structured_formatting: {
-        main_text: "New York",
-        main_text_matched_substrings: [
-          {
-            length: 3,
-            offset: 0,
-          },
-        ],
-        secondary_text: "NY, USA",
+        main_text: "Cancún",
+        main_text_matched_substrings: [{length: 4, offset: 0}],
+        secondary_text: "Quintana Roo, Mexico",
       },
       terms: [
-        {
-          offset: 0,
-          value: "New York",
-        },
-        {
-          offset: 10,
-          value: "NY",
-        },
-        {
-          offset: 14,
-          value: "USA",
-        },
+        {offset: 0, value: "Cancún"},
+        {offset: 8, value: "Quintana Roo"},
+        {offset: 22, value: "Mexico"},
       ],
       types: ["locality", "political", "geocode"],
     },
     {
-      description: "Newark, NJ, USA",
+      description: "Tulum, Quintana Roo, Mexico",
       matched_substrings: [
         {
-          length: 3,
+          length: 5,
           offset: 0,
         },
       ],
-      place_id: "ChIJHQ6aMnBTwokRc-T-3CrcvOE",
-      reference: "ChIJHQ6aMnBTwokRc-T-3CrcvOE",
+      place_id: "ChIJSyrkEAPUT48Rt5r_k9vA7Q4",
+      reference: "ChIJSyrkEAPUT48Rt5r_k9vA7Q4",
       structured_formatting: {
-        main_text: "Newark",
+        main_text: "Tulum",
         main_text_matched_substrings: [
           {
-            length: 3,
+            length: 5,
             offset: 0,
           },
         ],
-        secondary_text: "NJ, USA",
+        secondary_text: "Quintana Roo, Mexico",
       },
       terms: [
         {
           offset: 0,
-          value: "Newark",
+          value: "Tulum",
         },
         {
-          offset: 8,
-          value: "NJ",
+          offset: 7,
+          value: "Quintana Roo",
         },
         {
-          offset: 12,
-          value: "USA",
-        },
-      ],
-      types: ["locality", "political", "geocode"],
-    },
-    {
-      description: "New Haven, CT, USA",
-      matched_substrings: [
-        {
-          length: 3,
-          offset: 0,
-        },
-      ],
-      place_id: "ChIJ5XCAOkTY54kR7WSyWcZUo_Y",
-      reference: "ChIJ5XCAOkTY54kR7WSyWcZUo_Y",
-      structured_formatting: {
-        main_text: "New Haven",
-        main_text_matched_substrings: [
-          {
-            length: 3,
-            offset: 0,
-          },
-        ],
-        secondary_text: "CT, USA",
-      },
-      terms: [
-        {
-          offset: 0,
-          value: "New Haven",
-        },
-        {
-          offset: 11,
-          value: "CT",
-        },
-        {
-          offset: 15,
-          value: "USA",
+          offset: 21,
+          value: "Mexico",
         },
       ],
       types: ["locality", "political", "geocode"],
