@@ -24,8 +24,11 @@ import {
 } from "@material-ui/core"
 import {
   DataGrid,
+  GridCellParams,
+  GridColumns,
   GridToolbarContainer,
   GridToolbarExport,
+  GridValueFormatterParams,
   GridValueGetterParams,
 } from "@material-ui/data-grid"
 import {
@@ -337,6 +340,14 @@ function AttendeesPage() {
     }
   }, [dispatch, loadingQuestions, missingQuestions])
 
+  function allowNewLines(str: string | undefined) {
+    let start = str
+    if (str && str.replace(/[\r\n]/gm, " | ") !== str) {
+      start += ","
+    }
+    return start
+  }
+
   let formQuestionColumns = Object.keys(questionIds).map((id) => {
     return {
       field: questions[parseInt(id)]?.title ?? id,
@@ -350,11 +361,10 @@ function AttendeesPage() {
             let answer = formResponse.answers.find(
               (answer) => answer.form_question_id === parseInt(id)
             )
-            return answer ? answer.answer : ""
+            return allowNewLines(answer?.answer)
           }
         }
       },
-      hide: !showResponses,
     }
   })
 
@@ -531,6 +541,117 @@ function AttendeesPage() {
     setNewAttendeeErrorState(errorState)
   }
 
+  let flightsColumns = [
+    {
+      field: "arrival",
+      headerName: "Flight Arrival",
+      width: 160,
+      valueGetter: (params: GridValueGetterParams) => {
+        let attendee = params.row
+        return attendee.travel &&
+          attendee.travel.arr_trip &&
+          trips[attendee.travel.arr_trip.id] &&
+          trips[attendee.travel.arr_trip.id].trip_legs[
+            trips[attendee.travel.arr_trip.id].trip_legs.length - 1
+          ]
+          ? trips[attendee.travel.arr_trip.id].trip_legs[
+              trips[attendee.travel.arr_trip.id].trip_legs.length - 1
+            ].arr_datetime
+          : undefined
+      },
+      valueFormatter: (params: GridValueFormatterParams) => {
+        return !isNaN(new Date(params.value as string).getTime())
+          ? datetimeFormat(new Date(params.value as string))
+          : undefined
+      },
+    },
+    {
+      field: "departure",
+      headerName: "Flight Departure",
+      width: 160,
+      valueGetter: (params: GridValueGetterParams) => {
+        let attendee = params.row
+        return attendee.travel &&
+          attendee.travel.dep_trip &&
+          trips[attendee.travel.dep_trip.id] &&
+          trips[attendee.travel.dep_trip.id].trip_legs.length
+          ? trips[attendee.travel.dep_trip.id].trip_legs[0].dep_datetime
+          : undefined
+      },
+      valueFormatter: (params: GridValueFormatterParams) => {
+        return !isNaN(new Date(params.value as string).getTime())
+          ? datetimeFormat(new Date(params.value as string))
+          : undefined
+      },
+    },
+    {
+      field: "cost",
+      headerName: "Flights Cost",
+      width: 150,
+      valueGetter: (params: GridValueGetterParams) => params.row.travel?.cost,
+      valueFormatter: (params: GridValueFormatterParams) => {
+        if (params.value) {
+          return currencyFormat(params.value as number)
+        }
+      },
+    },
+    {
+      field: "flight_status",
+      headerName: "Flight Status",
+      width: 180,
+      valueFormatter: (params: GridValueFormatterParams) => {
+        if (params.value === "BOOKED") {
+          return "Booked"
+        } else if (params.value === "PENDING") {
+          return "To Book"
+        } else if (params.value === "OPT_OUT") {
+          return "Opted Out"
+        }
+      },
+      renderCell: (params: GridCellParams) => {
+        if (params.value === "BOOKED") {
+          return (
+            <Chip
+              variant="outlined"
+              label="Booked"
+              className={classes.successChip}
+            />
+          )
+        } else if (params.value === "PENDING") {
+          return (
+            <Chip
+              variant="outlined"
+              label="To Book"
+              className={classes.warningChip}
+            />
+          )
+        } else if (params.value === "OPT_OUT") {
+          return (
+            <Chip
+              variant="outlined"
+              label="Opted Out"
+              className={classes.infoChip}
+            />
+          )
+        }
+      },
+    },
+    {
+      field: "receipts",
+      valueFormatter: (params: GridValueFormatterParams) => {
+        let value = params.value as FileModel[]
+        return value.map((value) => value.file_url).join(" ")
+      },
+      headerName: "Flight Receipts",
+      align: "center",
+      width: 180,
+      renderCell: (params: GridCellParams) => {
+        let attendee = params.row as RetreatAttendeeModel
+        return <AttendeeFlightReceiptViewer attendee={attendee} />
+      },
+    },
+  ]
+
   return (
     <PageBody appBar>
       <div className={classes.section}>
@@ -705,120 +826,23 @@ function AttendeesPage() {
                 },
               },
               {
-                field: "arrival",
-                headerName: "Flight Arrival",
-                width: 160,
-                hide: !showFlights,
+                field: "notes",
+                headerName: "Other Notes",
+                width: 140,
+                hide: true,
                 valueGetter: (params) => {
                   let attendee = params.row
-                  return attendee.travel &&
-                    attendee.travel.arr_trip &&
-                    trips[attendee.travel.arr_trip.id] &&
-                    trips[attendee.travel.arr_trip.id].trip_legs[
-                      trips[attendee.travel.arr_trip.id].trip_legs.length - 1
-                    ]
-                    ? trips[attendee.travel.arr_trip.id].trip_legs[
-                        trips[attendee.travel.arr_trip.id].trip_legs.length - 1
-                      ].arr_datetime
-                    : undefined
-                },
-                valueFormatter: (params) => {
-                  return !isNaN(new Date(params.value as string).getTime())
-                    ? datetimeFormat(new Date(params.value as string))
-                    : undefined
+                  return allowNewLines(attendee.notes)
                 },
               },
               {
-                field: "departure",
-                hide: !showFlights,
-                headerName: "Flight Departure",
-                width: 160,
-                valueGetter: (params) => {
-                  let attendee = params.row
-                  return attendee.travel &&
-                    attendee.travel.dep_trip &&
-                    trips[attendee.travel.dep_trip.id] &&
-                    trips[attendee.travel.dep_trip.id].trip_legs.length
-                    ? trips[attendee.travel.dep_trip.id].trip_legs[0]
-                        .dep_datetime
-                    : undefined
-                },
-                valueFormatter: (params) => {
-                  return !isNaN(new Date(params.value as string).getTime())
-                    ? datetimeFormat(new Date(params.value as string))
-                    : undefined
-                },
+                field: "dietary_prefs",
+                headerName: "Dietary Restrictions",
+                width: 140,
+                hide: true,
               },
-              {
-                field: "cost",
-                hide: !showFlights,
-                headerName: "Flights Cost",
-                width: 150,
-                valueGetter: (params) => params.row.travel?.cost,
-                valueFormatter: (params) => {
-                  if (params.value) {
-                    return currencyFormat(params.value as number)
-                  }
-                },
-              },
-              {
-                field: "flight_status",
-                hide: !showFlights,
-                headerName: "Flight Status",
-                width: 180,
-                valueFormatter: (params) => {
-                  if (params.value === "BOOKED") {
-                    return "Booked"
-                  } else if (params.value === "PENDING") {
-                    return "To Book"
-                  } else if (params.value === "OPT_OUT") {
-                    return "Opted Out"
-                  }
-                },
-                renderCell: (params) => {
-                  if (params.value === "BOOKED") {
-                    return (
-                      <Chip
-                        variant="outlined"
-                        label="Booked"
-                        className={classes.successChip}
-                      />
-                    )
-                  } else if (params.value === "PENDING") {
-                    return (
-                      <Chip
-                        variant="outlined"
-                        label="To Book"
-                        className={classes.warningChip}
-                      />
-                    )
-                  } else if (params.value === "OPT_OUT") {
-                    return (
-                      <Chip
-                        variant="outlined"
-                        label="Opted Out"
-                        className={classes.infoChip}
-                      />
-                    )
-                  }
-                },
-              },
-              {
-                field: "receipts",
-                hide: !showFlights,
-                valueFormatter: (params) => {
-                  let value = params.value as FileModel[]
-                  return value.map((value) => value.file_url).join(" ")
-                },
-                headerName: "Flight Receipts",
-                align: "center",
-                width: 180,
-                renderCell: (params) => {
-                  let attendee = params.row as RetreatAttendeeModel
-                  return <AttendeeFlightReceiptViewer attendee={attendee} />
-                },
-              },
-              ...formQuestionColumns,
+              ...(showFlights ? (flightsColumns as GridColumns) : []),
+              ...(showResponses ? formQuestionColumns : []),
               {
                 disableExport: true,
                 field: "actions",
@@ -1142,6 +1166,7 @@ type CustomToolbarAttendeePageProps = {
   setShowResponses: (newValue: boolean) => void
   showResponses: boolean
   isV1: boolean
+  fields: string[]
 }
 function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
   let classes = useToolbarStyles()
@@ -1178,6 +1203,9 @@ function CustomToolbarAttendeePage(props: CustomToolbarAttendeePageProps) {
       )}
       {!(searchExpanded && isSmallScreen) && (
         <GridToolbarExport
+          csvOptions={{
+            allColumns: true,
+          }}
           size="medium"
           className={classes.toolbarButton}
           classes={{
