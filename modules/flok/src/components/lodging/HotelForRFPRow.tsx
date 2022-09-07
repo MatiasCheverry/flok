@@ -1,4 +1,4 @@
-import {Button, Link, makeStyles, Paper} from "@material-ui/core"
+import {Button, makeStyles, Paper} from "@material-ui/core"
 import {useDispatch} from "react-redux"
 import {Link as RouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
@@ -162,12 +162,10 @@ function HotelForRFPRow(props: ProposalListRowProps) {
       <Paper elevation={0} className={classes.card}>
         <div className={classes.imgAndBodyContainer}>
           <div className={classes.imgContainer}>
-            <Link to={props.hotelLinkTo} component={RouterLink}>
-              <img
-                src={hotel.spotlight_img.image_url}
-                alt={`${hotel.name} spotlight`}
-              />
-            </Link>
+            <img
+              src={hotel.spotlight_img.image_url}
+              alt={`${hotel.name} spotlight`}
+            />
           </div>
 
           <div className={classes.cardBody}>
@@ -175,12 +173,7 @@ function HotelForRFPRow(props: ProposalListRowProps) {
               <AppTypography variant="body2" color="textSecondary" uppercase>
                 {DestinationUtils.getHotelLocationName(hotel, true)}
               </AppTypography>
-              <Link
-                to={props.hotelLinkTo}
-                className={classes.hotelName}
-                component={RouterLink}>
-                <AppTypography variant="h4">{hotel.name}</AppTypography>
-              </Link>
+              <AppTypography variant="h4">{hotel.name}</AppTypography>
             </div>
             <div className={classes.attributeTagsContainer}>
               {hotel.airport_travel_time && (
