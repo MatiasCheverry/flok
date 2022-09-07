@@ -395,13 +395,6 @@ function RetreatHotelSearchPage() {
     dispatch,
     pageQuery,
   ])
-  function valuetext(value: number) {
-    if (value >= 60) {
-      return `${value / 60} hr`
-    } else {
-      return `${value} min`
-    }
-  }
   function isValidLocations(
     locationListQuery: string[],
     googlePlaces: {[place_id: string]: GooglePlace}
@@ -727,7 +720,6 @@ function RetreatHotelSearchPage() {
                     Maximum Distance From the Airport
                   </Typography>
                   <Slider
-                    valueLabelFormat={valuetext}
                     className={classes.distanceSlider}
                     step={15}
                     marks={distanceFromAirportMarks}
