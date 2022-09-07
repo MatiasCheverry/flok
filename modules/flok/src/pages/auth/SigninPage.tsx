@@ -50,6 +50,7 @@ let useStyles = makeStyles((theme) => ({
 type SigninPageProps = RouteComponentProps<{}>
 function SigninPage(props: SigninPageProps) {
   let [nextQueryParam] = useQuery("next")
+  let [attendeeSiteQueryParam] = useQuery("login-site")
   let [loginTypeQueryParam] = useQuery("login-type")
   let classes = useStyles(props)
   let dispatch = useDispatch()
@@ -80,7 +81,9 @@ function SigninPage(props: SigninPageProps) {
                 to={
                   loginTypeQueryParam === "attendee"
                     ? AppRoutes.getPath("AttendeeSignUpPage", {
-                        retreatName: "yoga",
+                        retreatName: attendeeSiteQueryParam
+                          ? attendeeSiteQueryParam
+                          : "",
                       })
                     : AppRoutes.getPath("DeprecatedNewRetreatFormPage")
                 }

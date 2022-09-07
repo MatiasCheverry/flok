@@ -179,6 +179,7 @@ export default function AttendeeCreateAccountPage() {
                       })
                     ),
                     "login-type": "attendee",
+                    "login-site": retreatName,
                   }
                 )}
                 component={ReactRouterLink}>
