@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@material-ui/core"
 import {Autocomplete} from "@material-ui/lab"
+import {push} from "connected-react-router"
 import {useFormik} from "formik"
 import _ from "lodash"
 import {useEffect, useState} from "react"
@@ -21,12 +22,15 @@ import {useDispatch, useSelector} from "react-redux"
 import * as yup from "yup"
 import config, {GOOGLE_API_KEY} from "../../config"
 import {AdminHotelDetailsModel} from "../../models"
+import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {
   addGooglePlace,
+  deleteHotel,
   getLodgingTags,
   patchHotel,
 } from "../../store/actions/admin"
+import {ApiAction} from "../../store/actions/api"
 import {
   fetchGooglePlace,
   getTextFieldErrorProps,
@@ -34,6 +38,7 @@ import {
   useDestinations,
   useScript,
 } from "../../utils"
+import AppConfirmationModal from "../base/AppConfirmationModal"
 import AppLoadingScreen from "../base/AppLoadingScreen"
 import AppTypography from "../base/AppTypography"
 import GooglePlacesAutoComplete from "./GoogleLocationsAutocomplete"
@@ -134,6 +139,7 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
       hotel_contact_email: props.hotel.hotel_contact_email ?? "",
       hotel_contact_name: props.hotel.hotel_contact_name ?? "",
       is_pareto_task_complete: props.hotel.is_pareto_task_complete ?? false,
+      is_hidden: props.hotel.is_hidden,
     }),
     validationSchema: yup.object({
       website_url: yup.string().url().nullable(),
@@ -164,8 +170,26 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
       )
     }
   }, [googlePlace, setFieldValue])
+
+  let [deleteHotelModalOpen, setDeleteHotelModalOpen] = useState(false)
   return (
     <form className={classes.root} onSubmit={formik.handleSubmit}>
+      <AppConfirmationModal
+        open={deleteHotelModalOpen}
+        onSubmit={async () => {
+          let response = (await dispatch(
+            deleteHotel(props.hotel.id)
+          )) as unknown as ApiAction
+          if (!response.error) {
+            dispatch(push(AppRoutes.getPath("HotelsListPage")))
+          }
+        }}
+        onClose={() => {
+          setDeleteHotelModalOpen(false)
+        }}
+        title="Are you sure you wish to delete this hotel?"
+        text="This action cannot be undone."
+      />
       <Paper elevation={0} className={classes.formGroup}>
         <div>{loadingUpdate ? <AppLoadingScreen /> : undefined}</div>
         <Dialog
@@ -232,6 +256,17 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
             />
           }
           label="Is Pareto Task Completed?"
+        />
+        <FormControlLabel
+          control={
+            <Checkbox
+              color="primary"
+              checked={formik.values.is_hidden}
+              id="is_hidden"
+              onChange={formik.handleChange}
+            />
+          }
+          label="Hide from clients?"
         />
         <Typography variant="h4">Hotel General Info</Typography>
         <TextField
@@ -513,7 +548,15 @@ export default function HotelProfileForm(props: HotelProfileFormProps) {
           helperText='Only add if it should be different from the "main" destination'
         />
       </Paper>
-      <Box width="100%" display="flex" justifyContent="flex-end">
+      <Box width="100%" display="flex" justifyContent="space-between">
+        <Button
+          color="primary"
+          variant="outlined"
+          onClick={() => {
+            setDeleteHotelModalOpen(true)
+          }}>
+          Delete Hotel
+        </Button>
         <Button
           disabled={
             _.isEqual(

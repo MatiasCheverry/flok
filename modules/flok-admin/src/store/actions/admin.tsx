@@ -188,6 +188,24 @@ export function patchHotel(
   })
 }
 
+export const DELETE_HOTEL_REQUEST = "DELETE_HOTEL_REQUEST"
+export const DELETE_HOTEL_SUCCESS = "DELETE_HOTEL_SUCCESS"
+export const DELETE_HOTEL_FAILURE = "DELETE_HOTEL_FAILURE"
+
+export function deleteHotel(hotelId: number) {
+  let endpoint = `/v1.0/admin/hotels/${hotelId}`
+  return createApiAction({
+    endpoint,
+    body: JSON.stringify({is_inactive: true}),
+    method: "PATCH",
+    types: [
+      {type: DELETE_HOTEL_REQUEST},
+      {type: DELETE_HOTEL_SUCCESS, meta: {hotelId}},
+      {type: DELETE_HOTEL_FAILURE, meta: {hotelId}},
+    ],
+  })
+}
+
 export const POST_HOTEL_TEMPLATE_PROPOSAL_REQUEST =
   "POST_HOTEL_TEMPLATE_PROPOSAL_REQUEST"
 export const POST_HOTEL_TEMPLATE_PROPOSAL_SUCCESS =

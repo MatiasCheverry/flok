@@ -210,6 +210,8 @@ export type AdminHotelDetailsModel = {
   is_pareto_task_complete?: boolean
   hotel_contact_email?: string
   hotel_contact_name?: string
+  is_hidden: boolean
+  is_inactive: boolean
 }
 
 export type AdminHotelModel = Pick<

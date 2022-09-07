@@ -24,6 +24,7 @@ import {
   ADD_GOOGLE_PLACE,
   ADD_RETREAT_TASKS_SUCCESS,
   DELETE_HOTEL_GROUP_SUCCESS,
+  DELETE_HOTEL_SUCCESS,
   DELETE_RETREAT_ATTENDEES_SUCCESS,
   DELETE_RETREAT_HOTEL_PROPOSAL_SUCCESS,
   DELETE_SELECTED_HOTEL_SUCCESS,
@@ -325,6 +326,15 @@ export default function AdminReducer(
         },
         hotelsDataGridHasNext: payload.has_next,
       }
+    case DELETE_HOTEL_SUCCESS:
+      meta = (action as unknown as {meta: {hotelId: number}}).meta
+      let newHotels = {...state.hotels}
+      delete newHotels[meta.hotelId]
+      return {
+        ...state,
+        hotels: newHotels,
+      }
+
     case POST_SELECTED_HOTEL_SUCCESS:
     case PUT_SELECTED_HOTEL_SUCCESS:
     case DELETE_SELECTED_HOTEL_SUCCESS:
