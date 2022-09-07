@@ -16,6 +16,7 @@ import {
   Slider,
   TextField,
   Typography,
+  useMediaQuery,
 } from "@material-ui/core"
 import {
   ArrowBackIos,
@@ -43,6 +44,7 @@ import {
   getFilteredHotels,
   getLodgingTags,
 } from "../../store/actions/lodging"
+import {FlokTheme} from "../../theme"
 import {useQuery, useQueryAsList, useScript} from "../../utils"
 import {
   fetchGooglePlace,
@@ -152,6 +154,8 @@ let useStyles = makeStyles((theme) => ({
     cursor: "pointer",
     marginLeft: theme.spacing(2),
     marginRight: "auto",
+    width: "100%",
+    flexWrap: "wrap",
     gap: theme.spacing(0.5),
   },
   filterHeader: {
@@ -444,6 +448,9 @@ function RetreatHotelSearchPage() {
       label: "1000 +",
     },
   ]
+  const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
+    theme.breakpoints.down("xs")
+  )
 
   if (loadingDestinations || (!hotels[0] && loadingHotels)) {
     return <LoadingPage />
@@ -536,25 +543,31 @@ function RetreatHotelSearchPage() {
                   variant="outlined"
                 />
               )}
-              <Chip
-                className={classes.filterChip}
-                label={`Rooms: ${minNumberOfRooms} - ${maxNumberOfRooms}`}
-                variant="outlined"
-              />
 
-              <Chip
-                className={classes.filterChip}
-                label={`Max Distance from Airport: ${maxDistanceFromAirport} min`}
-                variant="outlined"
-              />
-              <Chip
-                className={classes.filterChip}
-                variant="outlined"
-                label={`${
-                  Object.values(selectedTags).filter((tag) => {
-                    return tag === true
-                  }).length
-                }
+              {(!isSmallScreen || roomsMaxQuery || roomsMinQuery) && (
+                <Chip
+                  className={classes.filterChip}
+                  label={`Rooms: ${minNumberOfRooms} - ${maxNumberOfRooms}`}
+                  variant="outlined"
+                />
+              )}
+
+              {(!isSmallScreen || maxDistanceFromAirportQuery) && (
+                <Chip
+                  className={classes.filterChip}
+                  label={`Max Distance from Airport: ${maxDistanceFromAirport} min`}
+                  variant="outlined"
+                />
+              )}
+              {(!isSmallScreen || hotelTagsQuery[0]) && (
+                <Chip
+                  className={classes.filterChip}
+                  variant="outlined"
+                  label={`${
+                    Object.values(selectedTags).filter((tag) => {
+                      return tag === true
+                    }).length
+                  }
               Tag${
                 Object.values(selectedTags).filter((tag) => {
                   return tag === true
@@ -563,7 +576,8 @@ function RetreatHotelSearchPage() {
                   : "s"
               }
               Selected`}
-              />
+                />
+              )}
 
               <Avatar className={classes.avatar}>
                 <Tune fontSize="small" />
