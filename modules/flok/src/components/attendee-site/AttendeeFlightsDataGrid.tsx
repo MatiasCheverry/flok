@@ -164,6 +164,7 @@ export default function AttendeeFlightsDataGrid(
     departure: {attr: "dep_datetime", direction: "departure"},
     arrival_flight_number: {attr: "flight_num", direction: "arrival"},
     departure_flight_number: {attr: "flight_num", direction: "departure"},
+    arrival_airport: {attr: "arr_airport", direction: "arrival"},
   }
 
   function tripValueGetter(params: GridValueGetterParams) {
@@ -281,6 +282,14 @@ export default function AttendeeFlightsDataGrid(
           minWidth: 160,
           flex: 1.23,
           hide: flightsState === "arrival",
+          valueGetter: tripValueGetter,
+        },
+        {
+          field: "arrival_airport",
+          headerName: "Arrival Airport",
+          minWidth: 160,
+          flex: 1.23,
+          hide: flightsState === "departure",
           valueGetter: tripValueGetter,
         },
       ]}></DataGrid>
