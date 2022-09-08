@@ -18,6 +18,8 @@ import {
 import {Add, CalendarToday, Delete, DragIndicator} from "@material-ui/icons"
 import {Alert} from "@material-ui/lab"
 import clsx from "clsx"
+import {parse} from "csv-parse/dist/esm/sync"
+import {stringify} from "csv-stringify/dist/esm/sync"
 import {useFormik} from "formik"
 import React, {useEffect, useState} from "react"
 import {DraggableProvidedDragHandleProps} from "react-beautiful-dnd"
@@ -577,9 +579,15 @@ type RegFormViewerSelectQuestionProps = {
 export function RegFormViewerSelectQuestion(
   props: RegFormViewerSelectQuestionProps
 ) {
-  let [selectedOptions, setSelectedOptions] = useState(props.value.split(","))
+  let [selectedOptions, setSelectedOptions] = useState(
+    parse(props.value, {skip_empty_lines: true, cast: false})[0] ??
+      ([] as string[])
+  )
   useEffect(() => {
-    setSelectedOptions(props.value.split(","))
+    setSelectedOptions(
+      parse(props.value, {skip_empty_lines: true, cast: false})[0] ??
+        ([] as string[])
+    )
   }, [props.value])
   return (
     <FormControl>
@@ -587,7 +595,7 @@ export function RegFormViewerSelectQuestion(
         {props.optionIds.map((optionId, i) => {
           return (
             <SelectQuestionViewerLabel
-              onChange={(newVal) => props.onChange(newVal.join(","))}
+              onChange={(newVal) => props.onChange(stringify([newVal]))}
               value={selectedOptions}
               optionId={optionId}
               type={props.type}
