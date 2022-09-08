@@ -25,6 +25,7 @@ import {
   Close,
   ExpandLess,
   ExpandMore,
+  Search,
   Tune,
 } from "@material-ui/icons"
 import querystring from "querystring"
@@ -44,7 +45,7 @@ import {
   getFilteredHotels,
   getLodgingTags,
 } from "../../store/actions/lodging"
-import {FlokTheme} from "../../theme"
+import {FlokTheme, theme} from "../../theme"
 import {useQuery, useQueryAsList, useScript} from "../../utils"
 import {
   fetchGooglePlace,
@@ -209,6 +210,7 @@ function RetreatHotelSearchPage() {
   )
   let [locationListQuery, setLocationListQuery] = useQueryAsList("location")
   let [pageQuery, setPageQuery] = useQuery("page")
+  let [searchTermQuery, setSearchTermQuery] = useQuery("search-term")
   let [total, setTotal] = useState(0)
 
   // to pass as a next parameter
@@ -231,6 +233,9 @@ function RetreatHotelSearchPage() {
   if (pageQuery) {
     queryParams["page"] = pageQuery
   }
+  if (searchTermQuery) {
+    queryParams["search-term"] = searchTermQuery
+  }
 
   let dispatch = useDispatch()
   let [destinations, loadingDestinations] = useDestinations()
@@ -252,6 +257,8 @@ function RetreatHotelSearchPage() {
   let [selectedTags, setSelectedTags] = useState<{[id: number]: boolean}>({})
 
   let [fillRFPModalOpen, setFillRFPModalOpen] = useState(false)
+
+  let [searchTerm, setSearchTerm] = useState(searchTermQuery ?? "")
 
   let selectedHotelsMap: {[hotelId: number]: RetreatSelectedHotelProposal} = {}
   retreat.selected_hotels.forEach((selectedHotel) => {
@@ -287,6 +294,14 @@ function RetreatHotelSearchPage() {
   }, [locationListQuery])
 
   useEffect(() => {
+    if (searchTermQuery) {
+      setSearchTerm(searchTermQuery)
+    } else {
+      setSearchTerm("")
+    }
+  }, [searchTermQuery])
+
+  useEffect(() => {
     if (hotelTagsQuery) {
       let selectedTagsMap: {[id: string]: boolean} = {}
       hotelTagsQuery.forEach((hotelId) => {
@@ -306,6 +321,17 @@ function RetreatHotelSearchPage() {
     !Object.values(lodgingTags)[0] && dispatch(getLodgingTags())
   }, [dispatch, lodgingTags])
 
+  let [searchExpanded, setSearchExpanded] = useState(
+    searchTermQuery ? true : false
+  )
+  let [typing, setTyping] = useState(false)
+
+  useEffect(() => {
+    if (searchExpanded) {
+      setTyping(true)
+    }
+  }, [searchExpanded])
+
   useEffect(() => {
     async function getHotels(filterRequest: {
       max_rooms?: number
@@ -314,6 +340,7 @@ function RetreatHotelSearchPage() {
       max_distance_from_airport?: number
       locations?: {lat: number; lng: number; distance: number}[]
       offset?: number
+      search_term?: string
     }) {
       setLoadingHotels(true)
       let response = (await dispatch(
@@ -326,7 +353,7 @@ function RetreatHotelSearchPage() {
 
       setLoadingHotels(false)
     }
-    if (!showFilters) {
+    if (!showFilters && !typing) {
       let filters: {
         tags?: number[]
         max_rooms?: number
@@ -334,6 +361,7 @@ function RetreatHotelSearchPage() {
         max_distance_from_airport?: number
         locations?: {lat: number; lng: number; distance: number}[]
         offset?: number
+        search_term?: string
       } = {}
       if (hotelTagsQuery[0]) {
         filters.tags = hotelTagsQuery.map((tag) => parseInt(tag))
@@ -351,6 +379,9 @@ function RetreatHotelSearchPage() {
       }
       if (roomsMinQuery) {
         filters.min_rooms = parseInt(roomsMinQuery)
+      }
+      if (searchTermQuery) {
+        filters.search_term = searchTermQuery
       }
 
       if (isValidLocations(locationListQuery, googlePlaces)) {
@@ -385,10 +416,12 @@ function RetreatHotelSearchPage() {
     roomsMaxQuery,
     roomsMinQuery,
     locationListQuery,
+    searchTermQuery,
     googlePlaces,
     showFilters,
     dispatch,
     pageQuery,
+    typing,
   ])
 
   function isValidLocations(
@@ -512,62 +545,68 @@ function RetreatHotelSearchPage() {
           </DialogContent>
         </Dialog>
         <div>
-          <div
-            className={classes.filterBar}
-            onClick={() => {
-              setShowFilters((filters) => !filters)
-            }}>
-            <div className={classes.chipContainer}>
-              {locationList[0] ? (
-                locationList.length === 1 ? (
-                  <Chip
-                    className={classes.filterChip}
-                    label={
-                      googlePlaces[locationList[0].split(":")[0]]
-                        ? `${googlePlaces[locationList[0].split(":")[0]].name}`
-                        : `${locationList.length} location`
-                    }
-                    variant="outlined"
-                  />
-                ) : (
-                  <Chip
-                    className={classes.filterChip}
-                    label={`${locationList.length} locations`}
-                    variant="outlined"
-                  />
-                )
-              ) : (
-                <Chip
-                  className={classes.filterChip}
-                  label={"Anywhere"}
-                  variant="outlined"
-                />
-              )}
+          <div style={{display: "flex", alignItems: "center"}}>
+            <div
+              className={classes.filterBar}
+              onClick={() => {
+                setShowFilters((filters) => !filters)
+              }}>
+              <div className={classes.chipContainer}>
+                {!searchExpanded && (
+                  <>
+                    {locationList[0] ? (
+                      locationList.length === 1 ? (
+                        <Chip
+                          className={classes.filterChip}
+                          label={
+                            googlePlaces[locationList[0].split(":")[0]]
+                              ? `${
+                                  googlePlaces[locationList[0].split(":")[0]]
+                                    .name
+                                }`
+                              : `${locationList.length} location`
+                          }
+                          variant="outlined"
+                        />
+                      ) : (
+                        <Chip
+                          className={classes.filterChip}
+                          label={`${locationList.length} locations`}
+                          variant="outlined"
+                        />
+                      )
+                    ) : (
+                      <Chip
+                        className={classes.filterChip}
+                        label={"Anywhere"}
+                        variant="outlined"
+                      />
+                    )}
 
-              {(!isSmallScreen || roomsMaxQuery || roomsMinQuery) && (
-                <Chip
-                  className={classes.filterChip}
-                  label={`Rooms: ${minNumberOfRooms} - ${maxNumberOfRooms}`}
-                  variant="outlined"
-                />
-              )}
+                    {(!isSmallScreen || roomsMaxQuery || roomsMinQuery) && (
+                      <Chip
+                        className={classes.filterChip}
+                        label={`Rooms: ${minNumberOfRooms} - ${maxNumberOfRooms}`}
+                        variant="outlined"
+                      />
+                    )}
 
-              {(!isSmallScreen || maxDistanceFromAirportQuery) && (
-                <Chip
-                  className={classes.filterChip}
-                  label={`Max Distance from Airport: ${maxDistanceFromAirport} min`}
-                  variant="outlined"
-                />
-              )}
-              {(!isSmallScreen || hotelTagsQuery[0]) && (
-                <Chip
-                  className={classes.filterChip}
-                  variant="outlined"
-                  label={`${
-                    Object.values(selectedTags).filter((tag) => {
-                      return tag === true
-                    }).length
-                  }
+                    {(!isSmallScreen || maxDistanceFromAirportQuery) && (
+                      <Chip
+                        className={classes.filterChip}
+                        label={`Max Distance from Airport: ${maxDistanceFromAirport} min`}
+                        variant="outlined"
+                      />
+                    )}
+                    {(!isSmallScreen || hotelTagsQuery[0]) && (
+                      <Chip
+                        className={classes.filterChip}
+                        variant="outlined"
+                        label={`${
+                          Object.values(selectedTags).filter((tag) => {
+                            return tag === true
+                          }).length
+                        }
               Tag${
                 Object.values(selectedTags).filter((tag) => {
                   return tag === true
@@ -576,13 +615,53 @@ function RetreatHotelSearchPage() {
                   : "s"
               }
               Selected`}
-                />
-              )}
+                      />
+                    )}
+                  </>
+                )}
 
-              <Avatar className={classes.avatar}>
-                <Tune fontSize="small" />
-              </Avatar>
+                <Avatar className={classes.avatar}>
+                  <Tune fontSize="small" />
+                </Avatar>
+              </div>
             </div>
+            {searchExpanded ? (
+              <TextField
+                autoFocus
+                value={searchTerm}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setSearchTermQuery(e.target.value)
+                  } else {
+                    setSearchTermQuery(null)
+                  }
+                }}
+                onBlur={() => {
+                  setTyping(false)
+                  if (!searchTerm) {
+                    setSearchExpanded(false)
+                  }
+                }}
+                onFocus={() => {
+                  setTyping(true)
+                }}
+                variant="outlined"
+                size="small"
+                style={{
+                  marginLeft: theme.spacing(2),
+                  backgroundColor: theme.palette.common.white,
+                  width: "300px",
+                }}
+              />
+            ) : (
+              <Avatar
+                className={classes.avatar}
+                onClick={() => {
+                  setSearchExpanded(true)
+                }}>
+                <Search fontSize="small" />
+              </Avatar>
+            )}
           </div>
 
           {showFilters && (
