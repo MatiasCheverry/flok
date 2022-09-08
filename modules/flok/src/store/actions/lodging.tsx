@@ -108,7 +108,7 @@ export const DELETE_SELECTED_HOTEL_SUCCESS = "DELETE_SELECTED_HOTEL_SUCCESS"
 export const DELETE_SELECTED_HOTEL_FAILURE = "DELETE_SELECTED_HOTEL_FAILURE"
 
 export function deleteSelectedHotel(retreatId: number, hotelId: number) {
-  let endpoint = `/v1.0/admin/retreats/${retreatId}/hotels/${hotelId}`
+  let endpoint = `/v1.0/retreats/${retreatId}/hotels/${hotelId}`
   return createApiAction({
     endpoint,
     method: "DELETE",
