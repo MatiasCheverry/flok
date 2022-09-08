@@ -645,12 +645,14 @@ function RetreatHotelSearchPage() {
                 onFocus={() => {
                   setTyping(true)
                 }}
+                placeholder="Search Hotel Name"
                 variant="outlined"
                 size="small"
                 style={{
                   marginLeft: theme.spacing(2),
                   backgroundColor: theme.palette.common.white,
                   width: "300px",
+                  borderRadius: theme.shape.borderRadius,
                 }}
               />
             ) : (
