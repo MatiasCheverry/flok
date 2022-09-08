@@ -201,7 +201,7 @@ let navItems: NavItem[] = [
       },
       {
         title: "Draft Itinerary",
-        activeRoutes: [],
+        activeRoutes: ["RetreatItineraryPage"],
         redirect: (retreat, retreatIdx) =>
           retreat.itinerary_final_draft_link
             ? {url: retreat.itinerary_final_draft_link, external: true}
