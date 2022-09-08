@@ -191,42 +191,28 @@ let navItems: NavItem[] = [
   {
     title: "Itinerary",
     icon: MapRounded,
-    activeRoutes: ["RetreatItineraryPage"],
-    redirect: (retreat, retreatIdx) =>
-      retreat.itinerary_final_draft_link
-        ? {url: retreat.itinerary_final_draft_link, external: true}
-        : {
-            url: AppRoutes.getPath("RetreatItineraryPage", {
-              retreatIdx: retreatIdx.toString(),
-            }),
-          },
+    activeRoutes: [],
+    redirect: redirectFlok("RetreatItineraryInspirationPage"),
+    navSubItems: [
+      {
+        title: "Inspiration",
+        activeRoutes: ["RetreatItineraryInspirationPage"],
+        redirect: redirectFlok("RetreatItineraryInspirationPage"),
+      },
+      {
+        title: "Draft Itinerary",
+        activeRoutes: [],
+        redirect: (retreat, retreatIdx) =>
+          retreat.itinerary_final_draft_link
+            ? {url: retreat.itinerary_final_draft_link, external: true}
+            : {
+                url: AppRoutes.getPath("RetreatItineraryPage", {
+                  retreatIdx: retreatIdx.toString(),
+                }),
+              },
+      },
+    ],
   },
-  // TODO ADD BACK ONCE ITINERARY INSPIRATION LAUNCHED
-  // {
-  //   title: "Itinerary",
-  //   icon: MapRounded,
-  //   activeRoutes: [],
-  //   redirect: redirectFlok("RetreatItineraryInspirationPage"),
-  //   navSubItems: [
-  //     {
-  //       title: "Inspiration",
-  //       activeRoutes: ["RetreatItineraryInspirationPage"],
-  //       redirect: redirectFlok("RetreatItineraryInspirationPage"),
-  //     },
-  //     {
-  //       title: "Draft Itinerary",
-  //       activeRoutes: [],
-  //       redirect: (retreat, retreatIdx) =>
-  //         retreat.itinerary_final_draft_link
-  //           ? {url: retreat.itinerary_final_draft_link, external: true}
-  //           : {
-  //               url: AppRoutes.getPath("RetreatItineraryPage", {
-  //                 retreatIdx: retreatIdx.toString(),
-  //               }),
-  //             },
-  //     },
-  //   ],
-  // },
   {
     title: "Budget",
     icon: LocalAtm,
