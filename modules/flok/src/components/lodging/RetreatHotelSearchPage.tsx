@@ -148,6 +148,7 @@ let useStyles = makeStyles((theme) => ({
     height: 30,
     width: 30,
     marginLeft: theme.spacing(1),
+    cursor: "pointer",
   },
   filterChip: {
     cursor: "pointer",
