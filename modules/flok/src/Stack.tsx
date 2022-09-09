@@ -1,5 +1,6 @@
 import {Route, Switch} from "react-router-dom"
 import AttendeeSiteFlightsPage from "./components/attendee-site/AttendeeSiteFlightsPage"
+import AttendeeSiteThemeProvider from "./components/attendee-site/AttendeeSiteThemeProvider"
 import RetreatHotelSearchPage from "./components/lodging/RetreatHotelSearchPage"
 import RetreatRfpPage from "./components/lodging/RetreatRfpPage"
 import PageContainer from "./components/page/PageContainer"
@@ -196,13 +197,17 @@ export default function Stack() {
       <Route path={Constants.attendeeSitePathPrefix}>
         <Switch>
           <Route path={[AppRoutes.getPath("AttendeeSiteFormPage")]} exact>
-            <AttendeeSiteFormPage />
+            <AttendeeSiteThemeProvider>
+              <AttendeeSiteFormPage />
+            </AttendeeSiteThemeProvider>
           </Route>
           <Route path={[AppRoutes.getPath("AttendeeSignUpPage")]} exact>
             <AttendeeCreateAccountPage />
           </Route>
           <Route path={[AppRoutes.getPath("AttendeeSiteFlightsPage")]} exact>
-            <AttendeeSiteFlightsPage />
+            <AttendeeSiteThemeProvider>
+              <AttendeeSiteFlightsPage />
+            </AttendeeSiteThemeProvider>
           </Route>
           <Route
             path={[
@@ -210,7 +215,9 @@ export default function Stack() {
               AppRoutes.getPath("AttendeeSitePage"),
             ]}
             exact>
-            <AttendeeSite />
+            <AttendeeSiteThemeProvider>
+              <AttendeeSite />
+            </AttendeeSiteThemeProvider>
           </Route>
         </Switch>
       </Route>

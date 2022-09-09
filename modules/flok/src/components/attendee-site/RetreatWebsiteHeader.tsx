@@ -113,16 +113,6 @@ let useStyles = makeStyles((theme) => ({
     marginLeft: "auto",
     marginRight: "auto",
   },
-  navigationLink: {
-    color: theme.palette.grey[900],
-    [theme.breakpoints.down("sm")]: {
-      minWidth: 200,
-      height: "45px",
-      fontSize: "1.3rem",
-      fontWeight: theme.typography.fontWeightBold,
-      marginLeft: theme.spacing(2),
-    },
-  },
   flightsNavDiv: {
     paddingRight: theme.spacing(2),
     display: "flex",
@@ -233,22 +223,13 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
               {(props.retreat.flights_live ||
                 (isRmc && attendeeViewQuery !== "attendee")) && (
                 <div className={classes.flightsNavDiv}>
-                  <Link
-                    underline={
-                      "flights" === props.selectedPage ? "always" : "none"
-                    }
-                    component={ReactRouterLink}
-                    to={AppRoutes.getPath(
-                      "AttendeeSitePage",
-                      {
-                        retreatName: props.retreatName,
-                        pageName: "flights",
-                      },
-                      !attendeeViewQuery ? {} : {view: "attendee"}
-                    )}
-                    className={classes.navigationLink}>
-                    Flights
-                  </Link>
+                  <RetreatWebsiteHeaderLink
+                    viewQuery={attendeeViewQuery}
+                    retreatName={props.retreatName}
+                    pageId={props.retreat.flights_page_id!}
+                    selectedPage={"Flights"}
+                  />
+
                   {!props.retreat.flights_live &&
                     user?.retreat_ids &&
                     user.retreat_ids.indexOf(props.retreat.id) !== -1 && (
@@ -308,20 +289,15 @@ function RetreatWebsiteHeader(props: RetreatWebsiteHeaderProps) {
                     />
                   )
                 })}
-                {(props.retreat.flights_live ||
+                {((props.retreat.flights_live &&
+                  props.retreat.flights_page_id) ||
                   (isRmc && attendeeViewQuery !== "attendee")) && (
-                  <Link
-                    underline={
-                      "flights" === props.selectedPage ? "always" : "none"
-                    }
-                    component={ReactRouterLink}
-                    to={AppRoutes.getPath("AttendeeSitePage", {
-                      retreatName: props.retreatName,
-                      pageName: "flights",
-                    })}
-                    className={classes.navigationLink}>
-                    Flights
-                  </Link>
+                  <RetreatWebsiteHeaderLink
+                    viewQuery={attendeeViewQuery}
+                    retreatName={props.retreatName}
+                    pageId={props.retreat.flights_page_id!}
+                    selectedPage={"Flights"}
+                  />
                 )}
               </div>
               <div className={classes.registerButton}>
@@ -363,7 +339,7 @@ export default RetreatWebsiteHeader
 let useLinkStyles = makeStyles((theme) => ({
   navigationLink: {
     paddingRight: theme.spacing(2),
-    color: theme.palette.grey[900],
+    color: theme.palette.text.primary,
     [theme.breakpoints.down("sm")]: {
       minWidth: 200,
       height: "45px",
@@ -376,7 +352,7 @@ let useLinkStyles = makeStyles((theme) => ({
 type RetreatWebsiteHeaderLinkProps = {
   retreatName: string
   pageId: number
-  selectedPage: string
+  selectedPage: string // if pageId doesn't exist use this for the title
   viewQuery: string | null
 }
 function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
@@ -395,12 +371,12 @@ function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
         "AttendeeSitePage",
         {
           retreatName: props.retreatName,
-          pageName: titleToNavigation(page?.title ?? "home"),
+          pageName: titleToNavigation(page?.title ?? props.selectedPage),
         },
         !props.viewQuery ? {} : {view: "attendee"}
       )}
       className={classes.navigationLink}>
-      {page?.title}
+      {page?.title ?? props.selectedPage}
     </Link>
   )
 }

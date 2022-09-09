@@ -21,6 +21,7 @@ import {ApiAction} from "../../store/actions/api"
 import {patchWebsite} from "../../store/actions/retreat"
 import {useAttendeeLandingWebsite} from "../../utils/retreatUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
+import ColorPicker from "./ColorPicker"
 import UploadImageWithTemplate from "./UploadImageWithTemplate"
 
 let useStyles = makeStyles((theme) => ({
@@ -81,12 +82,17 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
       banner_image_id: website?.banner_image?.id ?? -1,
       logo_image_id: website?.logo_image?.id ?? -1,
       name: website?.name ?? "",
+      background_color: website?.background_color ?? "#ffffff",
+      primary_color: website?.primary_color ?? "#4b51ff",
+      text_color: website?.text_color ?? "#ffffff",
     },
     onSubmit: (values) => {
       let newValues: {
         banner_image_id: number | undefined
         logo_image_id: number | undefined
         name: string
+        background_color?: string
+        primary_color?: string
       } = {...values}
       if (newValues.banner_image_id === -1) {
         newValues.banner_image_id = undefined
@@ -155,6 +161,39 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
           }}
           headerText="Logo Image"
         />
+        <div className={classes.uploadButton}>
+          <div className={classes.uploadButton}>
+            <ColorPicker
+              selectedColor={formik.values.text_color}
+              setSelectedColor={(newColor) => {
+                formik.setFieldValue("text_color", newColor)
+              }}
+              title="Text Color"
+              colors={["#000000", "#000080", "#006a28"]}
+            />
+          </div>
+          <ColorPicker
+            selectedColor={formik.values.background_color}
+            setSelectedColor={(newColor) => {
+              formik.setFieldValue("background_color", newColor)
+            }}
+            noPicker
+            title="Background Color"
+            colors={["#ffffff", "#EFF1F7", "#ADD8E6", "#f5f5dc"]}
+          />
+        </div>
+        <div className={classes.uploadButton}>
+          <ColorPicker
+            selectedColor={formik.values.primary_color}
+            setSelectedColor={(newColor) => {
+              formik.setFieldValue("primary_color", newColor)
+            }}
+            title="Primary Color"
+            tooltip="This color will be the color of main components such as buttons"
+            colors={["#4b51ff", "#8b0000", "#240073", "#006a28", "#49eaff"]}
+          />
+        </div>
+
         <Button
           type="submit"
           color="primary"

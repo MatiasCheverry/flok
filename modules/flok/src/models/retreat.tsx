@@ -219,6 +219,9 @@ export type AttendeeLandingWebsiteModel = {
   retreat_id: number
   id: number
   page_ids: number[]
+  background_color?: string
+  primary_color?: string
+  text_color?: string
 }
 
 export type PresetImageType = "BANNER"

@@ -1,4 +1,4 @@
-import {makeStyles} from "@material-ui/core"
+import {createMuiTheme, makeStyles} from "@material-ui/core"
 import {Alert} from "@material-ui/lab"
 import {push} from "connected-react-router"
 import {useEffect, useState} from "react"
@@ -69,6 +69,19 @@ export default function AttendeeSiteFormPage() {
   let [website, websiteLoading] = useAttendeeLandingWebsiteName(
     replaceDashes(retreatName)
   )
+  const theme = createMuiTheme({
+    palette: {
+      primary: {
+        main: website?.primary_color ?? "#4b51ff",
+      },
+      background: {
+        default: website?.background_color ?? "#FFA500",
+      },
+      text: {
+        primary: "#ff0000",
+      },
+    },
+  })
   let [retreat, retreatLoading] = useRetreat(website?.retreat_id ?? -1)
   let [attendee] = useMyAttendee(
     retreat !== ResourceNotFound && retreat != null ? retreat.id : -1

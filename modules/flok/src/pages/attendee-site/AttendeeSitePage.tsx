@@ -46,10 +46,10 @@ let useStyles = makeStyles((theme) => ({
 export default function AttendeeSite() {
   let router = useRouteMatch<{retreatName: string; pageName: string}>()
   let {retreatName, pageName} = router.params
-  let classes = useStyles()
   let [website, websiteLoading] = useAttendeeLandingWebsiteName(
     replaceDashes(retreatName)
   )
+  let classes = useStyles()
   let [retreat, retreatLoading] = useRetreat(website?.retreat_id ?? -1)
   let [page, pageLoading] = useAttendeeLandingPageName(
     website?.id ?? 0,

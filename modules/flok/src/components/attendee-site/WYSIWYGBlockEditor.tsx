@@ -72,7 +72,6 @@ type WYSIWYGBlockEditorProps = {
 function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   let dispatch = useDispatch()
   let block = useAttendeeLandingPageBlock(props.blockId)
-
   let formik = useFormik({
     initialValues: {
       content: block?.content
