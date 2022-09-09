@@ -215,6 +215,11 @@ let useStyles = makeStyles((theme) => ({
   searchButton: {
     marginLeft: theme.spacing(1),
   },
+  dialogActions: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
 }))
 
 function RetreatHotelSearchPage() {
@@ -658,7 +663,7 @@ function RetreatHotelSearchPage() {
               </div>
             </div>
             {searchExpanded ? (
-              <div style={{display: "flex", alignItems: "center"}}>
+              <div className={classes.searchContainer}>
                 <TextField
                   autoFocus
                   value={searchTerm}
@@ -892,12 +897,7 @@ function RetreatHotelSearchPage() {
 
               <Divider />
 
-              <DialogActions
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}>
+              <DialogActions className={classes.dialogActions}>
                 <Button
                   variant="outlined"
                   color="primary"
