@@ -4,10 +4,12 @@ import {
   convertToRaw,
   EditorState,
   RawDraftContentState,
+  RichUtils,
 } from "draft-js"
 import {useFormik} from "formik"
 import _ from "lodash"
-import {useEffect} from "react"
+import {useEffect, useState} from "react"
+import {RGBColor, SketchPicker} from "react-color"
 import {Editor} from "react-draft-wysiwyg"
 import {useDispatch} from "react-redux"
 import {patchBlock} from "../../store/actions/retreat"
@@ -117,6 +119,17 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
       <form onSubmit={formik.handleSubmit}>
         <Editor
           spellCheck
+          toolbarCustomButtons={[
+            <ToolbarColorPicker
+              selectedColor={getCurrentColor(formik.values.content)}
+              onSelectColor={(color) =>
+                formik.setFieldValue(
+                  "content",
+                  applyColor(formik.values.content, color)
+                )
+              }
+            />,
+          ]}
           editorState={formik.values.content}
           onEditorStateChange={(val) => formik.setFieldValue(`content`, val)}
           wrapperClassName={classes.wrapper}
@@ -158,3 +171,61 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   )
 }
 export default WYSIWYGBlockEditor
+
+function ToolbarColorPicker(props: {
+  selectedColor: RGBColor | undefined
+  onSelectColor: (color: RGBColor) => void
+}) {
+  let [el, setEl] = useState<HTMLButtonElement | null>(null)
+  return (
+    <>
+      <button onClick={(e) => setEl(e.currentTarget)}>open</button>
+      {/* <ClickAwayListener onClickAway={() => setEl(null)}> */}
+      {/* <Dialog open={!!el} onClose={() => setEl(null)}> */}
+      <SketchPicker
+        onChangeComplete={(color) => props.onSelectColor(color.rgb)}
+        disableAlpha
+        presetColors={["rgb(0,0,0)", "rgb(100,100,100)", "rgb(255,255,255)"]}
+        color={props.selectedColor}
+      />
+      {/* </Dialog> */}
+      {/* </ClickAwayListener> */}
+    </>
+  )
+}
+
+function getCurrentColor(editorState: EditorState): RGBColor | undefined {
+  let colorStrs = editorState
+    .getCurrentInlineStyle()
+    .filter((val) => !!val && val.startsWith("color-rgb"))
+  if (colorStrs.size) {
+    let colorStr = colorStrs.last().replace("color-rgb(", "").replace(")", "")
+    return {
+      r: parseInt(colorStr.split(",")[0]),
+      g: parseInt(colorStr.split(",")[1]),
+      b: parseInt(colorStr.split(",")[2]),
+    }
+  }
+}
+
+function applyColor(editorState: EditorState, color: RGBColor): EditorState {
+  let updatedEditorState = editorState
+  let colorStrs = updatedEditorState
+    .getCurrentInlineStyle()
+    .filter((val) => !!val && val.startsWith("color-rgb"))
+  colorStrs.forEach((style) => {
+    console.log(style)
+    if (style) {
+      updatedEditorState = RichUtils.toggleInlineStyle(
+        updatedEditorState,
+        style
+      )
+    }
+  })
+  let newColorStr = `color-rgb(${color.r}, ${color.g}, ${color.b})`
+  updatedEditorState = RichUtils.toggleInlineStyle(
+    updatedEditorState,
+    newColorStr
+  )
+  return updatedEditorState
+}
