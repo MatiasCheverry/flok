@@ -206,9 +206,9 @@ let useStyles = makeStyles((theme) => ({
   searchField: {
     marginLeft: theme.spacing(2),
     backgroundColor: theme.palette.common.white,
-    minWidth: "300px",
+    minWidth: 300,
     [theme.breakpoints.down("sm")]: {
-      minWidth: "200px",
+      minWidth: 200,
     },
 
     borderRadius: theme.shape.borderRadius,
@@ -241,7 +241,7 @@ function RetreatHotelSearchPage() {
   )
   let [locationListQuery, setLocationListQuery] = useQueryAsList("location")
   let [pageQuery, setPageQuery] = useQuery("page")
-  let [searchTermQuery, setSearchTermQuery] = useQuery("search-term")
+  let [searchTermQuery, setSearchTermQuery] = useQuery("q")
   let [total, setTotal] = useState(0)
 
   // to pass as a next parameter
@@ -265,7 +265,7 @@ function RetreatHotelSearchPage() {
     queryParams["page"] = pageQuery
   }
   if (searchTermQuery) {
-    queryParams["search-term"] = searchTermQuery
+    queryParams["q"] = searchTermQuery
   }
 
   let dispatch = useDispatch()
@@ -359,7 +359,7 @@ function RetreatHotelSearchPage() {
   )
   let [typing, setTyping] = useState(false)
 
-  let wait = useRef<any>()
+  let wait = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     async function getHotels(filterRequest: {

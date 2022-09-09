@@ -74,7 +74,8 @@ export function useQueryAsList(param: string, separator: string = ",") {
       })
     )
   }
-  return [paramVals, setParams] as const
+  let setCallback = useCallback(setParams, [dispatch, param, searchString])
+  return [paramVals, setCallback] as const
 }
 
 // Hook
