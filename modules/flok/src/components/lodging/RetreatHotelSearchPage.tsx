@@ -355,12 +355,6 @@ function RetreatHotelSearchPage() {
 
   let wait = useRef<any>()
 
-  // useEffect(() => {
-  //   if (searchExpanded) {
-  //     setTyping(true)
-  //   }
-  // }, [searchExpanded])
-
   useEffect(() => {
     async function getHotels(filterRequest: {
       max_rooms?: number

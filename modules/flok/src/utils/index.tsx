@@ -43,7 +43,7 @@ export function useQuery(param: string) {
     } else {
       allParams.set(param, newParamVal)
     }
-    return dispatch(
+    dispatch(
       push({
         search: `${allParams.toString() ? "?" + allParams.toString() : ""}`,
       })
