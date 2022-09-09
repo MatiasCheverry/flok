@@ -1,6 +1,6 @@
 import {TextFieldProps} from "@material-ui/core"
 import {push} from "connected-react-router"
-import {useEffect, useState} from "react"
+import {useCallback, useEffect, useState} from "react"
 import {useDispatch} from "react-redux"
 import {useLocation} from "react-router-dom"
 
@@ -43,13 +43,15 @@ export function useQuery(param: string) {
     } else {
       allParams.set(param, newParamVal)
     }
-    dispatch(
+    return dispatch(
       push({
         search: `${allParams.toString() ? "?" + allParams.toString() : ""}`,
       })
     )
   }
-  return [paramVal, setParam] as const
+
+  let setCallback = useCallback(setParam, [dispatch, param, searchString])
+  return [paramVal, setCallback] as const
 }
 
 export function useQueryAsList(param: string, separator: string = ",") {

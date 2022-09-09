@@ -5,6 +5,7 @@ import {
   Chip,
   CircularProgress,
   Dialog,
+  DialogActions,
   DialogContent,
   Divider,
   FormControl,
@@ -12,7 +13,6 @@ import {
   IconButton,
   Link,
   makeStyles,
-  Paper,
   Slider,
   TextField,
   Typography,
@@ -29,9 +29,13 @@ import {
   Tune,
 } from "@material-ui/icons"
 import querystring from "querystring"
-import {useEffect, useState} from "react"
+import {useEffect, useRef, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {Link as ReactRouterLink} from "react-router-dom"
+import {
+  Link as ReactRouterLink,
+  useHistory,
+  useLocation,
+} from "react-router-dom"
 import config, {GOOGLE_API_KEY} from "../../config"
 import {GooglePlace, HotelModel} from "../../models/lodging"
 import {RetreatSelectedHotelProposal} from "../../models/retreat"
@@ -45,7 +49,7 @@ import {
   getFilteredHotels,
   getLodgingTags,
 } from "../../store/actions/lodging"
-import {FlokTheme, theme} from "../../theme"
+import {FlokTheme} from "../../theme"
 import {useQuery, useQueryAsList, useScript} from "../../utils"
 import {
   fetchGooglePlace,
@@ -190,6 +194,27 @@ let useStyles = makeStyles((theme) => ({
   tagsFilter: {
     width: "50%",
   },
+  searchFilterContainer: {
+    display: "flex",
+    alignItems: "center",
+  },
+  searchContainer: {
+    display: "flex",
+    alignItems: "center",
+  },
+  searchField: {
+    marginLeft: theme.spacing(2),
+    backgroundColor: theme.palette.common.white,
+    minWidth: "300px",
+    [theme.breakpoints.down("sm")]: {
+      minWidth: "200px",
+    },
+
+    borderRadius: theme.shape.borderRadius,
+  },
+  searchButton: {
+    marginLeft: theme.spacing(1),
+  },
 }))
 
 function RetreatHotelSearchPage() {
@@ -274,32 +299,32 @@ function RetreatHotelSearchPage() {
   useEffect(() => {
     if (maxDistanceFromAirportQuery) {
       setMaxDistanceFromAirport(parseInt(maxDistanceFromAirportQuery))
+    } else {
+      setMaxDistanceFromAirport(180)
     }
   }, [maxDistanceFromAirportQuery])
   useEffect(() => {
     if (roomsMaxQuery) {
       setMaxNumberOfRooms(parseInt(roomsMaxQuery))
+    } else {
+      setMaxNumberOfRooms(1000)
     }
   }, [roomsMaxQuery])
   useEffect(() => {
     if (roomsMinQuery) {
       setMinNumberOfRooms(parseInt(roomsMinQuery))
+    } else {
+      setMinNumberOfRooms(0)
     }
   }, [roomsMinQuery])
 
   useEffect(() => {
     if (locationListQuery) {
       setLocationList(locationListQuery)
+    } else {
+      setLocationList([])
     }
   }, [locationListQuery])
-
-  useEffect(() => {
-    if (searchTermQuery) {
-      setSearchTerm(searchTermQuery)
-    } else {
-      setSearchTerm("")
-    }
-  }, [searchTermQuery])
 
   useEffect(() => {
     if (hotelTagsQuery) {
@@ -308,6 +333,8 @@ function RetreatHotelSearchPage() {
         selectedTagsMap[hotelId] = true
       })
       setSelectedTags(selectedTagsMap)
+    } else {
+      setSelectedTags({})
     }
   }, [hotelTagsQuery])
 
@@ -326,11 +353,13 @@ function RetreatHotelSearchPage() {
   )
   let [typing, setTyping] = useState(false)
 
-  useEffect(() => {
-    if (searchExpanded) {
-      setTyping(true)
-    }
-  }, [searchExpanded])
+  let wait = useRef<any>()
+
+  // useEffect(() => {
+  //   if (searchExpanded) {
+  //     setTyping(true)
+  //   }
+  // }, [searchExpanded])
 
   useEffect(() => {
     async function getHotels(filterRequest: {
@@ -380,8 +409,8 @@ function RetreatHotelSearchPage() {
       if (roomsMinQuery) {
         filters.min_rooms = parseInt(roomsMinQuery)
       }
-      if (searchTermQuery) {
-        filters.search_term = searchTermQuery
+      if (searchTerm) {
+        filters.search_term = searchTerm
       }
 
       if (isValidLocations(locationListQuery, googlePlaces)) {
@@ -407,6 +436,11 @@ function RetreatHotelSearchPage() {
             }
           })
         }
+        if (searchTerm) {
+          setSearchTermQuery(searchTerm)
+        } else {
+          setSearchTermQuery(null)
+        }
         getHotels(filters)
       }
     }
@@ -422,7 +456,12 @@ function RetreatHotelSearchPage() {
     dispatch,
     pageQuery,
     typing,
+    searchTerm,
+    setSearchTermQuery,
   ])
+
+  let location = useLocation()
+  let history = useHistory()
 
   function isValidLocations(
     locationListQuery: string[],
@@ -441,7 +480,6 @@ function RetreatHotelSearchPage() {
     }
     return isValid
   }
-
   useEffect(() => {
     if (googleMapScriptLoaded) {
       locationListQuery.forEach((locationString) => {
@@ -545,7 +583,7 @@ function RetreatHotelSearchPage() {
           </DialogContent>
         </Dialog>
         <div>
-          <div style={{display: "flex", alignItems: "center"}}>
+          <div className={classes.searchFilterContainer}>
             <div
               className={classes.filterBar}
               onClick={() => {
@@ -626,35 +664,40 @@ function RetreatHotelSearchPage() {
               </div>
             </div>
             {searchExpanded ? (
-              <TextField
-                autoFocus
-                value={searchTerm}
-                onChange={(e) => {
-                  if (e.target.value) {
-                    setSearchTermQuery(e.target.value)
-                  } else {
-                    setSearchTermQuery(null)
-                  }
-                }}
-                onBlur={() => {
-                  setTyping(false)
-                  if (!searchTerm) {
+              <div style={{display: "flex", alignItems: "center"}}>
+                <TextField
+                  autoFocus
+                  value={searchTerm}
+                  onChange={(e) => {
+                    setTyping(true)
+                    if (wait.current) {
+                      clearTimeout(wait.current)
+                    }
+                    wait.current = setTimeout(() => {
+                      setTyping(false)
+                    }, 1000)
+                    setSearchTerm(e.target.value)
+                  }}
+                  onBlur={() => {
+                    if (!searchTerm) {
+                      setTyping(false)
+                      setSearchExpanded(false)
+                    }
+                  }}
+                  placeholder="Search Hotel Name"
+                  variant="outlined"
+                  size="small"
+                  className={classes.searchField}
+                />
+                <IconButton
+                  onClick={() => {
+                    setSearchTerm("")
                     setSearchExpanded(false)
-                  }
-                }}
-                onFocus={() => {
-                  setTyping(true)
-                }}
-                placeholder="Search Hotel Name"
-                variant="outlined"
-                size="small"
-                style={{
-                  marginLeft: theme.spacing(2),
-                  backgroundColor: theme.palette.common.white,
-                  width: "300px",
-                  borderRadius: theme.shape.borderRadius,
-                }}
-              />
+                    setTyping(false)
+                  }}>
+                  <Close />
+                </IconButton>
+              </div>
             ) : (
               <Avatar
                 className={classes.avatar}
@@ -686,175 +729,203 @@ function RetreatHotelSearchPage() {
                   Filters
                 </Typography>
               </div>
-              <Divider />
-              <Paper className={classes.filterBody}>
-                <div className={classes.filterLocations}>
-                  <Typography variant="h5" className={classes.filterTitle}>
-                    Locations
-                  </Typography>
-                  <div className={classes.filterLocationsFilter}>
-                    <GooglePlacesAutoComplete
-                      clearOnSelect
-                      selectedOptions={locationList.map((location, index) => {
-                        return location.split(":")[0]
-                      })}
-                      types={["(cities)"]}
-                      clearOnBlur
-                      disableClearable
-                      selectOnFocus
-                      onInputChange={(e, value, reason) => {
-                        if (reason === "reset") {
-                          setTestValue("")
-                        } else {
-                          setTestValue(value)
-                        }
-                      }}
-                      inputValue={testValue}
-                      onChange={(e, value, reason) => {
-                        if (reason === "select-option" && value) {
-                          dispatch(
-                            addGooglePlace({
-                              place_id: value.place_id,
-                              name: value.structured_formatting.main_text,
-                            })
-                          )
-                          setLocationListQuery([
-                            ...locationListQuery,
-                            value.place_id + ":100",
-                          ])
-                        }
-                      }}
-                    />
-                    {locationList.map((location, index) => {
-                      let id = location.split(":")[0]
-                      let distance = location.split(":")[1]
-                      return (
-                        <LocationItem
-                          key={id}
-                          distance={parseInt(distance)}
-                          onChangeDistance={(newDistance) => {
-                            let locationListCopy = [...locationListQuery]
-                            locationListCopy[index] = `${id}:${newDistance}`
-                            setLocationListQuery([...locationListCopy])
-                          }}
-                          placeId={id}
-                          onDelete={() => {
-                            let locationsCopy = [...locationListQuery]
-                            let locationsToIds = locationsCopy.map(
-                              (location) => location.split(":")[0]
+              <DialogContent>
+                <div className={classes.filterBody}>
+                  <div className={classes.filterLocations}>
+                    <Typography variant="h5" className={classes.filterTitle}>
+                      Locations
+                    </Typography>
+                    <div className={classes.filterLocationsFilter}>
+                      <GooglePlacesAutoComplete
+                        clearOnSelect
+                        selectedOptions={locationList.map((location, index) => {
+                          return location.split(":")[0]
+                        })}
+                        types={["(cities)"]}
+                        clearOnBlur
+                        disableClearable
+                        selectOnFocus
+                        onInputChange={(e, value, reason) => {
+                          if (reason === "reset") {
+                            setTestValue("")
+                          } else {
+                            setTestValue(value)
+                          }
+                        }}
+                        inputValue={testValue}
+                        onChange={(e, value, reason) => {
+                          if (reason === "select-option" && value) {
+                            dispatch(
+                              addGooglePlace({
+                                place_id: value.place_id,
+                                name: value.structured_formatting.main_text,
+                              })
                             )
-                            var index = locationsToIds.indexOf(id.toString())
-                            if (index !== -1) {
-                              locationsCopy.splice(index, 1)
-                            }
-                            setLocationListQuery([...locationsCopy])
-                          }}
-                        />
+                            setLocationListQuery([
+                              ...locationListQuery,
+                              value.place_id + ":100",
+                            ])
+                          }
+                        }}
+                      />
+                      {locationList.map((location, index) => {
+                        let id = location.split(":")[0]
+                        let distance = location.split(":")[1]
+                        return (
+                          <LocationItem
+                            key={id}
+                            distance={parseInt(distance)}
+                            onChangeDistance={(newDistance) => {
+                              let locationListCopy = [...locationListQuery]
+                              locationListCopy[index] = `${id}:${newDistance}`
+                              setLocationListQuery([...locationListCopy])
+                            }}
+                            placeId={id}
+                            onDelete={() => {
+                              let locationsCopy = [...locationListQuery]
+                              let locationsToIds = locationsCopy.map(
+                                (location) => location.split(":")[0]
+                              )
+                              var index = locationsToIds.indexOf(id.toString())
+                              if (index !== -1) {
+                                locationsCopy.splice(index, 1)
+                              }
+                              setLocationListQuery([...locationsCopy])
+                            }}
+                          />
+                        )
+                      })}
+                    </div>
+                  </div>
+                  <Divider className={classes.filterDivider} />
+
+                  <div className={classes.filterSegment}>
+                    <Typography variant="h5" className={classes.filterTitle}>
+                      Number of Rooms
+                    </Typography>
+                    <Slider
+                      className={classes.slider}
+                      step={100}
+                      marks={roomNumberMarks}
+                      min={0}
+                      max={1000}
+                      valueLabelDisplay="on"
+                      value={[minNumberOfRooms, maxNumberOfRooms]}
+                      onChange={(event, newValue: number | number[]) => {
+                        let newValueArray = newValue as number[]
+                        if (roomsMaxQuery !== newValueArray[1].toString()) {
+                          setRoomsMaxQuery(newValueArray[1].toString())
+                        }
+                        if (roomsMinQuery !== newValueArray[0].toString()) {
+                          setRoomsMinQuery(newValueArray[0].toString())
+                        }
+                      }}></Slider>
+                  </div>
+                  <Divider className={classes.filterDivider} />
+                  <div className={classes.filterSegment}>
+                    <Typography variant="h5" className={classes.filterTitle}>
+                      Maximum Distance From the Airport
+                    </Typography>
+                    <Slider
+                      className={classes.slider}
+                      step={15}
+                      marks={distanceFromAirportMarks}
+                      min={15}
+                      max={180}
+                      valueLabelDisplay="on"
+                      value={maxDistanceFromAirport}
+                      onChange={(event, newValue: number | number[]) => {
+                        setMaxDistanceFromAirportQuery(newValue.toString())
+                      }}></Slider>
+                  </div>
+                  <Divider className={classes.filterDivider} />
+                  <Divider className={classes.filterDivider} />
+                  <div className={classes.hotelTagsWrapper}>
+                    <Typography variant="h5" className={classes.filterTitle}>
+                      Hotel Tags
+                    </Typography>
+                    {Object.values(lodgingTags)
+                      .slice(
+                        0,
+                        seeMoreHotelTags
+                          ? Object.values(lodgingTags).length
+                          : Math.min(4, Object.values(lodgingTags).length)
                       )
-                    })}
+                      .map((tag) => {
+                        return (
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={!!selectedTags[tag.id]}
+                                onChange={(e) => {
+                                  if (!selectedTags[tag.id]) {
+                                    setHotelTagsQuery([
+                                      ...hotelTagsQuery,
+                                      tag.id.toString(),
+                                    ])
+                                  } else {
+                                    let hotelTagsCopy = [...hotelTagsQuery]
+                                    var index = hotelTagsCopy.indexOf(
+                                      tag.id.toString()
+                                    )
+                                    if (index !== -1) {
+                                      hotelTagsCopy.splice(index, 1)
+                                    }
+                                    setHotelTagsQuery([...hotelTagsCopy])
+                                  }
+                                }}
+                                name={tag.name}
+                                color="primary"
+                              />
+                            }
+                            label={tag.name}
+                          />
+                        )
+                      })}
+                    <Button
+                      className={classes.tagsFilter}
+                      onClick={() => {
+                        setSeeMoreHotelTags(
+                          (seeMoreHotelTags) => !seeMoreHotelTags
+                        )
+                      }}>
+                      {seeMoreHotelTags ? <ExpandLess /> : <ExpandMore />}
+                      {seeMoreHotelTags ? "Show Less" : "Show More"}
+                    </Button>
                   </div>
                 </div>
-                <Divider className={classes.filterDivider} />
+              </DialogContent>
 
-                <div className={classes.filterSegment}>
-                  <Typography variant="h5" className={classes.filterTitle}>
-                    Number of Rooms
-                  </Typography>
-                  <Slider
-                    className={classes.slider}
-                    step={100}
-                    marks={roomNumberMarks}
-                    min={0}
-                    max={1000}
-                    valueLabelDisplay="on"
-                    value={[minNumberOfRooms, maxNumberOfRooms]}
-                    onChange={(event, newValue: number | number[]) => {
-                      let newValueArray = newValue as number[]
-                      if (roomsMaxQuery !== newValueArray[1].toString()) {
-                        setRoomsMaxQuery(newValueArray[1].toString())
-                      }
-                      if (roomsMinQuery !== newValueArray[0].toString()) {
-                        setRoomsMinQuery(newValueArray[0].toString())
-                      }
-                    }}></Slider>
-                </div>
-                <Divider className={classes.filterDivider} />
-                <div className={classes.filterSegment}>
-                  <Typography variant="h5" className={classes.filterTitle}>
-                    Maximum Distance From the Airport
-                  </Typography>
-                  <Slider
-                    className={classes.slider}
-                    step={15}
-                    marks={distanceFromAirportMarks}
-                    min={15}
-                    max={180}
-                    valueLabelDisplay="on"
-                    value={maxDistanceFromAirport}
-                    onChange={(event, newValue: number | number[]) => {
-                      setMaxDistanceFromAirportQuery(newValue.toString())
-                    }}></Slider>
-                </div>
-                <Divider className={classes.filterDivider} />
-                <Divider className={classes.filterDivider} />
-                <div className={classes.hotelTagsWrapper}>
-                  <Typography variant="h5" className={classes.filterTitle}>
-                    Hotel Tags
-                  </Typography>
-                  {Object.values(lodgingTags)
-                    .slice(
-                      0,
-                      seeMoreHotelTags
-                        ? Object.values(lodgingTags).length
-                        : Math.min(4, Object.values(lodgingTags).length)
-                    )
-                    .map((tag) => {
-                      return (
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={selectedTags[tag.id]}
-                              onChange={(e) => {
-                                if (!selectedTags[tag.id]) {
-                                  setHotelTagsQuery([
-                                    ...hotelTagsQuery,
-                                    tag.id.toString(),
-                                  ])
-                                } else {
-                                  let hotelTagsCopy = [...hotelTagsQuery]
-                                  var index = hotelTagsCopy.indexOf(
-                                    tag.id.toString()
-                                  )
-                                  if (index !== -1) {
-                                    hotelTagsCopy.splice(index, 1)
-                                  }
-                                  setHotelTagsQuery([...hotelTagsCopy])
-                                }
-                              }}
-                              name={tag.name}
-                              color="primary"
-                            />
-                          }
-                          label={tag.name}
-                        />
-                      )
-                    })}
-                  <Button
-                    className={classes.tagsFilter}
-                    onClick={() => {
-                      setSeeMoreHotelTags(
-                        (seeMoreHotelTags) => !seeMoreHotelTags
-                      )
-                    }}>
-                    {seeMoreHotelTags ? <ExpandLess /> : <ExpandMore />}
-                    {seeMoreHotelTags ? "Show Less" : "Show More"}
-                  </Button>
-                </div>
-              </Paper>
+              <Divider />
+
+              <DialogActions
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    history.replace("hotels")
+                  }}>
+                  Clear Filters
+                </Button>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={() => {
+                    setShowFilters(false)
+                    setPageQuery(null)
+                  }}>
+                  Filter
+                </Button>
+              </DialogActions>
             </Dialog>
           )}
         </div>
-        {loadingHotels ? (
+        {loadingHotels || typing ? (
           <div className={classes.loadingWheelContainer}>
             <CircularProgress size="3rem" className={classes.loadingWheel} />
           </div>
