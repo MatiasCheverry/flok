@@ -5,6 +5,7 @@ import {
   makeStyles,
   TextField,
   Typography,
+  useTheme,
 } from "@material-ui/core"
 import {HighlightOffRounded} from "@material-ui/icons"
 import {push} from "connected-react-router"
@@ -77,14 +78,16 @@ function EditWebsiteForm(props: EditWebsiteFormProps) {
       )
     }
   }
+  let theme = useTheme()
   let formik = useFormik({
     initialValues: {
       banner_image_id: website?.banner_image?.id ?? -1,
       logo_image_id: website?.logo_image?.id ?? -1,
       name: website?.name ?? "",
-      background_color: website?.background_color ?? "#ffffff",
-      primary_color: website?.primary_color ?? "#4b51ff",
-      text_color: website?.text_color ?? "#ffffff",
+      background_color:
+        website?.background_color ?? theme.palette.background.default,
+      primary_color: website?.primary_color ?? theme.palette.primary.main,
+      text_color: website?.text_color ?? theme.palette.text.primary,
     },
     onSubmit: (values) => {
       let newValues: {
