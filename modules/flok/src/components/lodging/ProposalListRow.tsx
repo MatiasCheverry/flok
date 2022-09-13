@@ -1,6 +1,12 @@
-import {Button, Chip, makeStyles, Paper, Tooltip} from "@material-ui/core"
+import {
+  Button,
+  Checkbox,
+  Chip,
+  makeStyles,
+  Paper,
+  Tooltip,
+} from "@material-ui/core"
 import {Favorite, FavoriteBorder, Info} from "@material-ui/icons"
-import React from "react"
 import {useDispatch} from "react-redux"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
@@ -96,6 +102,15 @@ let useStyles = makeStyles((theme) => ({
   },
   heart: {
     color: theme.palette.primary.light,
+    cursor: "pointer",
+  },
+  comparisonCheckBox: {
+    alignSelf: "center",
+    padding: "8px 22px",
+    marginLeft: "auto",
+    marginRight: theme.spacing(1),
+    height: 50,
+    width: 50,
   },
 }))
 
@@ -106,7 +121,13 @@ type ProposalListRowProps = {
   openInTab?: boolean
   proposalUrl?: string
   unavailable?: boolean
-  isLiked?: boolean
+  isLiked: boolean
+  requested?: boolean
+  comparing?: boolean
+  hotelsToCompare?: {
+    [guid: string]: boolean
+  }
+  updateHotelsToCompare?: (guid: string, value: boolean) => void
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
   let dispatch = useDispatch()
@@ -150,7 +171,8 @@ export default function ProposalListRow(props: ProposalListRowProps) {
         <div className={classes.cardBody}>
           <div className={classes.headerContainer}>
             <AppTypography variant="body2" color="textSecondary" uppercase>
-              {DestinationUtils.getLocationName(destination, true, hotel)}
+              {destination &&
+                DestinationUtils.getLocationName(destination, true, hotel)}
             </AppTypography>
             <div style={{display: "flex"}}>
               <AppTypography variant="h4">{hotel.name}</AppTypography>
@@ -251,31 +273,56 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           )}
         </div>
       </div>
-      <Button
-        className={classes.viewProposalButton}
-        disabled={unavailable}
-        variant={unavailable ? "contained" : "outlined"}
-        color="primary"
-        {...(openInTab && proposalUrl
-          ? {
-              component: "a",
-              href: proposalUrl,
-              target: "_blank",
+      {props.comparing && !props.unavailable ? (
+        <Checkbox
+          className={classes.comparisonCheckBox}
+          checked={
+            props.hotelsToCompare && props.hotelsToCompare[props.hotel.guid]
+              ? true
+              : false
+          }
+          color="primary"
+          onChange={(e, checked) => {
+            if (props.updateHotelsToCompare && props.hotelsToCompare) {
+              if (
+                !checked ||
+                Object.entries(props.hotelsToCompare)
+                  .filter((entry) => entry[1])
+                  .map((entry) => entry[0]).length < 4
+              ) {
+                props.updateHotelsToCompare(props.hotel.guid, checked)
+              }
             }
-          : proposalUrl
-          ? {
-              component: ReactRouterLink,
-              to: proposalUrl,
-            }
-          : {})}>
-        <AppTypography variant="inherit" noWrap>
-          {unavailable
-            ? "No Availability"
-            : `View Proposal${
-                proposals!.length > 1 ? `s (${proposals!.length})` : ""
-              }`}
-        </AppTypography>
-      </Button>
+          }}></Checkbox>
+      ) : (
+        <Button
+          className={classes.viewProposalButton}
+          disabled={unavailable || props.requested}
+          variant={unavailable ? "contained" : "outlined"}
+          color="primary"
+          {...(openInTab && proposalUrl
+            ? {
+                component: "a",
+                href: proposalUrl,
+                target: "_blank",
+              }
+            : proposalUrl
+            ? {
+                component: ReactRouterLink,
+                to: proposalUrl,
+              }
+            : {})}>
+          <AppTypography variant="inherit" noWrap>
+            {!props.requested
+              ? unavailable
+                ? "No Availability"
+                : `View Proposal${
+                    proposals!.length > 1 ? `s (${proposals!.length})` : ""
+                  }`
+              : "Requested"}
+          </AppTypography>
+        </Button>
+      )}
     </Paper>
   )
 }

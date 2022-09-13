@@ -1,7 +1,7 @@
 import {Box, makeStyles, Typography} from "@material-ui/core"
 import {push} from "connected-react-router"
 import querystring from "querystring"
-import React, {useEffect} from "react"
+import React, {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {RouteComponentProps, withRouter} from "react-router-dom"
 import AuthForm from "../../components/forms/AuthForm"
@@ -13,6 +13,7 @@ import {ApiAction} from "../../store/actions/api"
 import {getUserResetToken, postUserReset} from "../../store/actions/user"
 import UserGetters from "../../store/getters/user"
 import {apiToModel} from "../../utils/apiUtils"
+import LoadingPage from "../misc/LoadingPage"
 
 let useStyles = makeStyles((theme) => ({
   modal: {
@@ -43,16 +44,26 @@ let useStyles = makeStyles((theme) => ({
 export type AuthResetPageProps = RouteComponentProps<{}>
 function AuthResetPage(props: AuthResetPageProps) {
   let dispatch = useDispatch()
-  let {loginToken}: {loginToken: string} = apiToModel(
+
+  let {loginToken, next}: {loginToken: string; next: string} = apiToModel(
     querystring.parse(props.location.search)
   )
   let loginTokenUserEmail = useSelector(
     UserGetters.getUserForLoginToken(loginToken)
   )
+  let [loadingUser, setLoadingUser] = useState(true)
   useEffect(() => {
-    if (loginToken !== undefined && loginTokenUserEmail === undefined) {
-      dispatch(getUserResetToken(loginToken))
+    async function getUserToken() {
+      if (loginToken !== undefined && loginTokenUserEmail === undefined) {
+        setLoadingUser(true)
+        await dispatch(getUserResetToken(loginToken))
+        setLoadingUser(false)
+      } else {
+        setLoadingUser(false)
+      }
     }
+
+    getUserToken()
   }, [dispatch, loginToken, loginTokenUserEmail])
 
   async function submitForm(vals: {password: string}) {
@@ -60,7 +71,11 @@ function AuthResetPage(props: AuthResetPageProps) {
       postUserReset(loginToken, vals.password)
     )) as unknown as ApiAction
     if (!authResponse.error) {
-      dispatch(push(AppRoutes.getPath("RetreatHomePage", {retreatIdx: "0"})))
+      if (next) {
+        dispatch(push(decodeURIComponent(next)))
+      } else {
+        dispatch(push(AppRoutes.getPath("RetreatHomePage", {retreatIdx: "0"})))
+      }
     } else {
       dispatch(
         enqueueSnackbar(
@@ -74,6 +89,9 @@ function AuthResetPage(props: AuthResetPageProps) {
     }
   }
   let classes = useStyles(props)
+  if (loadingUser) {
+    return <LoadingPage />
+  }
   return (
     <PageContainer>
       <Box className={classes.body}>

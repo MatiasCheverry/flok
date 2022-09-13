@@ -20,7 +20,7 @@ let useStyles = makeStyles((theme) => ({
     fontStyle: (props: AppTypographyProps) =>
       props.italic ? "italic" : undefined,
     textDecoration: (props: AppTypographyProps) =>
-      props.underline ? "underline" : undefined,
+      props.underline ? "underline" : "none",
     textTransform: (props: AppTypographyProps) =>
       props.uppercase ? "uppercase" : undefined,
   },

@@ -9,7 +9,7 @@ export type BudgetBreakdownInputType = {
   addons: string[]
 }
 
-export const BUDGET_TOOL_FLOK_RECOMENDATIONS = {
+export const BUDGET_TOOL_FLOK_RECOMENDATIONS: BudgetBreakdownInputType = {
   trip_length: 4,
   experience_type: 4,
   avg_flight_cost: 600,
@@ -23,15 +23,15 @@ export const BUDGET_TOOL_FLOK_RECOMENDATIONS = {
     "Airport to home",
   ],
   addons: ["COVID test", "Swag", "Photographer", "Onsite Coordinator"],
-} as BudgetBreakdownInputType
+}
 
-export const INITIAL_BUDGET_TOOL_VALUES = {
-  trip_length: 0,
+export const INITIAL_BUDGET_TOOL_VALUES: BudgetBreakdownInputType = {
+  trip_length: 1,
   experience_type: 0,
-  avg_flight_cost: 600,
-  num_attendees: null,
-  work_play_mix: "",
-  alcohol: "",
+  avg_flight_cost: 0,
+  num_attendees: 0,
+  work_play_mix: "Mix",
+  alcohol: "No",
   ground_transportation: [],
   addons: [],
 }

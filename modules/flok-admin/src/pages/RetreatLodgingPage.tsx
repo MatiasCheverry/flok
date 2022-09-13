@@ -8,10 +8,12 @@ import {
 } from "react-router-dom"
 import AppTabPanel from "../components/base/AppTabPanel"
 import AppTypography from "../components/base/AppTypography"
+import SiteInspectionForm from "../components/lodging/SiteInspectionForm"
 import PageBase from "../components/page/PageBase"
 import RetreatHotelContractForm from "../components/retreats/RetreatHotelContractForm"
 import RetreatLodgingDetails from "../components/retreats/RetreatLodgingDetails"
 import RetreatStateTitle from "../components/retreats/RetreatStateTitle"
+import ViewRFPTab from "../components/retreats/ViewRFPTab"
 import {AppRoutes} from "../Stack"
 import {RootState} from "../store"
 import {getRetreatDetails} from "../store/actions/admin"
@@ -42,7 +44,7 @@ function RetreatLodgingPage(props: RetreatLodgingPageProps) {
   let [tabQuery, setTabQuery] = useQuery("tab")
   let [tabValue, setTabValue] = useState<string | undefined>(undefined)
   useEffect(() => {
-    const TABS = ["proposals", "contract"]
+    const TABS = ["proposals", "contract", "site-inspection", "rfp"]
     setTabValue(tabQuery && TABS.includes(tabQuery) ? tabQuery : "proposals")
   }, [tabQuery, setTabValue])
 
@@ -93,12 +95,20 @@ function RetreatLodgingPage(props: RetreatLodgingPageProps) {
           }>
           <Tab value={"proposals"} label="Proposals" />
           <Tab value={"contract"} label="Contract" />
+          <Tab value={"site-inspection"} label="Site Inspection" />
+          <Tab value="rfp" label="View RFP" />
         </Tabs>
         <AppTabPanel show={tabValue === "proposals"} renderDom="always">
           {retreat && <RetreatLodgingDetails retreat={retreat} />}
         </AppTabPanel>
         <AppTabPanel show={tabValue === "contract"} renderDom="always">
           {retreat && <RetreatHotelContractForm retreat={retreat} />}
+        </AppTabPanel>
+        <AppTabPanel show={tabValue === "site-inspection"} renderDom="always">
+          {retreat && <SiteInspectionForm retreat={retreat} />}
+        </AppTabPanel>
+        <AppTabPanel show={tabValue === "rfp"} renderDom="always">
+          <ViewRFPTab retreatId={retreatId} />
         </AppTabPanel>
       </div>
     </PageBase>

@@ -10,6 +10,7 @@ import AuthForm from "../../components/forms/AuthForm"
 import PageContainer from "../../components/page/PageContainer"
 import {AppRoutes} from "../../Stack"
 import {postUserSignin} from "../../store/actions/user"
+import {useQuery} from "../../utils"
 
 let useStyles = makeStyles((theme) => ({
   footer: {
@@ -48,10 +49,17 @@ let useStyles = makeStyles((theme) => ({
 
 type SigninPageProps = RouteComponentProps<{}>
 function SigninPage(props: SigninPageProps) {
+  let [nextQueryParam] = useQuery("next")
+  let [attendeeSiteQueryParam] = useQuery("login-site")
+  let [loginTypeQueryParam] = useQuery("login-type")
   let classes = useStyles(props)
   let dispatch = useDispatch()
   const handleLogin = (vals: {email: string; password: string}) => {
-    dispatch(postUserSignin(vals.email, vals.password))
+    if (nextQueryParam) {
+      dispatch(postUserSignin(vals.email, vals.password, nextQueryParam))
+    } else {
+      dispatch(postUserSignin(vals.email, vals.password))
+    }
   }
   return (
     <PageContainer>
@@ -70,7 +78,15 @@ function SigninPage(props: SigninPageProps) {
               <Link
                 color="inherit"
                 underline="always"
-                to={AppRoutes.getPath("DeprecatedNewRetreatFormPage")}
+                to={
+                  loginTypeQueryParam === "attendee"
+                    ? AppRoutes.getPath("AttendeeSignUpPage", {
+                        retreatName: attendeeSiteQueryParam
+                          ? attendeeSiteQueryParam
+                          : "",
+                      })
+                    : AppRoutes.getPath("DeprecatedNewRetreatFormPage")
+                }
                 component={ReactRouterLink}>
                 Don't have an account?
               </Link>

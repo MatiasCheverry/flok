@@ -20,19 +20,11 @@ import {
   MapRounded,
   PeopleAlt,
   SvgIconComponent,
+  Web,
 } from "@material-ui/icons"
-import React, {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useState,
-} from "react"
+import {createContext, PropsWithChildren, useContext, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {
-  Link as ReactRouterLink,
-  matchPath,
-  useRouteMatch,
-} from "react-router-dom"
+import {Link as ReactRouterLink, matchPath} from "react-router-dom"
 import AppImage from "../../components/base/AppImage"
 import {Constants} from "../../config"
 import {ResourceNotFound} from "../../models"
@@ -80,6 +72,7 @@ type NavItem = {
     retreat: RetreatModel,
     retreatIdx: number
   ) => {url: string; external?: boolean} | undefined
+  hidden?: (retreat: RetreatModel) => boolean
   navSubItems?: Exclude<NavItem, "navSubItems">[]
 }
 
@@ -115,6 +108,17 @@ let navItems: NavItem[] = [
         activeRoutes: ["RetreatLodgingContractPage"],
         redirect: redirectFlok("RetreatLodgingContractPage"),
       },
+      {
+        title: "Site Inspection",
+        activeRoutes: [],
+        redirect: (retreat) =>
+          retreat.lodging_site_inspection_url
+            ? {url: retreat.lodging_site_inspection_url, external: true}
+            : undefined,
+        hidden: (retreat) => {
+          return !retreat.lodging_site_inspection_url
+        },
+      },
     ],
   },
   {
@@ -122,27 +126,98 @@ let navItems: NavItem[] = [
     icon: PeopleAlt,
     activeRoutes: ["RetreatAttendeesPage", "RetreatAttendeePage"],
     redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !!retreat.attendees_v2_released,
+  },
+  {
+    title: "Attendees",
+    icon: PeopleAlt,
+    activeRoutes: [
+      "RetreatAttendeePage",
+      "RetreatAttendeesPage",
+      "RetreatAttendeeRegResponsePage",
+    ],
+    redirect: redirectFlok("RetreatAttendeesPage"),
+    hidden: (retreat) => !retreat.attendees_v2_released,
+    navSubItems: [],
+  },
+  {
+    title: "Website",
+    icon: Web,
+    activeRoutes: [],
+    redirect: redirectFlok("LandingPageGeneratorHome"),
+    hidden: (retreat) => !retreat.attendees_v2_released,
+    navSubItems: [
+      {
+        title: "Site Builder",
+        activeRoutes: [
+          "LandingPageGeneratorConfig",
+          "LandingPageGeneratorConfigAddPage",
+          "LandingPageGeneratorConfigWebsiteSettings",
+          "LandingPageGeneratorConfigPageSettings",
+          "LandingPageGeneratorHome",
+          "LandingPageGeneratorPage",
+        ],
+        redirect: redirectFlok("LandingPageGeneratorHome"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+      {
+        title: "Registration",
+        activeRoutes: [
+          "RetreatAttendeesRegFormBuilderPage",
+          "RetreatAttendeesRegFormBuilderConfig",
+        ],
+        redirect: redirectFlok("RetreatAttendeesRegFormBuilderPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+
+      {
+        title: "Flights",
+        activeRoutes: [
+          "RetreatFlightsOptionsPage",
+          "RetreatFlightsOptionsConfig",
+        ],
+        redirect: redirectFlok("RetreatFlightsOptionsPage"),
+        hidden: (retreat) => !retreat.attendees_v2_released,
+      },
+    ],
   },
   {
     title: "Flights",
     icon: FlightRounded,
     activeRoutes: ["RetreatFlightsPage", "RetreatAttendeeFlightsPage"],
     redirect: redirectFlok("RetreatFlightsPage"),
+    hidden: (retreat) => !!retreat.attendees_v2_released,
   },
   {
     title: "Itinerary",
     icon: MapRounded,
     activeRoutes: [],
-    redirect: (retreat) =>
-      retreat.itinerary_final_draft_link
-        ? {url: retreat.itinerary_final_draft_link, external: true}
-        : undefined,
+    redirect: redirectFlok("RetreatItineraryInspirationPage"),
+    navSubItems: [
+      {
+        title: "Inspiration",
+        activeRoutes: ["RetreatItineraryInspirationPage"],
+        redirect: redirectFlok("RetreatItineraryInspirationPage"),
+      },
+      {
+        title: "Draft Itinerary",
+        activeRoutes: ["RetreatItineraryPage"],
+        redirect: (retreat, retreatIdx) =>
+          retreat.itinerary_final_draft_link
+            ? {url: retreat.itinerary_final_draft_link, external: true}
+            : {
+                url: AppRoutes.getPath("RetreatItineraryPage", {
+                  retreatIdx: retreatIdx.toString(),
+                }),
+              },
+      },
+    ],
   },
   {
     title: "Budget",
     icon: LocalAtm,
-    activeRoutes: ["RetreatBudgetPage"],
-    redirect: redirectFlok("RetreatBudgetPage"),
+    activeRoutes: [],
+    redirect: redirectFlok("RetreatBudgetEstimatePage"),
     navSubItems: [
       {
         title: "Estimate",
@@ -151,11 +226,15 @@ let navItems: NavItem[] = [
       },
       {
         title: "Actual",
-        activeRoutes: [],
-        redirect: (retreat) =>
+        activeRoutes: ["RetreatBudgetPage"],
+        redirect: (retreat, retreatIdx) =>
           retreat.budget_link
             ? {url: retreat.budget_link, external: true}
-            : undefined,
+            : {
+                url: AppRoutes.getPath("RetreatBudgetPage", {
+                  retreatIdx: retreatIdx.toString(),
+                }),
+              },
       },
     ],
   },
@@ -227,60 +306,78 @@ export default function PageSidenav() {
         />
       </Box>
       <List>
-        {navItems.map((navItem, i) => {
-          let redirect = navItem.redirect
-            ? navItem.redirect(retreat, retreatIdx)
-            : undefined
-          let activeRoutes = navItem.activeRoutes.filter((page) => {
-            return matchPath(window.location.pathname, {
-              path: AppRoutes.getPath(page),
-              exact: true,
-            })
+        {navItems
+          .filter((navItem) => {
+            if (navItem.hidden) {
+              return !navItem.hidden(retreat)
+            } else {
+              return true
+            }
           })
-          let active = activeRoutes.length > 0
-          let activeSubItem = false
-          let subItems: JSX.Element[] = []
-          if (navItem.navSubItems) {
-            subItems = navItem.navSubItems.map((subItem, j) => {
-              let subnavRedirect = subItem.redirect
-                ? subItem.redirect(retreat, retreatIdx)
-                : undefined
-              let subItemActiveRoutes = subItem.activeRoutes.filter((page) => {
-                return matchPath(window.location.pathname, {
-                  path: AppRoutes.getPath(page),
-                  exact: true,
-                })
+          .map((navItem, i) => {
+            let redirect = navItem.redirect
+              ? navItem.redirect(retreat, retreatIdx)
+              : undefined
+            let activeRoutes = navItem.activeRoutes.filter((page) => {
+              return matchPath(window.location.pathname, {
+                path: AppRoutes.getPath(page),
+                exact: true,
               })
-              let subActive = subItemActiveRoutes.length > 0
-              if (subActive) {
-                activeSubItem = true
-              }
-              return (
-                <NavListItem
-                  key={`${i}-${j}`}
-                  title={subItem.title}
-                  redirect={subnavRedirect?.url}
-                  externalLink={subnavRedirect?.external}
-                  Icon={subItem.icon}
-                  active={subActive}
-                />
-              )
             })
-          }
-          return (
-            <>
-              <NavListItem
-                key={i}
-                title={navItem.title}
-                redirect={redirect?.url}
-                externalLink={redirect?.external}
-                Icon={navItem.icon}
-                active={active}
-              />
-              {activeSubItem ? subItems : undefined}
-            </>
-          )
-        })}
+            let active = activeRoutes.length > 0
+            let activeSubItem = false
+            let subItems: JSX.Element[] = []
+            if (navItem.navSubItems) {
+              subItems = navItem.navSubItems
+                .filter((subItem) => {
+                  if (subItem.hidden !== undefined) {
+                    return !subItem.hidden(retreat)
+                  } else {
+                    return true
+                  }
+                })
+                .map((subItem, j) => {
+                  let subnavRedirect = subItem.redirect
+                    ? subItem.redirect(retreat, retreatIdx)
+                    : undefined
+                  let subItemActiveRoutes = subItem.activeRoutes.filter(
+                    (page) => {
+                      return matchPath(window.location.pathname, {
+                        path: AppRoutes.getPath(page),
+                        exact: true,
+                      })
+                    }
+                  )
+                  let subActive = subItemActiveRoutes.length > 0
+                  if (subActive) {
+                    activeSubItem = true
+                  }
+                  return (
+                    <NavListItem
+                      key={`${i}-${j}`}
+                      title={subItem.title}
+                      redirect={subnavRedirect?.url}
+                      externalLink={subnavRedirect?.external}
+                      Icon={subItem.icon}
+                      active={subActive}
+                    />
+                  )
+                })
+            }
+            return (
+              <>
+                <NavListItem
+                  key={i}
+                  title={navItem.title}
+                  redirect={redirect?.url}
+                  externalLink={redirect?.external}
+                  Icon={navItem.icon}
+                  active={active}
+                />
+                {activeSubItem ? subItems : undefined}
+              </>
+            )
+          })}
       </List>
       <List className={classes.footer}>
         {retreat && user && user.retreats.length > 1 ? (
@@ -442,8 +539,6 @@ export function PageDemoSidenav(props: {}) {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
-  let {path} = useRouteMatch()
-  console.log(path)
 
   return (
     <Drawer

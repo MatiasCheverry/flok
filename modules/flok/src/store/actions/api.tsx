@@ -1,10 +1,5 @@
 import {Action} from "redux"
-import {
-  createAction,
-  RSAACall,
-  RSAARequestAction,
-  RSAAResultAction,
-} from "redux-api-middleware"
+import {createAction, RSAACall, RSAAResultAction} from "redux-api-middleware"
 import {ThunkDispatch} from "redux-thunk"
 import {RootState} from ".."
 import config, {APP_VERSION_KEY, SERVER_BASE_URL_KEY} from "../../config"
@@ -49,7 +44,7 @@ var _fetch = async (path: RequestInfo, opts?: RequestInit) => {
 /**
  * Generic Api Action from redux-api-middleware
  */
-export type ApiAction = RSAAResultAction<any, any> | RSAARequestAction<any, any>
+export type ApiAction<Payload = any> = RSAAResultAction<Payload, any>
 
 /**
  * Generic action creator. Given input, adds default

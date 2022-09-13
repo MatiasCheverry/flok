@@ -3,24 +3,23 @@ import {
   Chip,
   Link,
   makeStyles,
-  MenuItem,
+  TextField,
   Typography,
 } from "@material-ui/core"
-import {Flight} from "@material-ui/icons"
+import {
+  DataGrid,
+  GridToolbarContainer,
+  GridToolbarExport,
+} from "@material-ui/data-grid"
 import {push} from "connected-react-router"
 import {sortBy} from "lodash"
-import {useEffect} from "react"
+import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {Link as RouterLink} from "react-router-dom"
-import AppExpandableTable from "../../components/base/AppExpandableTable"
-import AppMoreInfoIcon from "../../components/base/AppMoreInfoIcon"
-import AppTypography from "../../components/base/AppTypography"
 import PageBody from "../../components/page/PageBody"
-import PageLockedModal from "../../components/page/PageLockedModal"
-import {SampleLockedAttendees} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
-import {getTrip} from "../../store/actions/retreat"
+import {getTrips} from "../../store/actions/retreat"
 import {useRetreatAttendees} from "../../utils/retreatUtils"
 import {useRetreat} from "../misc/RetreatProvider"
 
@@ -35,6 +34,7 @@ let useStyles = makeStyles((theme) => ({
     "& > *:not(:first-child)": {
       paddingLeft: theme.spacing(1),
     },
+    flex: 1,
   },
   headerIcon: {
     marginRight: theme.spacing(1),
@@ -61,13 +61,29 @@ let useStyles = makeStyles((theme) => ({
     borderColor: theme.palette.error.main,
     color: theme.palette.error.main,
   },
+  dataGrid: {
+    backgroundColor: theme.palette.common.white,
+    "&.MuiDataGrid-root .MuiDataGrid-cell:focus": {
+      outline: "none",
+    },
+  },
+  dataGridRow: {
+    cursor: "pointer",
+  },
+  dataGridWrapper: {
+    height: "90%",
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+    minHeight: 300,
+    width: "100%",
+  },
 }))
 
-function currencyFormat(num: Number) {
+export function currencyFormat(num: Number) {
   return "$" + num.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,")
 }
 
-function dateFormat(date: Date | undefined) {
+export function dateFormat(date: Date | undefined) {
   if (date === undefined) {
     return ""
   }
@@ -85,32 +101,50 @@ export default function FlightsPage() {
 
   let [attendeeTravelInfo] = useRetreatAttendees(retreat.id)
 
-  if (retreat.flights_state !== "BOOKING") {
-    attendeeTravelInfo = SampleLockedAttendees
-  }
+  let [attendeeSearchTerm, setAttendeeSearchTerm] = useState("")
 
   attendeeTravelInfo = attendeeTravelInfo.filter((attendee) =>
     ["CREATED", "INFO_ENTERED"].includes(attendee.info_status)
   )
 
-  let dispatch = useDispatch()
   let trips = useSelector((state: RootState) => {
     return state.retreat.trips
   })
+  let missingTrips = attendeeTravelInfo.reduce((prev, attendee) => {
+    let ret: {[key: number]: undefined} = {}
+    let depId =
+      attendee.travel && attendee.travel.dep_trip
+        ? attendee.travel.dep_trip.id
+        : undefined
+    let arrId =
+      attendee.travel && attendee.travel.arr_trip
+        ? attendee.travel.arr_trip.id
+        : undefined
+    if (depId && !trips[depId]) {
+      ret[depId] = undefined
+    }
+    if (arrId && !trips[arrId]) {
+      ret[arrId] = undefined
+    }
+    return {...prev, ...ret}
+  }, {})
+
+  let dispatch = useDispatch()
+
+  let [loadingTrips, setLoadingTrips] = useState(false)
+
   useEffect(() => {
-    attendeeTravelInfo.forEach((attendee) => {
-      if (
-        attendee.travel &&
-        attendee.travel.arr_trip?.id &&
-        attendee.travel.dep_trip?.id
-      ) {
-        !trips[attendee.travel.arr_trip?.id] &&
-          dispatch(getTrip(attendee.travel.arr_trip?.id))
-        !trips[attendee.travel.dep_trip?.id] &&
-          dispatch(getTrip(attendee.travel.dep_trip?.id))
-      }
-    })
-  }, [dispatch, attendeeTravelInfo, trips])
+    async function loadTrips() {
+      setLoadingTrips(true)
+      await dispatch(
+        getTrips(Object.keys(missingTrips).map((id) => parseInt(id)))
+      )
+      setLoadingTrips(false)
+    }
+    if (Object.keys(missingTrips).length && !loadingTrips) {
+      loadTrips()
+    }
+  }, [dispatch, missingTrips, loadingTrips])
 
   return (
     <PageBody appBar>
@@ -120,198 +154,207 @@ export default function FlightsPage() {
           justifyContent="space-between"
           alignItems="flex-end">
           <Typography variant="h1">Flights</Typography>
-          {retreat.flights_state !== "BOOKING" && (
-            <PageLockedModal pageDesc="This page will be unlocked when flight booking begins" />
-          )}
           <Link
             variant="body1"
             underline="always"
             component={RouterLink}
-            to={AppRoutes.getPath("RetreatAttendeesPage", {
-              retreatIdx: retreatIdx.toString(),
-            })}>
+            to={AppRoutes.getPath(
+              "RetreatAttendeesPage",
+              {
+                retreatIdx: retreatIdx.toString(),
+              },
+              {add: "single"}
+            )}>
             Need to add an attendee?
           </Link>
         </Box>
-        <AppExpandableTable
-          headers={[
-            {
-              name: "Last Name",
-              colId: "last_name",
-              comparator: (r1, r2) => {
-                if (r1.item.last_name === "" || !r1.item.last_name) {
-                  return 1
-                }
-                if (r2.item.last_name === "" || !r2.item.last_name) {
-                  return -1
-                }
-                return r1.item.last_name
-                  .toString()
-                  .localeCompare(r2.item.last_name.toString())
+        <div className={classes.dataGridWrapper}>
+          <DataGrid
+            disableColumnSelector
+            disableColumnFilter
+            disableColumnMenu
+            pageSize={50}
+            rowsPerPageOptions={[]}
+            onRowClick={(params) => {
+              dispatch(
+                push(
+                  AppRoutes.getPath("RetreatAttendeeFlightsPage", {
+                    retreatIdx: retreatIdx.toString(),
+                    attendeeId: params.row.id.toString(),
+                  })
+                )
+              )
+            }}
+            components={{Toolbar: CustomToolbarFlightsPage}}
+            componentsProps={{
+              toolbar: {
+                searchTerm: attendeeSearchTerm,
+                setSearchTerm: setAttendeeSearchTerm,
               },
-            },
-            {
-              name: "First Name",
-              colId: "first_name",
-              comparator: (r1, r2) => {
-                if (r1.item.first_name === "" || !r1.item.first_name) {
-                  return 1
-                }
-                if (r2.item.first_name === "" || !r2.item.first_name) {
-                  return -1
-                }
-                return r1.item.first_name
-                  .toString()
-                  .localeCompare(r2.item.first_name.toString())
+            }}
+            className={classes.dataGrid}
+            classes={{row: classes.dataGridRow}}
+            rows={sortBy(attendeeTravelInfo, (attendee) => {
+              if (attendee.flight_status === "BOOKED") {
+                return 0
+              } else if (attendee.flight_status === "OPT_OUT") {
+                return 1
+              } else {
+                return 2
+              }
+            }).filter((attendee) => {
+              let attendeeName = `${attendee.first_name.toLowerCase()} ${attendee.last_name.toLowerCase()}`
+              return attendeeName.includes(attendeeSearchTerm)
+            })}
+            columns={[
+              {
+                field: "first_name",
+                headerName: "First name",
+                width: 130,
+                minWidth: 130,
+                flex: 1,
               },
-            },
-            {
-              name: "Flight Arrival",
-              colId: "arrival",
-              renderCell: (val) => (
-                <AppTypography>
-                  {!isNaN(new Date(val as string).getTime())
-                    ? dateFormat(new Date(val as string))
-                    : undefined}
-                </AppTypography>
-              ),
-            },
-            {
-              name: "Flight Departure",
-              colId: "departure",
-              renderCell: (val) => (
-                <AppTypography>
-                  {!isNaN(new Date(val as string).getTime())
-                    ? dateFormat(new Date(val as string))
-                    : undefined}
-                </AppTypography>
-              ),
-            },
-            {
-              name: "Cost",
-              colId: "cost",
-              renderCell: (val) => (
-                <AppTypography>
-                  {val != null ? currencyFormat(val as number) : undefined}
-                </AppTypography>
-              ),
-            },
-            {
-              name: "Status",
-              colId: "status",
-              renderCell: (val) => {
-                if (val === "BOOKED") {
-                  return (
-                    <Chip
-                      variant="outlined"
-                      label={"Booked"}
-                      className={classes.successChip}
-                    />
-                  )
-                } else if (val === "OPT_OUT") {
-                  return (
-                    <Chip
-                      variant="outlined"
-                      label={
-                        <>
-                          Opt'd Out&nbsp;
-                          <AppMoreInfoIcon tooltipText="This attendee does not require flights to the retreat." />
-                        </>
-                      }
-                      className={classes.infoChip}
-                    />
-                  )
-                } else {
-                  return (
-                    <Chip
-                      variant="outlined"
-                      label={"To Book"}
-                      className={classes.warningChip}
-                    />
-                  )
-                }
+              {
+                field: "last_name",
+                headerName: "Last name",
+                width: 130,
+                minWidth: 130,
+                flex: 1,
               },
-              comparator: (r1, r2) => {
-                let order = ["BOOKED", "OPT_OUT", "PENDING"]
-                let r1val = order.indexOf(r1.item.status ?? "")
-                let r2val = order.indexOf(r2.item.status ?? "")
-                if (r1val === r2val) {
-                  return 0
-                } else if (r1val > r2val) {
-                  return -1
-                } else {
-                  return 1
-                }
-              },
-            },
-          ]}
-          rows={
-            attendeeTravelInfo !== undefined
-              ? sortBy(attendeeTravelInfo, (attendee) => {
-                  if (attendee.flight_status === "BOOKED") {
-                    return 0
-                  } else if (attendee.flight_status === "OPT_OUT") {
-                    return 1
-                  } else {
-                    return 2
-                  }
-                }).map((attendee) => ({
-                  id: attendee.id ?? -1,
-                  item: {
-                    id: attendee.id ?? -1,
-                    first_name: attendee.first_name,
-                    last_name: attendee.last_name ?? "",
-                    arrival:
-                      attendee.travel &&
-                      attendee.travel.arr_trip &&
-                      attendee.travel.arr_trip.trip_legs.length &&
-                      trips[attendee.travel.arr_trip.id] &&
-                      trips[attendee.travel.arr_trip.id].trip_legs[
+              {
+                field: "arrival",
+                headerName: "Flight Arrival",
+                width: 160,
+                valueGetter: (params) => {
+                  let attendee = params.row
+                  return attendee.travel &&
+                    attendee.travel.arr_trip &&
+                    attendee.travel.arr_trip.trip_legs.length &&
+                    trips[attendee.travel.arr_trip.id] &&
+                    trips[attendee.travel.arr_trip.id].trip_legs[
+                      trips[attendee.travel.arr_trip.id].trip_legs.length - 1
+                    ]
+                    ? trips[attendee.travel.arr_trip.id].trip_legs[
                         trips[attendee.travel.arr_trip.id].trip_legs.length - 1
-                      ]
-                        ? trips[attendee.travel.arr_trip.id].trip_legs[
-                            trips[attendee.travel.arr_trip.id].trip_legs
-                              .length - 1
-                          ].arr_datetime
-                        : undefined,
-                    departure:
-                      attendee.travel &&
-                      attendee.travel.dep_trip &&
-                      trips[attendee.travel.dep_trip.id] &&
-                      trips[attendee.travel.dep_trip.id].trip_legs.length
-                        ? trips[attendee.travel.dep_trip.id].trip_legs[0]
-                            .dep_datetime
-                        : undefined,
-                    cost: attendee.travel ? attendee.travel.cost : undefined,
-                    status: attendee.flight_status
-                      ? attendee.flight_status
-                      : "PENDING",
-                  },
-                }))
-              : []
-          }
-          menuItems={(row) => {
-            let editMenuItem = (
-              <MenuItem
-                onClick={() =>
-                  dispatch(
-                    push(
-                      AppRoutes.getPath("RetreatAttendeeFlightsPage", {
-                        retreatIdx: retreatIdx.toString(),
-                        attendeeId: row.item.id.toString(),
-                      })
+                      ].arr_datetime
+                    : undefined
+                },
+                minWidth: 160,
+                flex: 1.23,
+                valueFormatter: (params) => {
+                  return !isNaN(new Date(params.value as string).getTime())
+                    ? dateFormat(new Date(params.value as string))
+                    : undefined
+                },
+              },
+              {
+                field: "departure",
+                headerName: "Flight Departure",
+                width: 160,
+                minWidth: 160,
+                flex: 1.23,
+                valueGetter: (params) => {
+                  let attendee = params.row
+                  return attendee.travel &&
+                    attendee.travel.dep_trip &&
+                    trips[attendee.travel.dep_trip.id] &&
+                    trips[attendee.travel.dep_trip.id].trip_legs.length
+                    ? trips[attendee.travel.dep_trip.id].trip_legs[0]
+                        .dep_datetime
+                    : undefined
+                },
+                valueFormatter: (params) => {
+                  return !isNaN(new Date(params.value as string).getTime())
+                    ? dateFormat(new Date(params.value as string))
+                    : undefined
+                },
+              },
+              {
+                field: "cost",
+                headerName: "Cost",
+                width: 130,
+                minWidth: 130,
+                flex: 1,
+                valueGetter: (params) => params.row.travel?.cost,
+                valueFormatter: (params) => {
+                  if (params.value) {
+                    return currencyFormat(params.value as number)
+                  }
+                },
+              },
+              {
+                field: "flight_status",
+                headerName: "Status",
+                width: 130,
+                minWidth: 130,
+                flex: 1,
+                renderCell: (params) => {
+                  if (params.value === "BOOKED") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="Booked"
+                        className={classes.successChip}
+                      />
                     )
-                  )
-                }>
-                <Flight />
-                Edit
-              </MenuItem>
-            )
-
-            return [editMenuItem]
-          }}
-        />
+                  } else if (params.value === "PENDING") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="To Book"
+                        className={classes.warningChip}
+                      />
+                    )
+                  } else if (params.value === "OPT_OUT") {
+                    return (
+                      <Chip
+                        variant="outlined"
+                        label="Opted Out"
+                        className={classes.infoChip}
+                      />
+                    )
+                  }
+                },
+              },
+            ]}></DataGrid>
+        </div>
       </div>
     </PageBody>
+  )
+}
+let useToolbarStyles = makeStyles((theme) => ({
+  searchBar: {
+    marginLeft: "auto",
+    marginRight: theme.spacing(3),
+  },
+}))
+
+type CustomToolbarFlightsPageProps = {
+  searchTerm: string
+  setSearchTerm: (newValue: string) => void
+}
+
+function CustomToolbarFlightsPage(props: CustomToolbarFlightsPageProps) {
+  let classes = useToolbarStyles()
+  return (
+    <GridToolbarContainer>
+      <GridToolbarExport />
+      <TextField
+        value={props.searchTerm}
+        onChange={(e) => {
+          props.setSearchTerm(e.target.value)
+        }}
+        className={classes.searchBar}
+        margin="dense"
+        variant="outlined"
+        size="small"
+        placeholder="Search Attendees"
+        inputProps={{
+          style: {
+            height: "28px",
+          },
+        }}
+      />
+    </GridToolbarContainer>
   )
 }

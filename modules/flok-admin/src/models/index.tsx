@@ -40,6 +40,9 @@ export type AdminRetreatModel = {
   lodging_final_hotel_id?: number
   lodging_final_contract_notes?: string
   lodging_final_contract_url?: string
+  lodging_site_inspection_url?: string
+  request_for_proposal_id?: number
+  group_ids: number[]
 
   // Retreat data related to flights
   attendees_state?: RetreatAttendeesState
@@ -58,6 +61,9 @@ export type AdminRetreatModel = {
   faq_link?: string
   budget_link?: string
   rmc_survey_link?: string
+
+  // Notifications
+  slack_channel?: string
 }
 
 export type AdminRetreatUpdateModel = Pick<
@@ -108,6 +114,7 @@ export type AdminSelectedHotelStateTypes =
   | "PENDING"
   | "NOT_AVAILABLE"
   | "REVIEW"
+  | "REQUESTED"
 
 export type AdminSelectedHotelProposalModel = {
   retreat_id: number
@@ -115,6 +122,8 @@ export type AdminSelectedHotelProposalModel = {
   state: AdminSelectedHotelStateTypes
   hotel_proposals?: AdminLodgingProposalModel[]
   is_liked?: boolean
+  rfp_id?: number
+  group_id?: number
 }
 
 export type AdminLodgingProposalModel = {
@@ -188,6 +197,22 @@ export type AdminHotelDetailsModel = {
   spotlight_img?: AdminImageModel
   website_url: string
   sub_location: string
+  lodging_tags: LodgingTagModel[]
+  city: string
+  state?: string
+  country: string
+  num_rooms: number
+  google_place_id?: string
+  google_place_name?: string
+  address_coordinates?: [number, number]
+  brand?: string
+  notes: string
+  sourcing_tags?: string
+  is_pareto_task_complete?: boolean
+  hotel_contact_email?: string
+  hotel_contact_name?: string
+  is_hidden: boolean
+  is_inactive: boolean
 }
 
 export type AdminHotelModel = Pick<
@@ -241,6 +266,30 @@ export type AdminRetreatAttendeeModel = {
   flight_status: RetreatAttendeeFlightStatusType
   hotel_check_in?: string // iso date string
   hotel_check_out?: string // iso date string
+}
+
+export type AdminPastItineraryModel = {
+  id: number
+  name: string
+  start_date: string
+  end_date: string
+  hotel_id: number
+  nights: number
+  team_size: number
+  itinerary_link: string
+  spotlight_img_id: number
+  spotlight_img: AdminImageModel
+  location_ids: number[]
+}
+
+export type AdminPastItineraryLocationModel = {
+  id: number
+  name: string
+}
+
+export type AdminPastItineraryToLocationModel = {
+  itinerary_id: number
+  location_id: number
 }
 
 export type AdminRetreatAttendeeUpdateModel = Partial<AdminRetreatAttendeeModel>
@@ -344,3 +393,30 @@ export const OrderedRetreatItineraryState = [
 ] as const
 export type RetreatItineraryState = typeof OrderedRetreatFlightsState[number]
 /****************** End retreat states types ******************/
+
+// Hotel Tags
+export type LodgingTagModel = {
+  id: number
+  name: string
+}
+
+export type AgendaType = "ALL_WORK" | "ALL_PLAY" | "WORK_AND_PLAY"
+export type RFPModel = {
+  id: number
+  retreat_id: number
+  has_exact_dates: boolean
+  exact_dates_start?: string
+  exact_dates_end?: string
+  flexible_number_of_nights?: number
+  exact_dates_notes?: string
+  flexible_dates_notes?: string
+  agenda_type: AgendaType
+  agenda_notes?: string
+  number_of_rooms: number
+}
+
+export type HotelGroup = {
+  id: number
+  title: string
+  retreat_id: number
+}

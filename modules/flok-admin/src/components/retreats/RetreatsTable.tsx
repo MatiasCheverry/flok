@@ -1,22 +1,22 @@
-import {Button, makeStyles} from "@material-ui/core"
+import { Button, makeStyles } from "@material-ui/core"
 import {
   DataGrid,
   GridCellParams,
   GridColDef,
   GridSortModel,
-  GridToolbar,
+  GridToolbar
 } from "@material-ui/data-grid"
-import React, {useState} from "react"
-import {useDispatch} from "react-redux"
+import React, { useState } from "react"
+import { useDispatch } from "react-redux"
 import {
   RetreatAttendeesState,
   RetreatFlightsState,
   RetreatIntakeState,
   RetreatItineraryState,
-  RetreatLodgingState,
+  RetreatLodgingState
 } from "../../models"
-import {enqueueSnackbar} from "../../notistack-lib/actions"
-import {getDateTimeString} from "../../utils"
+import { enqueueSnackbar } from "../../notistack-lib/actions"
+import { getDateTimeString } from "../../utils"
 
 let useStyles = makeStyles((theme) => ({
   root: {
@@ -106,6 +106,12 @@ export default function RetreatsTable(props: RetreatsTableProps) {
       headerName: "# Attendees",
       width: 100,
       hideSortIcons: false,
+    },
+    {
+      ...commonColDefs,
+      field: "contactEmail",
+      headerName: "Email",
+      width: 150,
     },
     {
       ...commonColDefs,

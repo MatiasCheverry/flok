@@ -22,7 +22,7 @@ jobs:
               - 'modules/flok-admin/**'
   auto-deploy-flok:
     needs: changes
-    if: ${{ needs.changes.outputs.flok == 'true' }}
+    if: ${{ needs.changes.outputs.flok== 'true' }}
     uses: ./.github/workflows/deploy.yaml
     with:
       module: flok

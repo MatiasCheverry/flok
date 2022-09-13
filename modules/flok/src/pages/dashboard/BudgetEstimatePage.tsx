@@ -1,4 +1,5 @@
 import {makeStyles} from "@material-ui/core"
+import _ from "lodash"
 import {useState} from "react"
 import {withRouter} from "react-router-dom"
 import AppTypography from "../../components/base/AppTypography"
@@ -6,8 +7,8 @@ import BudgetBreakdownView from "../../components/budget/BudgetBreakdownView"
 import BudgetCalculator from "../../components/budget/BudgetCalculator"
 import PageBody from "../../components/page/PageBody"
 import {
-  BUDGET_TOOL_FLOK_RECOMENDATIONS,
   getBudgetBreakdown,
+  INITIAL_BUDGET_TOOL_VALUES,
 } from "../../utils/budgetUtils"
 
 let useStyles = makeStyles((theme) => ({
@@ -27,7 +28,7 @@ type BudgetEstimatePageProps = {}
 
 function BudgetEstimatePage(props: BudgetEstimatePageProps) {
   let classes = useStyles()
-  let [userInput, setUserInput] = useState(BUDGET_TOOL_FLOK_RECOMENDATIONS)
+  let [userInput, setUserInput] = useState(INITIAL_BUDGET_TOOL_VALUES)
   let [breakdown, setBreakdown] = useState(getBudgetBreakdown(userInput))
   return (
     <PageBody appBar>
@@ -41,7 +42,12 @@ function BudgetEstimatePage(props: BudgetEstimatePageProps) {
             setBreakdown(getBudgetBreakdown(vals))
           }}
         />
-        <BudgetBreakdownView breakdown={breakdown} breakdownInput={userInput} />
+        {!_.isEqual(userInput, INITIAL_BUDGET_TOOL_VALUES) && (
+          <BudgetBreakdownView
+            breakdown={breakdown}
+            breakdownInput={userInput}
+          />
+        )}
       </div>
     </PageBody>
   )

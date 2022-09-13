@@ -16,7 +16,9 @@ import BeforeUnload from "../base/BeforeUnload"
 
 let useStyles = makeStyles((theme) => ({
   wrapper: {
-    margin: theme.spacing(2),
+    marginLeft: theme.spacing(2),
+    marginRight: theme.spacing(2),
+    marginBottom: theme.spacing(2),
     display: "flex",
     justifyContent: "center",
   },
@@ -41,7 +43,6 @@ let useStyles = makeStyles((theme) => ({
     width: "90%",
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
-    marginTop: 30,
     [theme.breakpoints.down("sm")]: {
       width: "100%",
     },
@@ -71,7 +72,6 @@ type WYSIWYGBlockEditorProps = {
 function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   let dispatch = useDispatch()
   let block = useAttendeeLandingPageBlock(props.blockId)
-
   let formik = useFormik({
     initialValues: {
       content: block?.content
@@ -116,11 +116,13 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
       />
       <form onSubmit={formik.handleSubmit}>
         <Editor
+          spellCheck
           editorState={formik.values.content}
           onEditorStateChange={(val) => formik.setFieldValue(`content`, val)}
           wrapperClassName={classes.wrapper}
           editorClassName={classes.editor}
           toolbarClassName={classes.toolbar}
+          stripPastedStyles={true}
           toolbarOnFocus
           placeholder="Start typing here to create your page"
           toolbar={{

@@ -1,8 +1,14 @@
 // API endpoints
 import {
+  FormModel,
+  FormQuestionModel,
+  FormQuestionSelectOptionModel,
+} from "./form"
+import {
   AttendeeLandingWebsiteBlockModel,
   AttendeeLandingWebsiteModel,
   AttendeeLandingWebsitePageModel,
+  PresetImageModel,
   RetreatAttendeeModel,
   RetreatTripModel,
 } from "./retreat"
@@ -26,6 +32,10 @@ export type AttendeeApiResponse = {
   attendee: RetreatAttendeeModel
 }
 
+export type PresetImagesApiResponse = {
+  preset_images: PresetImageModel[]
+}
+
 export type TripApiResponse = {
   trip: RetreatTripModel
 }
@@ -37,4 +47,27 @@ export type AttendeeLandingWebsitePageApiResponse = {
 }
 export type AttendeeLandingWebsitePageBlockApiResponse = {
   block: AttendeeLandingWebsiteBlockModel
+}
+export type AttendeeLandingWebsiteInitializeApiResponse = {
+  website: AttendeeLandingWebsiteModel
+  page: AttendeeLandingWebsitePageModel
+  block: AttendeeLandingWebsiteBlockModel
+}
+export type AttendeeBatchUploadApiResponse = {
+  attendees: RetreatAttendeeModel[]
+  errors: (Pick<
+    RetreatAttendeeModel,
+    "email_address" | "first_name" | "last_name"
+  > & {error: string})[]
+}
+
+// Forms
+export type FormApiResponse = {
+  form: FormModel
+}
+export type QuestionApiResponse = {
+  form_question: FormQuestionModel
+}
+export type QuestionOptionApiResponse = {
+  select_option: FormQuestionSelectOptionModel
 }

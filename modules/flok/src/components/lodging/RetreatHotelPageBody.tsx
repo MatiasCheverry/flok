@@ -15,7 +15,7 @@ import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
 import AppImageGrid from "../base/AppImageGrid"
 import AppLoadingScreen from "../base/AppLoadingScreen"
-import PageLockedModal from "../page/PageLockedModal"
+import ContractFormModal from "../forms/ContractFormModal"
 
 let useStyles = makeStyles((theme) => ({
   root: {
@@ -36,6 +36,7 @@ let useStyles = makeStyles((theme) => ({
       justifyContent: "center",
     },
     height: "100%",
+    minHeight: 0,
   },
   hotelDetailsSection: {
     boxShadow: theme.shadows[0],
@@ -76,6 +77,7 @@ let useStyles = makeStyles((theme) => ({
       marginBottom: theme.spacing(0.5),
     },
   },
+  editingHeaderDiv: {justifyContent: "space-between", display: "flex"},
 }))
 
 type RetreatHotelPageBodyProps = {retreat: RetreatModel; retreatIdx: number}
@@ -107,6 +109,7 @@ export default function RetreatHotelPageBody(props: RetreatHotelPageBodyProps) {
       loadMissingHotel(retreat.lodging_final_hotel_id)
     }
   }, [hotel, dispatch, setLoadingHotel, retreat.lodging_final_hotel_id])
+  const [editContractModalOpen, setEditContractModalOpen] = useState(false)
 
   return (
     <div className={classes.root}>
@@ -138,9 +141,15 @@ export default function RetreatHotelPageBody(props: RetreatHotelPageBodyProps) {
       {loadingHotel ? (
         <AppLoadingScreen />
       ) : hotel === undefined ? (
-        <PageLockedModal pageDesc="This page will unlock once your hotel contract is finalized and signed!" />
+        <ContractFormModal open={true} sideNav={true} />
       ) : (
         <Grid container className={classes.hotelBody}>
+          <ContractFormModal
+            open={editContractModalOpen}
+            onClose={() => {
+              setEditContractModalOpen(false)
+            }}
+          />
           <Grid
             item
             xs={12}
@@ -150,7 +159,19 @@ export default function RetreatHotelPageBody(props: RetreatHotelPageBodyProps) {
             className={classes.overlay}>
             <div className={classes.overlayBody}>
               <Paper className={classes.hotelDetailsSection}>
-                <Typography variant="h4">Contract</Typography>
+                <div className={classes.editingHeaderDiv}>
+                  <Typography variant="h4">Contract</Typography>
+                  <Button
+                    color="primary"
+                    size="small"
+                    variant="outlined"
+                    onClick={() => {
+                      setEditContractModalOpen(true)
+                    }}>
+                    Edit
+                  </Button>
+                </div>
+
                 {retreat.lodging_final_start_date &&
                 retreat.lodging_final_end_date ? (
                   <div className={classes.hotelDetail}>
@@ -168,18 +189,6 @@ export default function RetreatHotelPageBody(props: RetreatHotelPageBodyProps) {
                     </Typography>
                   </div>
                 ) : undefined}
-                {retreat.lodging_final_contract_notes ? (
-                  <div className={classes.hotelDetail}>
-                    <Typography variant="body2">
-                      <strong>Contract notes</strong>
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      dangerouslySetInnerHTML={{
-                        __html: retreat.lodging_final_contract_notes,
-                      }}></Typography>
-                  </div>
-                ) : undefined}
                 {retreat.lodging_final_contract_url ? (
                   <div className={classes.hotelDetail}>
                     <Typography variant="body2">
@@ -193,6 +202,18 @@ export default function RetreatHotelPageBody(props: RetreatHotelPageBodyProps) {
                       target="_blank">
                       View
                     </Button>
+                  </div>
+                ) : undefined}
+                {retreat.lodging_final_contract_notes ? (
+                  <div className={classes.hotelDetail}>
+                    <Typography variant="body2">
+                      <strong>Contract notes</strong>
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      dangerouslySetInnerHTML={{
+                        __html: retreat.lodging_final_contract_notes,
+                      }}></Typography>
                   </div>
                 ) : undefined}
               </Paper>

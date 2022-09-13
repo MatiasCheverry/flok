@@ -10,7 +10,12 @@ import {
   TextFieldProps,
   useMediaQuery,
 } from "@material-ui/core"
-import {AccountBox, ArrowBackIos, FlightTakeoff} from "@material-ui/icons"
+import {
+  AccountBox,
+  ArrowBackIos,
+  FlightTakeoff,
+  FormatListBulleted,
+} from "@material-ui/icons"
 import {Autocomplete} from "@material-ui/lab"
 import {push} from "connected-react-router"
 import {useFormik} from "formik"
@@ -24,6 +29,7 @@ import {
   useRouteMatch,
 } from "react-router-dom"
 import * as yup from "yup"
+import AttendeeRegResponseTab from "../../components/attendee/AttendeeRegResponseTab"
 import BeforeUnload from "../../components/base/BeforeUnload"
 import AttendeeFlightTab from "../../components/flights/AttendeeFlightTab"
 import PageBody from "../../components/page/PageBody"
@@ -32,6 +38,8 @@ import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getAttendee, patchAttendee} from "../../store/actions/retreat"
 import {FlokTheme} from "../../theme"
+import {getTextFieldErrorProps} from "../../utils"
+import {useRetreat} from "../misc/RetreatProvider"
 
 let useStyles = makeStyles((theme) => ({
   section: {
@@ -98,6 +106,12 @@ let useStyles = makeStyles((theme) => ({
     flex: "1 1 auto",
     height: 0,
   },
+  flightsWrapper: {
+    width: "75%",
+    [theme.breakpoints.down("sm")]: {
+      width: "100%",
+    },
+  },
 }))
 
 function AttendeePage() {
@@ -111,6 +125,7 @@ function AttendeePage() {
   const isSmallScreen = useMediaQuery((theme: FlokTheme) =>
     theme.breakpoints.down("sm")
   )
+  let [retreat] = useRetreat()
 
   const isFlights =
     route.path === AppRoutes.getPath("RetreatAttendeeFlightsPage")
@@ -146,7 +161,10 @@ function AttendeePage() {
     },
     validate: (values) => {
       try {
-        yup.string().required().email().validateSync(values.email_address)
+        // If the attendee was created without an email, allow saving still
+        if (attendee?.email_address || values.email_address) {
+          yup.string().required().email().validateSync(values.email_address)
+        }
       } catch (err) {
         return {email_address: "Please enter a valid email."}
       }
@@ -177,7 +195,7 @@ function AttendeePage() {
             color="inherit"
             className={classes.tab}
             to={
-              isFlights
+              isFlights && !retreat.attendees_v2_released
                 ? AppRoutes.getPath("RetreatFlightsPage", {
                     retreatIdx: retreatIdx.toString(),
                   })
@@ -188,7 +206,9 @@ function AttendeePage() {
             <Icon>
               <ArrowBackIos />
             </Icon>
-            {isFlights ? "All Flights" : "All Attendees"}
+            {isFlights && !retreat.attendees_v2_released
+              ? "All Flights"
+              : "All Attendees"}
           </Link>
           <Tab
             className={classes.tab}
@@ -208,6 +228,17 @@ function AttendeePage() {
               attendeeId: attendeeId.toString(),
             })}
           />
+          {attendee?.registration_form_response_id && (
+            <Tab
+              className={classes.tab}
+              icon={<FormatListBulleted />}
+              label={isSmallScreen ? "" : "Registration Response"}
+              value={AppRoutes.getPath("RetreatAttendeeRegResponsePage", {
+                retreatIdx: retreatIdx.toString(),
+                attendeeId: attendeeId.toString(),
+              })}
+            />
+          )}
         </Tabs>
         <Switch>
           <Route
@@ -267,6 +298,7 @@ function AttendeePage() {
                       label="Email"
                       value={formik.values.email_address ?? ""}
                       id="email_address"
+                      {...getTextFieldErrorProps(formik, "email_address")}
                     />
                     <TextField
                       {...textFieldProps}
@@ -291,18 +323,20 @@ function AttendeePage() {
                       multiple
                       id="preferences_dates_flexible_months"
                       options={Array.from(
-                        new Set([
-                          ...Array.from(DIETARY_OPTIONS).map((a) =>
-                            a.toLocaleLowerCase()
-                          ),
-                          ...(formik.values.dietary_prefs
-                            ? formik.values.dietary_prefs.split(",")
-                            : []
-                          ).map((a) => a.toLocaleLowerCase()),
-                          ...(newOption && newOption.length > 1
-                            ? [`Add \`${newOption.toLocaleLowerCase()}\``]
-                            : []),
-                        ])
+                        new Set(
+                          [
+                            ...Array.from(DIETARY_OPTIONS).map((a) =>
+                              a.toLocaleLowerCase()
+                            ),
+                            ...(formik.values.dietary_prefs
+                              ? formik.values.dietary_prefs.split(",")
+                              : []
+                            ).map((a) => a.toLocaleLowerCase()),
+                            ...(newOption && newOption.length > 1
+                              ? [`Add \`${newOption.toLocaleLowerCase()}\``]
+                              : []),
+                          ].filter((value) => value)
+                        )
                       )}
                       getOptionLabel={(option) => {
                         return (
@@ -394,7 +428,20 @@ function AttendeePage() {
             path={AppRoutes.getPath("RetreatAttendeeFlightsPage")}
             render={() => (
               <div className={classes.fullPageTab}>
-                {attendee && <AttendeeFlightTab attendee={attendee} />}
+                {attendee && (
+                  <div className={classes.flightsWrapper}>
+                    <AttendeeFlightTab attendee={attendee} />
+                  </div>
+                )}
+              </div>
+            )}
+            exact
+          />
+          <Route
+            path={AppRoutes.getPath("RetreatAttendeeRegResponsePage")}
+            render={() => (
+              <div className={classes.fullPageTab}>
+                {attendee && <AttendeeRegResponseTab attendee={attendee} />}
               </div>
             )}
             exact
@@ -407,12 +454,19 @@ function AttendeePage() {
 export default AttendeePage
 
 const DIETARY_OPTIONS = new Set([
-  "Gluten Free",
-  "Peanut Free",
-  "Dairy Free",
   "Vegetarian",
   "Vegan",
-  "Kosher",
+  "Kosher style",
+  "Kosher certified",
+  "Nut allergy",
+  "Fish/shellfish allergy",
+  "Gluten free",
+  "Keto",
+  "Dairy free",
+  "Halal",
+  "Pescatarian",
+  "Diabetic",
+  "Mediterranean",
 ])
 const RetreatAttendeeInfoStatusOptions: {
   value: AttendeeInfoStatus
@@ -421,4 +475,5 @@ const RetreatAttendeeInfoStatusOptions: {
   {value: "CREATED", text: "Pending"},
   {value: "INFO_ENTERED", text: "Registered"},
   {value: "NOT_ATTENDING", text: "Not Attending"},
+  {value: "CANCELLED", text: "Cancelled"},
 ]

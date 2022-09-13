@@ -5,26 +5,40 @@ import {
   AdminDestinationModel,
   AdminHotelDetailsModel,
   AdminHotelModel,
+  AdminPastItineraryLocationModel,
+  AdminPastItineraryModel,
   AdminRetreatAttendeeModel,
   AdminRetreatListModel,
   AdminRetreatListType,
   AdminRetreatModel,
+  HotelGroup,
+  LodgingTagModel,
   RetreatNoteModel,
   RetreatTask,
   RetreatToTask,
+  RFPModel,
   User,
 } from "../../models"
+import {GooglePlace} from "../../utils"
 import {
+  ADD_GOOGLE_PLACE,
   ADD_RETREAT_TASKS_SUCCESS,
+  DELETE_HOTEL_GROUP_SUCCESS,
+  DELETE_HOTEL_SUCCESS,
   DELETE_RETREAT_ATTENDEES_SUCCESS,
   DELETE_RETREAT_HOTEL_PROPOSAL_SUCCESS,
   DELETE_SELECTED_HOTEL_SUCCESS,
   GET_DESTINATIONS_SUCCESS,
   GET_HOTELS_BY_DEST_SUCCESS,
   GET_HOTELS_BY_ID_SUCCESS,
+  GET_HOTELS_FOR_DATAGRID_SUCCESS,
   GET_HOTELS_SEARCH_SUCCESS,
   GET_HOTEL_DETAILS_SUCCESS,
+  GET_HOTEL_GROUP_SUCCESS,
+  GET_LOCATIONS_SUCCESS,
+  GET_LODGING_TAGS_SUCCESS,
   GET_LOGIN_TOKEN_SUCCESS,
+  GET_PAST_ITINERARIES_SUCCESS,
   GET_RETREATS_LIST_SUCCESS,
   GET_RETREAT_ATTENDEES_SUCCESS,
   GET_RETREAT_DETAILS_FAILURE,
@@ -32,10 +46,13 @@ import {
   GET_RETREAT_DETAILS_SUCCESS,
   GET_RETREAT_NOTES_SUCCESS,
   GET_RETREAT_TASKS_SUCCESS,
+  GET_RFP_SUCCESS,
   GET_TASKS_LIST_SUCCESS,
   GET_TASK_SUCCESS,
   GET_USERS_SUCCESS,
+  PATCH_HOTEL_GROUP_SUCCESS,
   PATCH_HOTEL_SUCCESS,
+  PATCH_PAST_ITINERARY_SUCCESS,
   PATCH_RETREAT_ATTENDEE_SUCCESS,
   PATCH_RETREAT_DETAILS_FAILURE,
   PATCH_RETREAT_DETAILS_REQUEST,
@@ -43,8 +60,12 @@ import {
   PATCH_RETREAT_TASK_SUCCESS,
   PATCH_TASK_SUCCESS,
   PATCH_USER_SUCCESS,
+  POST_DESTINATION_SUCCESS,
+  POST_HOTEL_GROUP_SUCCESS,
   POST_HOTEL_SUCCESS,
   POST_HOTEL_TEMPLATE_PROPOSAL_SUCCESS,
+  POST_LOCATION_SUCCESS,
+  POST_PAST_ITINERARY_SUCCESS,
   POST_RETREAT_ATTENDEE_SUCCESS,
   POST_RETREAT_HOTEL_PROPOSAL_SUCCESS,
   POST_RETREAT_NOTES_SUCCESS,
@@ -107,6 +128,23 @@ export type AdminState = {
   tasks: {
     [id: number]: RetreatTask | undefined
   }
+  past_itineraries: {
+    [id: number]: AdminPastItineraryModel | undefined
+  }
+  past_itinerary_locations: {
+    [id: number]: AdminPastItineraryLocationModel | undefined
+  }
+  lodgingTags: {
+    [id: number]: LodgingTagModel
+  }
+  googlePlaces: {[place_id: string]: GooglePlace}
+  hotelsDataGridHasNext: boolean
+  RFPs: {
+    [id: string]: RFPModel | undefined
+  }
+  hotelGroups: {
+    [id: number]: HotelGroup | undefined
+  }
 }
 
 const initialState: AdminState = {
@@ -117,7 +155,6 @@ const initialState: AdminState = {
   },
   retreatsDetails: {},
   destinations: {},
-  allDestinations: undefined,
   hotelsByDestination: {},
   hotelsBySearch: {},
   hotels: {},
@@ -131,6 +168,13 @@ const initialState: AdminState = {
   usersByRetreat: {},
   userLoginTokens: {},
   tasks: {},
+  past_itineraries: {},
+  past_itinerary_locations: {},
+  lodgingTags: {},
+  googlePlaces: {},
+  hotelsDataGridHasNext: false,
+  RFPs: {},
+  hotelGroups: {},
 }
 
 export default function AdminReducer(
@@ -265,6 +309,32 @@ export default function AdminReducer(
           [payload.hotel.id]: payload.hotel,
         },
       }
+    case GET_HOTELS_FOR_DATAGRID_SUCCESS:
+      meta = (action as unknown as {meta: {id: number}}).meta
+      payload = (action as unknown as ApiAction).payload as {
+        hotels: AdminHotelDetailsModel[]
+        has_next: boolean
+      }
+      return {
+        ...state,
+        hotels: {
+          ...state.hotels,
+          ...payload.hotels.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+        hotelsDataGridHasNext: payload.has_next,
+      }
+    case DELETE_HOTEL_SUCCESS:
+      meta = (action as unknown as {meta: {hotelId: number}}).meta
+      let newHotels = {...state.hotels}
+      delete newHotels[meta.hotelId]
+      return {
+        ...state,
+        hotels: newHotels,
+      }
+
     case POST_SELECTED_HOTEL_SUCCESS:
     case PUT_SELECTED_HOTEL_SUCCESS:
     case DELETE_SELECTED_HOTEL_SUCCESS:
@@ -411,6 +481,136 @@ export default function AdminReducer(
           ...state.tasks,
           [payload.task.id]: payload.task,
         },
+      }
+    case POST_DESTINATION_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        destination: AdminDestinationModel
+      }
+
+      let allDestinationsArray = Object.values(state.destinations).filter(
+        (destination) => destination !== undefined
+      ) as AdminDestinationModel[]
+      return {
+        ...state,
+        destinations: {
+          ...state.destinations,
+          [payload.destination.id]: payload.destination,
+        },
+        allDestinations: allDestinationsArray
+          .sort((a, b) => (a.location > b.location ? 0 : 1))
+          .map((dest) => dest.id),
+      }
+    case GET_PAST_ITINERARIES_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itineraries: AdminPastItineraryModel[]
+      }
+      return {
+        ...state,
+        past_itineraries: {
+          ...state.past_itineraries,
+          ...payload.past_itineraries.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+      }
+    case POST_LOCATION_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary_location: AdminPastItineraryLocationModel
+      }
+      return {
+        ...state,
+        past_itinerary_locations: {
+          ...state.past_itinerary_locations,
+          [payload.past_itinerary_location.id]: payload.past_itinerary_location,
+        },
+      }
+    case GET_LOCATIONS_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary_locations: AdminPastItineraryLocationModel[]
+      }
+      return {
+        ...state,
+        past_itinerary_locations: {
+          ...state.past_itinerary_locations,
+          ...payload.past_itinerary_locations.reduce(
+            (last, curr) => ({...last, [curr.id]: curr}),
+            {}
+          ),
+        },
+      }
+    case POST_PAST_ITINERARY_SUCCESS:
+    case PATCH_PAST_ITINERARY_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        past_itinerary: AdminPastItineraryModel
+      }
+      return {
+        ...state,
+        past_itineraries: {
+          ...state.past_itineraries,
+          [payload.past_itinerary.id]: payload.past_itinerary,
+        },
+      }
+    case GET_LODGING_TAGS_SUCCESS:
+      let lodgingTags = (
+        (action as ApiAction).payload as {lodging_tags: LodgingTagModel[]}
+      ).lodging_tags
+      let newTags = lodgingTags.reduce((last: any, curr: LodgingTagModel) => {
+        return {...last, [curr.id]: curr}
+      }, {})
+      return {
+        ...state,
+        lodgingTags: {
+          ...state.lodgingTags,
+          ...newTags,
+        },
+      }
+    case ADD_GOOGLE_PLACE:
+      let newPlace = action as GooglePlace
+      return {
+        ...state,
+        googlePlaces: {
+          ...state.googlePlaces,
+          [newPlace.place_id]: newPlace,
+        },
+      }
+    case GET_RFP_SUCCESS:
+      payload = (action as ApiAction).payload as {
+        request_for_proposal: RFPModel
+      }
+      let newRFPState = {...state}
+
+      newRFPState.RFPs = {
+        ...newRFPState.RFPs,
+        [payload.request_for_proposal.id]: payload.request_for_proposal,
+      }
+      return newRFPState
+    case POST_HOTEL_GROUP_SUCCESS:
+    case GET_HOTEL_GROUP_SUCCESS:
+    case PATCH_HOTEL_GROUP_SUCCESS:
+      action = action as unknown as ApiAction
+      payload = (action as unknown as ApiAction).payload as {
+        group: HotelGroup
+      }
+      return {
+        ...state,
+        hotelGroups: {
+          ...state.hotelGroups,
+          [payload.group.id]: payload.group,
+        },
+      }
+    case DELETE_HOTEL_GROUP_SUCCESS:
+      meta = (action as unknown as {meta: {groupId: number}}).meta
+      let newHotelGroups = {...state.hotelGroups}
+      delete newHotelGroups[meta.groupId]
+      return {
+        ...state,
+        hotelGroups: newHotelGroups,
       }
     default:
       return state

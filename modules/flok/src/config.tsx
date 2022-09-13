@@ -9,6 +9,12 @@ export const GOOGLE_MAPS_ID_HOTEL_PAGE_KEY = "google_maps_id_hotel_page"
 export const GOOGLE_TAG_MANAGER_ID_KEY = "google_tag_manager_id"
 export const DASHBOARD_VERSION_KEY = "dashboard_version"
 export const MAX_TASKS = "max_tasks"
+export const IMAGE_SERVER_BASE_URL_KEY = "image_server_base_url"
+export const DEFAULT_REGISTRATION_EMAIL_TEMPLATE =
+  "default_registration_email_template"
+export const DEFAULT_FLIGHTS_EMAIL_TEMPLATE = "default_flights_email_template"
+export const DEMO_TRIP_ARRIVAL = "demo_trip_arrival"
+export const DEMO_TRIP_DEPARTURE = "demo_trip_departure"
 type ConfigKey =
   | typeof APP_VERSION_KEY
   | typeof SERVER_BASE_URL_KEY
@@ -19,6 +25,11 @@ type ConfigKey =
   | typeof GOOGLE_TAG_MANAGER_ID_KEY
   | typeof DASHBOARD_VERSION_KEY
   | typeof MAX_TASKS
+  | typeof IMAGE_SERVER_BASE_URL_KEY
+  | typeof DEFAULT_FLIGHTS_EMAIL_TEMPLATE
+  | typeof DEFAULT_REGISTRATION_EMAIL_TEMPLATE
+  | typeof DEMO_TRIP_ARRIVAL
+  | typeof DEMO_TRIP_DEPARTURE
 
 class Config {
   appConfig: {[key: string]: any}
@@ -27,6 +38,10 @@ class Config {
     [MIXPANEL_TOKEN_KEY]: "BOGUS_KEY", // use default key to prevent error's from non-initialized mixpanel instance
     [GOOGLE_MAPS_ID_HOTEL_PAGE_KEY]: "209c3e9f6984bce3",
     [MAX_TASKS]: 10,
+    [DEFAULT_FLIGHTS_EMAIL_TEMPLATE]: 1,
+    [DEFAULT_REGISTRATION_EMAIL_TEMPLATE]: 1,
+    [DEMO_TRIP_ARRIVAL]: 1,
+    [DEMO_TRIP_DEPARTURE]: 2,
   }
   constructor() {
     this.appConfig = {}
@@ -111,4 +126,5 @@ export const Constants = {
   localStorageRetreatIdxKey: "activeRetreatIdx",
   retreatBaseUrlVar: "%%RETREAT_BASE_URL%%",
   demoRetreatGuid: "a42ca459-3e72-4b3b-9a91-d11bf2763378",
+  attendeeSitePathPrefix: "/sites",
 }

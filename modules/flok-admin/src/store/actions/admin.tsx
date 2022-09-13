@@ -1,12 +1,16 @@
 import querystring from "querystring"
 import {
+  AdminDestinationModel,
   AdminHotelDetailsModel,
   AdminLodgingProposalUpdateModel,
+  AdminPastItineraryLocationModel,
+  AdminPastItineraryModel,
   AdminRetreatAttendeeModel,
   AdminRetreatAttendeeUpdateModel,
   AdminRetreatListType,
   AdminRetreatModel,
-  AdminSelectedHotelStateTypes,
+  AdminSelectedHotelProposalModel,
+  HotelGroup,
   RetreatTask,
   RetreatToTaskState,
 } from "../../models"
@@ -184,6 +188,24 @@ export function patchHotel(
   })
 }
 
+export const DELETE_HOTEL_REQUEST = "DELETE_HOTEL_REQUEST"
+export const DELETE_HOTEL_SUCCESS = "DELETE_HOTEL_SUCCESS"
+export const DELETE_HOTEL_FAILURE = "DELETE_HOTEL_FAILURE"
+
+export function deleteHotel(hotelId: number) {
+  let endpoint = `/v1.0/admin/hotels/${hotelId}`
+  return createApiAction({
+    endpoint,
+    body: JSON.stringify({is_inactive: true}),
+    method: "PATCH",
+    types: [
+      {type: DELETE_HOTEL_REQUEST},
+      {type: DELETE_HOTEL_SUCCESS, meta: {hotelId}},
+      {type: DELETE_HOTEL_FAILURE, meta: {hotelId}},
+    ],
+  })
+}
+
 export const POST_HOTEL_TEMPLATE_PROPOSAL_REQUEST =
   "POST_HOTEL_TEMPLATE_PROPOSAL_REQUEST"
 export const POST_HOTEL_TEMPLATE_PROPOSAL_SUCCESS =
@@ -258,13 +280,15 @@ export const PUT_SELECTED_HOTEL_FAILURE = "PUT_SELECTED_HOTEL_FAILURE"
 export function putSelectedHotel(
   retreatId: number,
   hotelId: number,
-  newState: AdminSelectedHotelStateTypes
+  values: Partial<AdminSelectedHotelProposalModel>
 ) {
   let endpoint = `/v1.0/admin/retreats/${retreatId}/hotels/${hotelId}`
   return createApiAction({
     endpoint,
     method: "PUT",
-    body: JSON.stringify({state: newState}),
+    body: JSON.stringify(values, (key, value) =>
+      typeof value === "undefined" ? null : value
+    ),
     types: [
       PUT_SELECTED_HOTEL_REQUEST,
       PUT_SELECTED_HOTEL_SUCCESS,
@@ -720,6 +744,287 @@ export function addRetreatTasks(
       {type: ADD_RETREAT_TASKS_REQUEST, meta: {retreatId: retreat_id}},
       {type: ADD_RETREAT_TASKS_SUCCESS, meta: {retreatId: retreat_id}},
       {type: ADD_RETREAT_TASKS_FAILURE, meta: {retreatId: retreat_id}},
+    ],
+  })
+}
+
+export const POST_DESTINATION_REQUEST = "POST_DESTINATION_REQUEST"
+export const POST_DESTINATION_SUCCESS = "POST_DESTINATION_SUCCESS"
+export const POST_DESTINATION_FAILURE = "POST_DESTINATION_FAILURE"
+
+export function postDestination(values: Partial<AdminDestinationModel>) {
+  let endpoint = "/v1.0/admin/destinations"
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_DESTINATION_REQUEST},
+      {type: POST_DESTINATION_SUCCESS},
+      {type: POST_DESTINATION_FAILURE},
+    ],
+  })
+}
+
+export const GET_LOCATIONS_REQUEST = "GET_LOCATIONS_REQUEST"
+export const GET_LOCATIONS_SUCCESS = "GET_LOCATIONS_SUCCESS"
+export const GET_LOCATIONS_FAILURE = "GET_LOCATIONS_FAILURE"
+
+export function getPastItineraryLocations() {
+  let endpoint = "/v1.0/admin/past-itineraries-locations"
+
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_LOCATIONS_REQUEST,
+      GET_LOCATIONS_SUCCESS,
+      GET_LOCATIONS_FAILURE,
+    ],
+  })
+}
+
+export const POST_LOCATION_REQUEST = "POST_LOCATION_REQUEST"
+export const POST_LOCATION_SUCCESS = "POST_LOCATION_SUCCESS"
+export const POST_LOCATION_FAILURE = "POST_LOCATION_FAILURE"
+
+export function postLocation(values: Partial<AdminPastItineraryLocationModel>) {
+  let endpoint = "/v1.0/admin/past-itineraries-locations"
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_LOCATION_REQUEST},
+      {type: POST_LOCATION_SUCCESS},
+      {type: POST_LOCATION_FAILURE},
+    ],
+  })
+}
+
+export const DELETE_LOCATION_REQUEST = "DELETE_LOCATION_REQUEST"
+export const DELETE_LOCATION_SUCCESS = "DELETE_LOCATION_SUCCESS"
+export const DELETE_LOCATION_FAILURE = "DELETE_LOCATION_FAILURE"
+
+export function deleteLocation(locationId: number) {
+  let endpoint = `/v1.0/admin/past-itineraries-locations/${locationId}`
+  return createApiAction({
+    endpoint,
+    method: "DELETE",
+    types: [
+      {type: DELETE_LOCATION_REQUEST},
+      {type: DELETE_LOCATION_SUCCESS},
+      {type: DELETE_LOCATION_FAILURE},
+    ],
+  })
+}
+
+export const GET_PAST_ITINERARIES_REQUEST = "GET_PAST_ITINERARIES_REQUEST"
+export const GET_PAST_ITINERARIES_SUCCESS = "GET_PAST_ITINERARIES_SUCCESS"
+export const GET_PAST_ITINERARIES_FAILURE = "GET_PAST_ITINERARIES_FAILURE"
+
+export function getPastItineraries() {
+  let endpoint = "/v1.0/admin/past-itineraries"
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_PAST_ITINERARIES_REQUEST,
+      GET_PAST_ITINERARIES_SUCCESS,
+      GET_PAST_ITINERARIES_FAILURE,
+    ],
+  })
+}
+
+export type PastItineraryPostModel = Pick<
+  AdminPastItineraryModel,
+  | "name"
+  | "end_date"
+  | "start_date"
+  | "hotel_id"
+  | "itinerary_link"
+  | "location_ids"
+  | "nights"
+  | "spotlight_img_id"
+  | "team_size"
+>
+
+export const POST_PAST_ITINERARY_REQUEST = "POST_PAST_ITINERARY_REQUEST"
+export const POST_PAST_ITINERARY_SUCCESS = "POST_PAST_ITINERARY_SUCCESS"
+export const POST_PAST_ITINERARY_FAILURE = "POST_PAST_ITINERARY_FAILURE"
+
+export function postPastItinerary(values: PastItineraryPostModel) {
+  let endpoint = "/v1.0/admin/past-itineraries"
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_PAST_ITINERARY_REQUEST},
+      {type: POST_PAST_ITINERARY_SUCCESS},
+      {type: POST_PAST_ITINERARY_FAILURE},
+    ],
+  })
+}
+export const PATCH_PAST_ITINERARY_REQUEST = "PATCH_PAST_ITINERARY_REQUEST"
+export const PATCH_PAST_ITINERARY_SUCCESS = "PATCH_PAST_ITINERARY_SUCCESS"
+export const PATCH_PAST_ITINERARY_FAILURE = "PATCH_PAST_ITINERARY_FAILURE"
+
+export function patchPastItinerary(
+  itineraryId: number,
+  itinerary: Partial<PastItineraryPostModel>
+) {
+  let endpoint = `/v1.0/admin/past-itineraries/${itineraryId}`
+  return createApiAction({
+    endpoint,
+    body: JSON.stringify(nullifyEmptyString(itinerary)),
+    method: "PATCH",
+    types: [
+      {type: PATCH_PAST_ITINERARY_REQUEST, meta: {itineraryId}},
+      {type: PATCH_PAST_ITINERARY_SUCCESS, meta: {itineraryId}},
+      {type: PATCH_PAST_ITINERARY_FAILURE, meta: {itineraryId}},
+    ],
+  })
+}
+
+export const GET_LODGING_TAGS_REQUEST = "GET_LODGING_TAGS_REQUEST"
+export const GET_LODGING_TAGS_SUCCESS = "GET_LODGING_TAGS_SUCCESS"
+export const GET_LODGING_TAGS_FAILURE = "GET_LODGING_TAGS_FAILURE"
+
+export function getLodgingTags() {
+  let endpoint = `/v1.0/lodging-tags`
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_LODGING_TAGS_REQUEST,
+      GET_LODGING_TAGS_SUCCESS,
+      GET_LODGING_TAGS_FAILURE,
+    ],
+  })
+}
+export const GET_HOTEL_GROUP_REQUEST = "GET_HOTEL_GROUP_REQUEST"
+export const GET_HOTEL_GROUP_SUCCESS = "GET_HOTEL_GROUP_SUCCESS"
+export const GET_HOTEL_GROUP_FAILURE = "GET_HOTEL_GROUP_FAILURE"
+
+export function getHotelGroup(groupId: number) {
+  let endpoint = `/v1.0/hotel-groups/${groupId}`
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      {type: GET_HOTEL_GROUP_REQUEST},
+      {type: GET_HOTEL_GROUP_SUCCESS},
+      {type: GET_HOTEL_GROUP_FAILURE},
+    ],
+  })
+}
+
+export const ADD_GOOGLE_PLACE = "ADD_GOOGLE_PLACE"
+
+export function addGooglePlace(place: {
+  name: string
+  place_id: string
+  lat?: number
+  lng?: number
+  address?: string
+}) {
+  let action = {...place, type: ADD_GOOGLE_PLACE}
+  return action
+}
+
+export const GET_HOTELS_FOR_DATAGRID_REQUEST = "GET_HOTELS_FOR_DATAGRID_REQUEST"
+export const GET_HOTELS_FOR_DATAGRID_SUCCESS = "GET_HOTELS_FOR_DATAGRID_SUCCESS"
+export const GET_HOTELS_FOR_DATAGRID_FAILURE = "GET_HOTELS_FOR_DATAGRID_FAILURE"
+
+export function getHotelsForDataGrid(
+  offset: number = 0,
+  filters?: {
+    column?: string
+    operator?: string
+    value?: string
+    pareto?: "complete" | "incomplete"
+  }
+) {
+  let endpoint = `/v1.0/admin/hotels/datagrid?offset=${offset}${
+    filters?.column && filters?.operator && filters?.value
+      ? `&column=${filters.column}&operator=${filters.operator}&value=${filters.value}`
+      : ""
+  }&pareto=${filters?.pareto ?? "none"}`
+  return createApiAction({
+    endpoint,
+    method: "GET",
+    types: [
+      GET_HOTELS_FOR_DATAGRID_REQUEST,
+      GET_HOTELS_FOR_DATAGRID_SUCCESS,
+      GET_HOTELS_FOR_DATAGRID_FAILURE,
+    ],
+  })
+}
+export const POST_HOTEL_GROUP_REQUEST = "POST_HOTEL_GROUP_REQUEST"
+export const POST_HOTEL_GROUP_SUCCESS = "POST_HOTEL_GROUP_SUCCESS"
+export const POST_HOTEL_GROUP_FAILURE = "POST_HOTEL_GROUP_FAILURE"
+
+export function postHotelGroup(values: Partial<HotelGroup>) {
+  let endpoint = `/v1.0/admin/hotel-groups`
+  return createApiAction({
+    endpoint,
+    method: "POST",
+    body: JSON.stringify(values),
+    types: [
+      {type: POST_HOTEL_GROUP_REQUEST},
+      {type: POST_HOTEL_GROUP_SUCCESS},
+      {type: POST_HOTEL_GROUP_FAILURE},
+    ],
+  })
+}
+
+export const PATCH_HOTEL_GROUP_REQUEST = "PATCH_HOTEL_GROUP_REQUEST"
+export const PATCH_HOTEL_GROUP_SUCCESS = "PATCH_HOTEL_GROUP_SUCCESS"
+export const PATCH_HOTEL_GROUP_FAILURE = "PATCH_HOTEL_GROUP_FAILURE"
+
+export function patchHotelGroup(groupId: number, values: Partial<HotelGroup>) {
+  let endpoint = `/v1.0/admin/hotel-groups/${groupId}`
+  return createApiAction({
+    endpoint,
+    method: "PATCH",
+    body: JSON.stringify(values),
+    types: [
+      {type: PATCH_HOTEL_GROUP_REQUEST},
+      {type: PATCH_HOTEL_GROUP_SUCCESS},
+      {type: PATCH_HOTEL_GROUP_FAILURE},
+    ],
+  })
+}
+
+export const DELETE_HOTEL_GROUP_REQUEST = "DELETE_HOTEL_GROUP_REQUEST"
+export const DELETE_HOTEL_GROUP_SUCCESS = "DELETE_HOTEL_GROUP_SUCCESS"
+export const DELETE_HOTEL_GROUP_FAILURE = "DELETE_HOTEL_GROUP_FAILURE"
+export function deleteHotelGroup(groupId: number) {
+  let endpoint = `/v1.0/admin/hotel-groups/${groupId}`
+  return createApiAction({
+    endpoint,
+    method: "DELETE",
+    types: [
+      {type: DELETE_HOTEL_GROUP_REQUEST, meta: {groupId}},
+      {type: DELETE_HOTEL_GROUP_SUCCESS, meta: {groupId}},
+      {type: DELETE_HOTEL_GROUP_FAILURE, meta: {groupId}},
+    ],
+  })
+}
+
+export const GET_RFP_REQUEST = "GET_RFP_REQUEST"
+export const GET_RFP_SUCCESS = "GET_RFP_SUCCESS"
+export const GET_RFP_FAILURE = "GET_RFP_FAILURE"
+export function getRFP(rfpId: number) {
+  let endpoint = `/v1.0/rfps/${rfpId}`
+  return createApiAction({
+    method: "GET",
+    endpoint,
+    types: [
+      {type: GET_RFP_REQUEST},
+      {type: GET_RFP_SUCCESS},
+      {type: GET_RFP_FAILURE},
     ],
   })
 }

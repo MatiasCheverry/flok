@@ -1,4 +1,4 @@
-import {Box, makeStyles, Typography} from "@material-ui/core"
+import {Box, IconButton, makeStyles, Typography} from "@material-ui/core"
 import {
   Apartment,
   CheckCircle,
@@ -6,9 +6,11 @@ import {
   Flight,
   People,
   Room,
+  Settings,
 } from "@material-ui/icons"
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
+import {Link as ReactRouterLink} from "react-router-dom"
 import AppTypography from "../../components/base/AppTypography"
 import AppOverviewCard, {
   AppOverviewCardList,
@@ -16,16 +18,12 @@ import AppOverviewCard, {
 import AppTodoList from "../../components/overview/AppTaskList"
 import PageBody from "../../components/page/PageBody"
 import config, {MAX_TASKS} from "../../config"
-import {
-  OrderedRetreatAttendeesState,
-  OrderedRetreatFlightsState,
-  RetreatAttendeeModel,
-  RetreatToTask,
-} from "../../models/retreat"
+import {RetreatAttendeeModel, RetreatToTask} from "../../models/retreat"
+import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
 import {putRetreatTask} from "../../store/actions/retreat"
-import {useRetreatAttendees} from "../../utils/retreatUtils"
+import {getRetreatName, useRetreatAttendees} from "../../utils/retreatUtils"
 import {useRetreat} from "../misc/RetreatProvider"
 
 let useStyles = makeStyles((theme) => ({
@@ -59,6 +57,7 @@ let useStyles = makeStyles((theme) => ({
     textDecoration: "underline",
     cursor: "pointer",
   },
+  retreatNameLine: {display: "flex", alignItems: "center"},
 }))
 
 export default function RetreatHomePage() {
@@ -77,6 +76,9 @@ export default function RetreatHomePage() {
     return attendees.filter(
       (attendee) => attendee.info_status === "INFO_ENTERED"
     )
+  }
+  function getAttendeesToRegister(attendees: RetreatAttendeeModel[]) {
+    return attendees.filter((attendee) => attendee.info_status === "CREATED")
   }
 
   useEffect(() => {
@@ -113,48 +115,13 @@ export default function RetreatHomePage() {
     setDestinationOverview(retreat.lodging_final_destination)
   }, [retreat.lodging_final_destination])
 
-  let [attendeesOverview, setAttendeesOverview] = useState<string | undefined>(
-    undefined
-  )
-  useEffect(() => {
-    if (
-      attendees &&
-      retreat.attendees_state &&
-      OrderedRetreatAttendeesState.indexOf(retreat.attendees_state) >=
-        OrderedRetreatAttendeesState.indexOf("REGISTRATION_OPEN")
-    ) {
-      setAttendeesOverview(getRegisteredAttendees(attendees).length.toString())
-    } else {
-      setAttendeesOverview(undefined)
-    }
-  }, [attendees, retreat.attendees_state])
-
-  let [flightsOverview, setFlightsOverview] = useState<string | undefined>(
-    undefined
-  )
-  useEffect(() => {
-    if (
-      attendees &&
-      retreat.flights_state &&
-      OrderedRetreatFlightsState.indexOf(retreat.flights_state) >=
-        OrderedRetreatFlightsState.indexOf("POLICY_REVIEW")
-    ) {
-      let numBookedFlights = attendees
-        .filter((attendee) =>
-          ["INFO_ENTERED", "CREATED"].includes(attendee.info_status)
-        )
-        .filter(
-          (attendee) =>
-            attendee.flight_status &&
-            ["OPT_OUT", "BOOKED"].includes(attendee.flight_status)
-        ).length
-      setFlightsOverview(
-        `${numBookedFlights} / ${getRegisteredAttendees(attendees).length}`
-      )
-    } else {
-      setFlightsOverview(undefined)
-    }
-  }, [setFlightsOverview, attendees, retreat.flights_state])
+  let numBookedFlights = attendees
+    .filter((attendee) => ["INFO_ENTERED"].includes(attendee.info_status))
+    .filter(
+      (attendee) =>
+        attendee.flight_status &&
+        ["OPT_OUT", "BOOKED"].includes(attendee.flight_status)
+    ).length
 
   let [lodgingOverview, setLodgingOverview] = useState<string | undefined>(
     undefined
@@ -222,9 +189,18 @@ export default function RetreatHomePage() {
       <div className={classes.section}>
         <div className={classes.overviewHeader}>
           <Typography variant="h1">Overview</Typography>
-          <Typography variant="body1">
-            {retreat.company_name}'s Retreat
-          </Typography>
+          <div className={classes.retreatNameLine}>
+            <Typography variant="body1">{getRetreatName(retreat)}</Typography>
+            &nbsp;
+            <IconButton
+              size="small"
+              component={ReactRouterLink}
+              to={AppRoutes.getPath("RetreatSettingsPage", {
+                retreatIdx: retreatIdx.toString(),
+              })}>
+              <Settings />
+            </IconButton>
+          </div>
           <Typography variant="body1">{datesOverview}</Typography>
         </div>
         <AppOverviewCardList>
@@ -241,13 +217,28 @@ export default function RetreatHomePage() {
           <AppOverviewCard
             label="Attendees"
             Icon={People}
-            value={attendeesOverview}
+            value={
+              getRegisteredAttendees(attendees).length +
+                getAttendeesToRegister(attendees).length >
+              0
+                ? `${getRegisteredAttendees(attendees).length.toString()} / ${
+                    getRegisteredAttendees(attendees).length +
+                    getAttendeesToRegister(attendees).length
+                  }`
+                : "-- / --"
+            }
             moreInfo={"# of attendees successfully registered for your retreat"}
           />
           <AppOverviewCard
             label="Flights"
             Icon={Flight}
-            value={flightsOverview ?? "-- / --"}
+            value={
+              getRegisteredAttendees(attendees).length
+                ? `${numBookedFlights} / ${getRegisteredAttendees(
+                    attendees
+                  ).length.toString()}`
+                : "-- / --"
+            }
             moreInfo={
               "# of attendees who've confirmed their flights for your retreat"
             }

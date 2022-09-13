@@ -1,9 +1,15 @@
 import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
 import {ResourceNotFound} from "../models"
-import {DestinationModel, HotelModel} from "../models/lodging"
+import {DestinationModel, GooglePlace, HotelModel} from "../models/lodging"
 import {RootState} from "../store"
-import {getDestinations, getHotelByGuid} from "../store/actions/lodging"
+import {
+  addGooglePlace,
+  getDestinations,
+  getHotelByGuid,
+  getHotels,
+} from "../store/actions/lodging"
+import {useScript} from "../utils"
 
 // HOOKS
 export function useDestinations() {
@@ -23,6 +29,27 @@ export function useDestinations() {
     }
   }, [dispatch, destinations])
   return [destinations, loadingDestinations] as const
+}
+
+export function useHotelFromId(hotelId: number) {
+  let dispatch = useDispatch()
+  let [loadingHotel, setLoadingHotel] = useState(false)
+  let hotel: HotelModel | undefined = useSelector((state: RootState) => {
+    return state.lodging.hotels[hotelId]
+  })
+
+  useEffect(() => {
+    async function loadHotel() {
+      setLoadingHotel(true)
+      await dispatch(getHotels([hotelId]))
+      setLoadingHotel(false)
+    }
+    if (!hotel) {
+      loadHotel()
+    }
+  }, [hotel, hotelId, dispatch])
+
+  return [hotel, loadingHotel] as const
 }
 
 export function useHotel(hotelGuid: string) {
@@ -103,8 +130,8 @@ export class DestinationUtils {
       locationStr = hotel.sub_location
     } else {
       locationStr = `${
-        (hotel && hotel.sub_location) || destination.location
-      }, ${destination.state_abbreviation || destination.country}`
+        (hotel && hotel.sub_location) || destination?.location
+      }, ${destination?.state_abbreviation || destination?.country}`
     }
     if (includeEmoji) {
       let emoji = DestinationUtils.getCountryEmoji(destination)
@@ -126,4 +153,61 @@ export class HotelUtils {
         : ""
     }${airportMins} mins`
   }
+}
+
+export function useGooglePlaceId(placeId: string) {
+  const API_KEY = "AIzaSyBNW3s0RPJx7CRFbYWhHJpIAHyN7GrGVgE"
+  let dispatch = useDispatch()
+  let [name, setName] = useState("")
+  let [googleMapScriptLoaded] = useScript(
+    `https://maps.googleapis.com/maps/api/js?libraries=places&key=${API_KEY}`
+  )
+  let place = useSelector(
+    (state: RootState) => state.lodging.googlePlaces[placeId]
+  )
+  useEffect(() => {
+    if (googleMapScriptLoaded && (!place || !place.lat || !place.lng)) {
+      fetchGooglePlace(placeId, (place) => {
+        setName(place.name)
+        dispatch(
+          addGooglePlace({
+            name: place.name,
+            place_id: placeId,
+            lat: place.lat,
+            lng: place.lng,
+          })
+        )
+      })
+    }
+  }, [setName, googleMapScriptLoaded, placeId, place, dispatch])
+
+  return place ? place.name : name
+}
+
+export function fetchGooglePlace(
+  placeId: string,
+  onFetch: (place: GooglePlace) => void
+) {
+  // can only call this if google script has been loaded
+  let map = new google.maps.Map(document.createElement("div"))
+  let service = new google.maps.places.PlacesService(map)
+  service.getDetails(
+    {
+      placeId: placeId,
+      fields: ["name", "geometry"],
+    },
+    (place, status) => {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        if (place && place.name && place.geometry?.location) {
+          onFetch({
+            name: place.name,
+            place_id: placeId,
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng(),
+            type: "ADD_GOOGLE_PLACE",
+          })
+        }
+      }
+    }
+  )
 }

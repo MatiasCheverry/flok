@@ -1,15 +1,32 @@
-import {Box, makeStyles, Typography} from "@material-ui/core"
-import React, {useEffect, useState} from "react"
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogContent,
+  Fab,
+  IconButton,
+  makeStyles,
+  Tooltip,
+  Typography,
+} from "@material-ui/core"
+import {Close, Compare} from "@material-ui/icons"
+import {useEffect, useState} from "react"
 import {useDispatch, useSelector} from "react-redux"
-import {RetreatModel, RetreatSelectedHotelProposal} from "../../models/retreat"
+import {
+  HotelGroup,
+  RetreatModel,
+  RetreatSelectedHotelProposal,
+} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {RootState} from "../../store"
 import {getHotels} from "../../store/actions/lodging"
+import {getHotelGroup} from "../../store/actions/retreat"
 import {DestinationUtils, useDestinations} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
 import AppShareableLinkButton from "../base/AppShareableLinkButton"
 import AppTypography from "../base/AppTypography"
 import PageLockedModal from "../page/PageLockedModal"
+import ProposalComparision from "./ProposalComparison"
 import ProposalListRow from "./ProposalListRow"
 
 let useStyles = makeStyles((theme) => ({
@@ -36,6 +53,39 @@ let useStyles = makeStyles((theme) => ({
       marginTop: theme.spacing(1),
     },
   },
+  fab: {
+    position: "absolute",
+    bottom: theme.spacing(4),
+    right: "40%",
+    [theme.breakpoints.down("sm")]: {
+      right: "50%",
+      transform: "translateX(50%)",
+    },
+    zIndex: 10000,
+    "&:disabled": {
+      opacity: 1,
+      backgroundColor: theme.palette.grey[200],
+    },
+  },
+  compareButton: {
+    display: "flex",
+    alignItems: "center",
+    gap: theme.spacing(2),
+  },
+  dialogHeader: {
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+    paddingTop: theme.spacing(1),
+    paddingRight: theme.spacing(1),
+  },
+  dialogBody: {
+    backgroundColor: theme.palette.background.default,
+  },
+  comparisonContainer: {
+    overflowX: "auto",
+    width: "100%",
+  },
 }))
 
 type ProposalsListPageBodyProps = {retreat: RetreatModel; retreatIdx: number}
@@ -46,11 +96,42 @@ export default function ProposalsListPageBody(
   let classes = useStyles(props)
   let dispatch = useDispatch()
 
+  useEffect(() => {
+    for (let groupId of retreat.group_ids) {
+      if (!hotelGroups.find((group) => group.id === groupId)) {
+        dispatch(getHotelGroup(groupId))
+      }
+    }
+  }, [dispatch])
+
   let hotelsById = useSelector((state: RootState) => state.lodging.hotels)
   let selectedHotels = retreat.selected_hotels
 
+  let hotelGroups = useSelector((state: RootState) => {
+    return Object.values(state.retreat.hotelGroups).filter(
+      (group) => group?.retreat_id === props.retreat.id
+    )
+  })
+
+  let [showOld, setShowOld] = useState(true)
+  useEffect(() => {
+    for (let hotel of selectedHotels) {
+      if (
+        hotel.group_id &&
+        hotel.state !== "NOT_AVAILABLE" &&
+        hotel.state !== "PENDING"
+      ) {
+        setShowOld(false)
+        break
+      }
+    }
+  }, [selectedHotels])
+
   // Probably not the best way to set loading state, but will do for now
   let [loadingHotels, setLoadingHotels] = useState(false)
+  let [groupedSelectedHotels, setGroupedSelectedHotels] = useState<
+    {destinationId: number; selectedHotels: RetreatSelectedHotelProposal[]}[]
+  >([])
   useEffect(() => {
     async function loadMissingHotels(ids: number[]) {
       setLoadingHotels(true)
@@ -70,15 +151,16 @@ export default function ProposalsListPageBody(
 
   let destinations = useDestinations()[0]
 
-  let [groupedSelectedHotels, setGroupedSelectedHotels] = useState<
-    {destinationId: number; selectedHotels: RetreatSelectedHotelProposal[]}[]
-  >([])
   useEffect(() => {
     let byDestinationId: {[key: number]: RetreatSelectedHotelProposal[]} = {}
     let reviewableHotels = hotelsById
       ? selectedHotels
           .filter((selectedHotel) => hotelsById[selectedHotel.hotel_id])
-          .filter((selectedHotel) => selectedHotel.state === "REVIEW")
+          .filter(
+            (selectedHotel) =>
+              selectedHotel.state === "REVIEW" ||
+              selectedHotel.state === "REQUESTED"
+          )
       : []
     reviewableHotels.forEach((selectedHotel) => {
       let destinationId = hotelsById[selectedHotel.hotel_id].destination_id
@@ -87,7 +169,6 @@ export default function ProposalsListPageBody(
       }
       byDestinationId[destinationId].push(selectedHotel)
     })
-
     setGroupedSelectedHotels(
       Object.keys(byDestinationId)
         .sort()
@@ -99,7 +180,7 @@ export default function ProposalsListPageBody(
           }
         })
     )
-  }, [selectedHotels, setGroupedSelectedHotels, hotelsById, retreat])
+  }, [selectedHotels, hotelsById, retreat, setGroupedSelectedHotels])
 
   // Set unavailable hotels bucket
   let [unavailableSelectedHotels, setUnavailableSelectedHotels] = useState<
@@ -119,14 +200,67 @@ export default function ProposalsListPageBody(
     setUnavailableSelectedHotels(unavailableHotels)
   }, [selectedHotels, setUnavailableSelectedHotels, retreat, hotelsById])
 
+  let [showComparison, setShowComparison] = useState(false)
+  let [comparing, setComparing] = useState(false)
+  let [hotelsToCompare, setHotelsToCompare] = useState<{
+    [guid: string]: boolean
+  }>({})
+  let guidToIdMap = useSelector((state: RootState) => {
+    return state.lodging.hotelsGuidMapping
+  })
+
+  let hotelsToCompareArray = Object.entries(hotelsToCompare)
+    .filter((entry) => entry[1])
+    .map((entry) => entry[0])
+
+  function closeComparison() {
+    setShowComparison(false)
+    setHotelsToCompare({})
+    setComparing(false)
+  }
+
   return (
     <div className={classes.root}>
+      {comparing && !showComparison && (
+        <Fab
+          className={classes.fab}
+          disabled={hotelsToCompareArray.length < 2}
+          onClick={() => {
+            setShowComparison(true)
+          }}
+          variant="extended"
+          color="primary">
+          <Compare />
+          &nbsp; Compare ({hotelsToCompareArray.length}/4)
+        </Fab>
+      )}
+      <Dialog
+        fullWidth
+        maxWidth="xl"
+        open={showComparison}
+        classes={{paper: classes.dialogBody}}
+        onClose={closeComparison}>
+        <div className={classes.dialogHeader}>
+          <IconButton size="small" onClick={closeComparison}>
+            <Close />
+          </IconButton>
+        </div>
+        <DialogContent>
+          <div className={classes.comparisonContainer}>
+            <ProposalComparision
+              retreat={retreat}
+              hotels={hotelsToCompareArray.map(
+                (guid) => hotelsById[guidToIdMap[guid] as number]
+              )}
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
       <div className={classes.header}>
         <div>
           <Typography variant="h1">
             Lodging
             <AppTypography variant="inherit" fontWeight="light">
-              {" "}
               - Hotel Proposals
             </AppTypography>
           </Typography>
@@ -135,7 +269,18 @@ export default function ProposalsListPageBody(
             team.
           </Typography>
         </div>
-        <div>
+        <div className={classes.compareButton}>
+          <Tooltip
+            title={comparing ? "Cancel Comparison" : "Compare Proposals"}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => {
+                setComparing((comparing) => !comparing)
+              }}>
+              {comparing ? "Cancel" : "Compare"}
+            </Button>
+          </Tooltip>
           <AppShareableLinkButton
             link={
               new URL(
@@ -149,7 +294,7 @@ export default function ProposalsListPageBody(
         </div>
       </div>
       <Box overflow="auto" width="100%">
-        {groupedSelectedHotels.length + unavailableSelectedHotels.length ===
+        {selectedHotels.filter((hotel) => hotel.state !== "PENDING").length ===
         0 ? (
           loadingHotels ? (
             <AppTypography variant="body1">Loading...</AppTypography>
@@ -157,12 +302,13 @@ export default function ProposalsListPageBody(
             <PageLockedModal pageDesc="We're currently working on collecting hotel proposals on your behalf and will let you know they are ready to view!" />
           )
         ) : undefined}
+
         {/* Liked hotels render */}
 
         {selectedHotels.filter((selectedHotel) => selectedHotel.is_liked)
           .length > 0 && (
           <div className={classes.proposalsList}>
-            <AppTypography variant="h2">Liked</AppTypography>
+            <AppTypography variant="h2">Favorites</AppTypography>
             {selectedHotels
               .sort((a, b) => {
                 if (hotelsById[a.hotel_id] && hotelsById[b.hotel_id]) {
@@ -182,8 +328,110 @@ export default function ProposalsListPageBody(
                     <ProposalListRow
                       hotel={hotel}
                       destination={destination}
-                      isLiked={selectedHotel.is_liked}
+                      isLiked={selectedHotel.is_liked ?? false}
                       proposals={proposals}
+                      proposalUrl={AppRoutes.getPath(
+                        "RetreatLodgingProposalPage"
+                      )}
+                    />
+                  )
+                }
+              })}
+          </div>
+        )}
+        {/* Available hotels render */}
+        {!showOld &&
+          selectedHotels.filter((hotel) => hotel.state !== "PENDING").length !==
+            0 &&
+          hotelGroups
+            .filter((group) =>
+              checkIfGroupHasHotelsReady(group, selectedHotels)
+            )
+            .sort((a, b) => a.id - b.id)
+            .map((group) => {
+              return (
+                <div className={classes.proposalsList}>
+                  <AppTypography variant="h2">{group.title}</AppTypography>
+                  {selectedHotels
+                    .filter(
+                      (hotel) =>
+                        hotel.group_id === group.id &&
+                        hotelsById[hotel.hotel_id] &&
+                        hotel.state !== "NOT_AVAILABLE" &&
+                        hotel.state !== "PENDING"
+                    )
+                    .map((selectedHotel) => {
+                      let hotel = hotelsById[selectedHotel.hotel_id]
+                      let destination = destinations[hotel.destination_id]
+                      let proposals = selectedHotel.hotel_proposals || []
+                      return (
+                        destination && (
+                          <ProposalListRow
+                            isLiked={selectedHotel.is_liked ?? false}
+                            hotelsToCompare={hotelsToCompare}
+                            updateHotelsToCompare={(
+                              guid: string,
+                              value: boolean
+                            ) => {
+                              setHotelsToCompare((hotelsToCompare) => {
+                                return {...hotelsToCompare, [guid]: value}
+                              })
+                            }}
+                            comparing={comparing}
+                            hotel={hotel}
+                            destination={destination}
+                            proposals={proposals}
+                            proposalUrl={AppRoutes.getPath(
+                              "RetreatLodgingProposalPage",
+                              {
+                                retreatIdx: retreatIdx.toString(),
+                                hotelGuid: hotel.guid,
+                              }
+                            )}
+                          />
+                        )
+                      )
+                    })}
+                </div>
+              )
+            })}
+        {!showOld &&
+        selectedHotels.filter(
+          (hotel) =>
+            !hotel.group_id &&
+            hotelsById[hotel.hotel_id] &&
+            hotel.state !== "NOT_AVAILABLE" &&
+            hotel.state !== "PENDING"
+        ).length ? (
+          <div className={classes.proposalsList}>
+            <AppTypography variant="h2">Other</AppTypography>
+            {selectedHotels
+              .filter(
+                (hotel) =>
+                  !hotel.group_id &&
+                  hotelsById[hotel.hotel_id] &&
+                  hotel.state !== "NOT_AVAILABLE" &&
+                  hotel.state !== "PENDING"
+              )
+              .map((selectedHotel) => {
+                let hotel = hotelsById[selectedHotel.hotel_id]
+                let destination = destinations[hotel.destination_id]
+                let proposals = selectedHotel.hotel_proposals || []
+                return (
+                  destination && (
+                    <ProposalListRow
+                      isLiked={selectedHotel.is_liked ?? false}
+                      hotelsToCompare={hotelsToCompare}
+                      updateHotelsToCompare={(guid: string, value: boolean) => {
+                        setHotelsToCompare((hotelsToCompare) => {
+                          return {...hotelsToCompare, [guid]: value}
+                        })
+                      }}
+                      comparing={comparing}
+                      hotel={hotel}
+                      destination={destination}
+                      proposals={proposals}
+                      requested={selectedHotel.state === "REQUESTED"}
                       proposalUrl={AppRoutes.getPath(
                         "RetreatLodgingProposalPage",
                         {
@@ -193,31 +441,40 @@ export default function ProposalsListPageBody(
                       )}
                     />
                   )
-                }
+                )
               })}
           </div>
+        ) : (
+          ""
         )}
-
-        {/* Available hotels render */}
-        {groupedSelectedHotels.map((destList) => {
-          let destination = destinations[destList.destinationId]
-          if (destination && destList.selectedHotels.length) {
-            return (
-              <div className={classes.proposalsList}>
-                <AppTypography variant="h2">
-                  {DestinationUtils.getLocationName(destination)}
-                </AppTypography>
-                {destList.selectedHotels
-                  .sort((a, b) => a.hotel_id - b.hotel_id)
-                  .filter((selectedHotel) => !selectedHotel.is_liked)
-                  .map((selectedHotel) => {
+        {/* Old way render */}
+        {showOld &&
+          groupedSelectedHotels.map((destList) => {
+            let destination = destinations[destList.destinationId]
+            if (destination && destList.selectedHotels.length) {
+              return (
+                <div className={classes.proposalsList}>
+                  <AppTypography variant="h2">
+                    {DestinationUtils.getLocationName(destination)}
+                  </AppTypography>
+                  {destList.selectedHotels.map((selectedHotel) => {
                     let hotel = hotelsById[selectedHotel.hotel_id]
                     let proposals = selectedHotel.hotel_proposals || []
                     return (
                       <ProposalListRow
+                        isLiked={selectedHotel.is_liked ?? false}
+                        hotelsToCompare={hotelsToCompare}
+                        updateHotelsToCompare={(
+                          guid: string,
+                          value: boolean
+                        ) => {
+                          setHotelsToCompare((hotelsToCompare) => {
+                            return {...hotelsToCompare, [guid]: value}
+                          })
+                        }}
+                        comparing={comparing}
                         hotel={hotel}
                         destination={destination}
-                        isLiked={selectedHotel.is_liked}
                         proposals={proposals}
                         proposalUrl={AppRoutes.getPath(
                           "RetreatLodgingProposalPage",
@@ -229,12 +486,12 @@ export default function ProposalsListPageBody(
                       />
                     )
                   })}
-              </div>
-            )
-          } else {
-            return undefined
-          }
-        })}
+                </div>
+              )
+            } else {
+              return undefined
+            }
+          })}
         {/* Unavailable hotels render */}
         <div className={classes.proposalsList}>
           {unavailableSelectedHotels.length ? (
@@ -248,9 +505,10 @@ export default function ProposalsListPageBody(
             let destination = destinations[hotel.destination_id]
             return destination ? (
               <ProposalListRow
+                isLiked={selectedHotel.is_liked ?? false}
+                comparing={comparing}
                 unavailable
                 hotel={hotel}
-                isLiked={selectedHotel.is_liked}
                 proposals={[]}
                 destination={destination}
               />
@@ -260,4 +518,18 @@ export default function ProposalsListPageBody(
       </Box>
     </div>
   )
+}
+
+export function checkIfGroupHasHotelsReady(
+  group: HotelGroup,
+  hotels: RetreatSelectedHotelProposal[]
+) {
+  return !!hotels.find((hotel) => {
+    return (
+      hotel.group_id === group.id &&
+      (hotel.state === "REVIEW" ||
+        hotel.state === "REQUESTED" ||
+        hotel.state === "SELECTED")
+    )
+  })
 }

@@ -1,7 +1,12 @@
 import {Action} from "redux"
-import {UserAuthResponse, UserHomeResponse} from "../../models/api"
+import {
+  AttendeeApiResponse,
+  UserAuthResponse,
+  UserHomeResponse,
+} from "../../models/api"
 import {UserModel} from "../../models/user"
 import {ApiAction} from "../actions/api"
+import {GET_MY_ATTENDEE_SUCCESS} from "../actions/retreat"
 import {
   GET_USER_HOME_SUCCESS,
   GET_USER_RESET_SUCCESS,
@@ -15,6 +20,10 @@ export type UserState = {
     tokens: {[key: string]: UserModel}
   }
   user?: UserModel
+  myAttendeeByRetreat: {
+    // retreatId => attendeeId
+    [id: number]: number
+  }
 }
 
 const initialState: UserState = {
@@ -23,6 +32,7 @@ const initialState: UserState = {
   },
   loginStatus: "UNKNOWN",
   user: undefined,
+  myAttendeeByRetreat: {},
 }
 
 export default function userReducer(
@@ -47,6 +57,15 @@ export default function userReducer(
         auth: {
           ...state.auth,
           tokens: {...state.auth.tokens, [loginToken]: user.user},
+        },
+      }
+    case GET_MY_ATTENDEE_SUCCESS:
+      payload = (action as ApiAction).payload as AttendeeApiResponse
+      return {
+        ...state,
+        myAttendeeByRetreat: {
+          ...state.myAttendeeByRetreat,
+          [payload.attendee.retreat_id]: payload.attendee.id,
         },
       }
     default:

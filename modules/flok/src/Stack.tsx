@@ -1,15 +1,29 @@
-import React from "react"
 import {Route, Switch} from "react-router-dom"
+import AttendeeSiteFlightsPage from "./components/attendee-site/AttendeeSiteFlightsPage"
+import AttendeeSiteThemeProvider from "./components/attendee-site/AttendeeSiteThemeProvider"
+import RetreatHotelSearchPage from "./components/lodging/RetreatHotelSearchPage"
+import RetreatRfpPage from "./components/lodging/RetreatRfpPage"
 import PageContainer from "./components/page/PageContainer"
 import PageSidenav, {PageDemoSidenav} from "./components/page/PageSidenav"
+import {Constants} from "./config"
+import AttendeeCreateAccountPage from "./pages/attendee-site/AttendeeCreateAccountPage"
+import AttendeeSiteFormPage from "./pages/attendee-site/AttendeeSiteFormPage"
+import AttendeeSite from "./pages/attendee-site/AttendeeSitePage"
 import AuthResetPage from "./pages/auth/AuthResetPage"
 import ForgotPasswordPage from "./pages/auth/ForgotPasswordPage"
 import SigninPage from "./pages/auth/SigninPage"
 import AttendeePage from "./pages/dashboard/AttendeePage"
+import AttendeesRegFormBuilderPage from "./pages/dashboard/AttendeeRegFormBuilderPage"
 import AttendeesPage from "./pages/dashboard/AttendeesPage"
 import BudgetEstimatePage from "./pages/dashboard/BudgetEstimatePage"
-import BudgetPage from "./pages/dashboard/BudgetPage"
+import RetreatBudgetPage from "./pages/dashboard/BudgetPage"
+import EditEmailTemplate from "./pages/dashboard/EditEmailTemplate"
+import FlightsOptionsPage from "./pages/dashboard/FlightsOptionsPage"
 import FlightsPage from "./pages/dashboard/FlightsPage"
+import HotelProfilePage from "./pages/dashboard/HotelProfilePage"
+import ItineraryInspirationPage from "./pages/dashboard/ItineraryInspirationPage"
+import ItineraryPage from "./pages/dashboard/ItineraryPage"
+import LandingPageGenerator from "./pages/dashboard/LandingPageGenerator"
 import LodgingContractPage from "./pages/dashboard/LodgingContractPage"
 import LodgingPage from "./pages/dashboard/LodgingPage"
 import LodgingProposalPage from "./pages/dashboard/LodgingProposalPage"
@@ -20,14 +34,13 @@ import DeprecatedProposalPage from "./pages/deprecated/DeprecatedProposalPage"
 import DeprecatedProposalsListPage from "./pages/deprecated/DeprecatedProposalsListPage"
 import DeprecatedRetreatPreferencesFormPage from "./pages/deprecated/DeprecatedRetreatPreferencesFormPage"
 import HomeRoutingPage from "./pages/HomeRoutingPage"
-import LandingPageGenerator from "./pages/LandingPageGenerator"
 import NotFound404Page from "./pages/misc/NotFound404Page"
 import ProtectedRoute from "./pages/misc/ProtectedRoute"
 import RetreatProvider from "./pages/misc/RetreatProvider"
+import RetreatSettingsPage from "./pages/misc/RetreatSettingsPage"
 import PretripHomePage from "./pages/pretrip/PretripHomePage"
 import PretripProposalPage from "./pages/pretrip/PretripProposalPage"
 import PretripProposalsPage from "./pages/pretrip/PretripProposalsPage"
-import RetreatWebsite from "./pages/RetreatWebsite"
 
 export type FlokPageName = keyof typeof AppRoutes.pages
 
@@ -54,29 +67,50 @@ export class AppRoutes {
     RetreatLodgingPage: "/r/:retreatIdx/lodging",
     RetreatLodgingProposalsPage: "/r/:retreatIdx/lodging/proposals",
     RetreatLodgingProposalPage: "/r/:retreatIdx/lodging/proposals/:hotelGuid", // no sidebar
-    RetreatLodgingContractPage: "/r/:retreatIdx/lodging/contract", // no sidebar
+    RetreatLodgingContractPage: "/r/:retreatIdx/lodging/contract",
+
+    RetreatHotelSearchPage: "/r/:retreatIdx/lodging/hotels",
+    RetreatHotelProfilePage: "/r/:retreatIdx/lodging/hotels/:hotelGuid", // no sidebar work in progress
+    RetreatRfpPage: "/r/:retreatIdx/lodging/rfp",
 
     RetreatAttendeesPage: "/r/:retreatIdx/attendees",
-    RetreatAttendeePage: "/r/:retreatIdx/attendees/:attendeeId",
+    RetreatAttendeePage: "/r/:retreatIdx/attendees/:attendeeId/profile",
     RetreatAttendeeFlightsPage: "/r/:retreatIdx/attendees/:attendeeId/flights",
+    RetreatAttendeeRegResponsePage:
+      "/r/:retreatIdx/attendees/:attendeeId/registration",
+    RetreatAttendeesRegFormBuilderPage: "/r/:retreatIdx/attendees/registration",
+    RetreatAttendeesRegFormBuilderConfig:
+      "/r/:retreatIdx/attendees/registration/config",
+    RetreatSettingsPage: "/r/:retreatIdx/settings",
+
+    // AttendeelLanding page
+    LandingPageGeneratorHome: "/r/:retreatIdx/attendees/landing",
+    LandingPageGeneratorPage: "/r/:retreatIdx/attendees/landing/:currentPageId",
+    LandingPageGeneratorConfig:
+      "/r/:retreatIdx/attendees/landing/:currentPageId/config",
+    LandingPageGeneratorConfigWebsiteSettings:
+      "/r/:retreatIdx/attendees/landing/:currentPageId/config/website-settings",
+    LandingPageGeneratorConfigPageSettings:
+      "/r/:retreatIdx/attendees/landing/:currentPageId/config/page-settings/:pageId",
+    LandingPageGeneratorConfigAddPage:
+      "/r/:retreatIdx/attendees/landing/:currentPageId/config/add-page",
 
     RetreatFlightsPage: "/r/:retreatIdx/flights",
+    RetreatFlightsOptionsPage: "/r/:retreatIdx/attendees/flights",
+    RetreatFlightsOptionsConfig: "/r/:retreatIdx/attendees/flights/config",
 
     RetreatBudgetPage: "/r/:retreatIdx/budget",
     RetreatBudgetEstimatePage: "/r/:retreatIdx/budget/estimate",
 
+    RetreatItineraryPage: "/r/:retreatIdx/itinerary",
+    RetreatItineraryInspirationPage: "/r/:retreatIdx/itinerary/inspiration",
+
     // Not in sidebar yet
-    RetreatWebsiteHome: "/retreats/:retreatName",
-    RetreatWebsitePage: "/retreats/:retreatName/:pageName",
-    LandingPageGeneratorHome: "/r/:retreatIdx/landing",
-    LandingPageGeneratorPage: "/r/:retreatIdx/landing/:currentPageId",
-    LandingPageGeneratorConfig: "/r/:retreatIdx/landing/:currentPageId/config",
-    LandingPageGeneratorConfigWebsiteSettings:
-      "/r/:retreatIdx/landing/:currentPageId/config/website-settings",
-    LandingPageGeneratorConfigPageSettings:
-      "/r/:retreatIdx/landing/:currentPageId/config/page-settings/:pageId",
-    LandingPageGeneratorConfigAddPage:
-      "/r/:retreatIdx/landing/:currentPageId/config/add-page",
+    AttendeeSiteHome: `${Constants.attendeeSitePathPrefix}/:retreatName`,
+    AttendeeSitePage: `${Constants.attendeeSitePathPrefix}/:retreatName/:pageName`,
+    AttendeeSiteFormPage: `${Constants.attendeeSitePathPrefix}/:retreatName/registration`,
+    AttendeeSignUpPage: `${Constants.attendeeSitePathPrefix}/:retreatName/sign-up`,
+    AttendeeSiteFlightsPage: `${Constants.attendeeSitePathPrefix}/:retreatName/flights`,
 
     // PRETRIP DEMO
     PretripHomePage: "/r/demo",
@@ -89,11 +123,15 @@ export class AppRoutes {
     DeprecatedRetreatPreferencesFormPage: "/r/:retreatGuid/preferences",
     DeprecatedProposalsListPage: "/r/:retreatGuid/proposals",
     DeprecatedProposalPage: "/r/:retreatGuid/proposals/:hotelGuid",
+
+    // Email
+    EmailTemplatePage: "/r/:retreatIdx/email-templates/:templateName",
   }
 
   static getPath(
     name: FlokPageName,
-    pathParams: {[key: string]: string} = {}
+    pathParams: {[key: string]: string} = {},
+    queryParams: {[key: string]: string} = {}
   ): string {
     let path = this.pages[name]
     Object.keys(pathParams).forEach((key) => {
@@ -101,6 +139,12 @@ export class AppRoutes {
       let toReplace = ":" + key
       path = path.replace(toReplace, value)
     })
+    if (Object.keys(queryParams).length > 0) {
+      path += "?"
+    }
+    let queryString = new URLSearchParams(queryParams).toString()
+    path += queryString
+
     return path
   }
 }
@@ -150,14 +194,33 @@ export default function Stack() {
         exact
         component={ForgotPasswordPage}
       />
-      <Route
-        path={[
-          AppRoutes.getPath("RetreatWebsiteHome"),
-          AppRoutes.getPath("RetreatWebsitePage"),
-        ]}
-        exact
-        component={RetreatWebsite}
-      />
+      <Route path={Constants.attendeeSitePathPrefix}>
+        <Switch>
+          <Route path={[AppRoutes.getPath("AttendeeSiteFormPage")]} exact>
+            <AttendeeSiteThemeProvider>
+              <AttendeeSiteFormPage />
+            </AttendeeSiteThemeProvider>
+          </Route>
+          <Route path={[AppRoutes.getPath("AttendeeSignUpPage")]} exact>
+            <AttendeeCreateAccountPage />
+          </Route>
+          <Route path={[AppRoutes.getPath("AttendeeSiteFlightsPage")]} exact>
+            <AttendeeSiteThemeProvider>
+              <AttendeeSiteFlightsPage />
+            </AttendeeSiteThemeProvider>
+          </Route>
+          <Route
+            path={[
+              AppRoutes.getPath("AttendeeSiteHome"),
+              AppRoutes.getPath("AttendeeSitePage"),
+            ]}
+            exact>
+            <AttendeeSiteThemeProvider>
+              <AttendeeSite />
+            </AttendeeSiteThemeProvider>
+          </Route>
+        </Switch>
+      </Route>
       {/* Dashboard routes */}
       <Route path="/r/demo">
         <PageContainer>
@@ -192,6 +255,15 @@ export default function Stack() {
               <Route exact path={AppRoutes.getPath("RetreatHomePage")}>
                 <RetreatHomePage />
               </Route>
+              {/* Email */}
+              <Route exact path={AppRoutes.getPath("EmailTemplatePage")}>
+                <EditEmailTemplate />
+              </Route>
+
+              {/* Settings */}
+              <Route exact path={AppRoutes.getPath("RetreatSettingsPage")}>
+                <RetreatSettingsPage />
+              </Route>
 
               {/* Lodging */}
               <Route exact path={AppRoutes.getPath("RetreatLodgingPage")}>
@@ -212,10 +284,27 @@ export default function Stack() {
                 path={AppRoutes.getPath("RetreatLodgingContractPage")}>
                 <LodgingContractPage />
               </Route>
+              <Route exact path={AppRoutes.getPath("RetreatHotelProfilePage")}>
+                <HotelProfilePage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatHotelSearchPage")}>
+                <RetreatHotelSearchPage />
+              </Route>
+              <Route exact path={AppRoutes.getPath("RetreatRfpPage")}>
+                <RetreatRfpPage />
+              </Route>
 
               {/* Attendees */}
               <Route exact path={AppRoutes.getPath("RetreatAttendeesPage")}>
                 <AttendeesPage />
+              </Route>
+              <Route
+                exact
+                path={[
+                  AppRoutes.getPath("RetreatAttendeesRegFormBuilderPage"),
+                  AppRoutes.getPath("RetreatAttendeesRegFormBuilderConfig"),
+                ]}>
+                <AttendeesRegFormBuilderPage />
               </Route>
               <Route exact path={AppRoutes.getPath("RetreatAttendeePage")}>
                 <AttendeePage />
@@ -226,13 +315,26 @@ export default function Stack() {
                 <AttendeePage />
               </Route>
               <Route
+                exact
+                path={AppRoutes.getPath("RetreatAttendeeRegResponsePage")}>
+                <AttendeePage />
+              </Route>
+              <Route
                 path={[
                   AppRoutes.getPath("LandingPageGeneratorConfig"),
                   AppRoutes.getPath("LandingPageGeneratorPage"),
                   AppRoutes.getPath("LandingPageGeneratorHome"),
-                ]}
-                component={LandingPageGenerator}
-              />
+                ]}>
+                <LandingPageGenerator />
+              </Route>
+              <Route
+                exact
+                path={[
+                  AppRoutes.getPath("RetreatFlightsOptionsPage"),
+                  AppRoutes.getPath("RetreatFlightsOptionsConfig"),
+                ]}>
+                <FlightsOptionsPage />
+              </Route>
 
               {/* Flights */}
               <Route exact path={AppRoutes.getPath("RetreatFlightsPage")}>
@@ -240,14 +342,25 @@ export default function Stack() {
               </Route>
 
               {/* Budget */}
-              <Route exact path={AppRoutes.getPath("RetreatBudgetPage")}>
-                <BudgetPage />
-              </Route>
               <Route
                 exact
                 path={AppRoutes.getPath("RetreatBudgetEstimatePage")}>
                 <BudgetEstimatePage />
               </Route>
+              <Route exact path={AppRoutes.getPath("RetreatBudgetPage")}>
+                <RetreatBudgetPage />
+              </Route>
+
+              {/* Itinerary */}
+              <Route exact path={AppRoutes.getPath("RetreatItineraryPage")}>
+                <ItineraryPage />
+              </Route>
+              <Route
+                exact
+                path={AppRoutes.getPath("RetreatItineraryInspirationPage")}>
+                <ItineraryInspirationPage />
+              </Route>
+
               <Route path={"*"} component={NotFound404Page} />
             </Switch>
           </PageContainer>

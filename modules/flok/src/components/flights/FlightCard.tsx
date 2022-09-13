@@ -26,7 +26,7 @@ let useStyles = makeStyles((theme) => ({
       width: (props: FlightCardProps) => (props.isEditing ? "80%" : "100%"),
       gap: (props: FlightCardProps) => (props.overall ? theme.spacing(2) : "0"),
     },
-    width: (props: FlightCardProps) => (props.isEditing ? "100%" : "65%"),
+    width: "100%",
     justifyContent: "space-around",
     overflow: "scroll",
     paddingLeft: theme.spacing(1),
@@ -110,7 +110,7 @@ let useStyles = makeStyles((theme) => ({
     width: "50%",
   },
   singleColumnContainer: {
-    width: "30%",
+    width: "35%",
   },
   columnInSingle: {
     width: "fit-content",
@@ -132,9 +132,12 @@ function FlightCard(props: FlightCardProps) {
 
   let classes = useStyles(props)
 
-  function chop(string: string) {
-    //removes the last character from a string
-    return string.substring(0, string.length - 1)
+  function differenceInDays(arr_datetime: Date, dep_datetime: Date) {
+    dep_datetime.setHours(0, 0, 0, 0)
+    arr_datetime.setHours(0, 0, 0, 0)
+    return Math.ceil(
+      (arr_datetime.getTime() - dep_datetime.getTime()) / (1000 * 3600 * 24)
+    )
   }
 
   let dep_datetime = flight.dep_datetime
@@ -161,26 +164,11 @@ function FlightCard(props: FlightCardProps) {
         <div className={`${classes.column} ${classes.columnInSingle}`}>
           {flight?.dep_datetime ? (
             <Typography className={classes.bold}>
-              {(!isSmallScreen
-                ? new Intl.DateTimeFormat("en-US", {
-                    dateStyle: "full",
-                    timeStyle: undefined,
-                  })
-                    .format(dep_datetime)
-                    .split(" ")[0]
-                    .substring(0, 3)
-                : "") +
-                " " +
-                chop(
-                  new Intl.DateTimeFormat("en-US", {
-                    dateStyle: "full",
-                    timeStyle: undefined,
-                  })
-                    .format(dep_datetime)
-                    .split(" ")
-                    .slice(1, 3)
-                    .join(" ")
-                )}
+              {new Intl.DateTimeFormat("en-US", {
+                weekday: isSmallScreen ? undefined : "short",
+                month: "short",
+                day: "numeric",
+              }).format(dep_datetime)}
             </Typography>
           ) : (
             "N/A"
@@ -191,15 +179,26 @@ function FlightCard(props: FlightCardProps) {
       <div className={`${classes.twoColumns} ${classes.columnInDouble}`}>
         <div className={`${classes.column} ${classes.columnInDouble}`}>
           {dep_datetime && arr_datetime ? (
-            <Typography>
-              {new Intl.DateTimeFormat("en-GB", {
-                timeStyle: "short",
-              }).format(dep_datetime)}
-              {" - "}
-              {new Intl.DateTimeFormat("en-GB", {
-                timeStyle: "short",
-              }).format(arr_datetime)}
-            </Typography>
+            <>
+              <Typography>
+                {new Intl.DateTimeFormat("en-GB", {
+                  timeStyle: "short",
+                }).format(dep_datetime)}
+                {" - "}
+                {new Intl.DateTimeFormat("en-GB", {
+                  timeStyle: "short",
+                }).format(arr_datetime)}
+                {arr_datetime &&
+                  dep_datetime &&
+                  differenceInDays(arr_datetime, dep_datetime) > 0 && (
+                    <sup>
+                      &nbsp;
+                      {"+" +
+                        differenceInDays(arr_datetime, dep_datetime).toString()}
+                    </sup>
+                  )}
+              </Typography>
+            </>
           ) : (
             "N/A"
           )}

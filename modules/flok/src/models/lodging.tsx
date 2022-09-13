@@ -26,6 +26,7 @@ export type HotelModel = {
   destination_id: number
   sub_location?: string
   street_address?: string
+  address_coordinates?: [number, number]
 
   website_url: string
   description_short: string
@@ -34,4 +35,22 @@ export type HotelModel = {
 
   spotlight_img: ImageModel
   imgs: ImageModel[]
+  num_rooms?: number
+  is_flok_recommended?: boolean
+  lodging_tags: LodgingTagModel[]
+  price: "$" | "$$" | "$$$" | "$$$$"
+  lodging_tags_filter_dict: {[id: number]: boolean}
+}
+
+export type LodgingTagModel = {
+  id: number
+  name: string
+}
+
+export type GooglePlace = {
+  name: string
+  place_id: string
+  lat?: number
+  lng?: number
+  type: "ADD_GOOGLE_PLACE"
 }

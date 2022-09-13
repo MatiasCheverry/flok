@@ -12,7 +12,13 @@ import {
   TextFieldProps,
   Typography,
 } from "@material-ui/core"
-import {Add, ArrowDownward, ArrowUpward, Delete} from "@material-ui/icons"
+import {
+  Add,
+  ArrowDownward,
+  ArrowUpward,
+  Close,
+  Delete,
+} from "@material-ui/icons"
 import {useFormik} from "formik"
 import _ from "lodash"
 import {useState} from "react"
@@ -183,11 +189,13 @@ export default function HotelImageForm(props: HotelImageFormType) {
           onClick={() => setUploadImageModalOpen(true)}>
           Upload Images
         </Button>
-        <Dialog
-          open={uploadImageModalOpen}
-          onClose={() => setUploadImageModalOpen(false)}
-          fullWidth>
-          <ImageUploadForm hotelId={props.hotel.id} />
+        <Dialog open={uploadImageModalOpen} fullWidth>
+          <ImageUploadForm
+            hotelId={props.hotel.id}
+            onClose={() => {
+              setUploadImageModalOpen(false)
+            }}
+          />
         </Dialog>
       </Box>
     </form>
@@ -329,10 +337,16 @@ let useUploadFormStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.error.main,
     color: theme.palette.common.white,
   },
+  titleDiv: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
 }))
 
 type ImageUploadFormProps = {
   hotelId: number
+  onClose?: () => void
 }
 
 function ImageUploadForm(props: ImageUploadFormProps) {
@@ -405,7 +419,15 @@ function ImageUploadForm(props: ImageUploadFormProps) {
 
   return (
     <form className={classes.verticalSpacing} onSubmit={formik.handleSubmit}>
-      <Typography variant="h4">Upload Images</Typography>
+      <div className={classes.titleDiv}>
+        <Typography variant="h4">Upload Images</Typography>{" "}
+        {props.onClose && (
+          <IconButton onClick={props.onClose}>
+            <Close />
+          </IconButton>
+        )}
+      </div>
+
       {uploadLoading ? <AppLoadingScreen /> : undefined}
       {formik.values.imgs.map((img, i) => (
         <Box className={classes.verticalSpacing}>

@@ -171,7 +171,7 @@ export default function AppRetreatDatesInput(props: AppRetreatDatesInputProps) {
     }
   }
   let minPlanningDate = new Date()
-  minPlanningDate.setDate(minPlanningDate.getDate() + 90)
+  minPlanningDate.setDate(minPlanningDate.getDate() + 45)
 
   return (
     <ClickAwayListener onClickAway={closePopper}>

@@ -19,6 +19,7 @@ else
 fi
 
 [[ ! -z "$FLOK_BASE_URL" ]] && echo "window.appConfig.flok_base_url=\"$FLOK_BASE_URL\"" >> /usr/share/nginx/html/config.js
+[[ ! -z "$GOOGLE_API_KEY" ]] && echo "window.appConfig.google_api_key=\"$GOOGLE_API_KEY\"" >> /usr/share/nginx/html/config.js
 
 echo "Final config.js file"
 cat /usr/share/nginx/html/config.js
