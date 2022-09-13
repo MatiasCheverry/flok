@@ -29,12 +29,6 @@ export default function AttendeeSiteThemeProvider(
               primary: website?.text_color ?? theme.palette.text.primary,
             },
           },
-          typography: {
-            ...theme.typography,
-            h1: {
-              color: "red",
-            },
-          },
         })
       }>
       <CssBaseline />
