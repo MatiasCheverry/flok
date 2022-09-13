@@ -4,12 +4,16 @@ import {
   Chip,
   makeStyles,
   Paper,
+  Popover,
   Tooltip,
+  Typography,
 } from "@material-ui/core"
 import {Info} from "@material-ui/icons"
+import {useState} from "react"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
 import {HotelLodgingProposal} from "../../models/retreat"
+import {theme} from "../../theme"
 import {formatCurrency} from "../../utils"
 import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
@@ -133,6 +137,21 @@ export default function ProposalListRow(props: ProposalListRowProps) {
     }
   }
 
+  // For popover
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handlePopoverClose = () => {
+    // setAnchorEl(null)
+    console.log("mouse leave")
+  }
+
+  const open = Boolean(anchorEl)
+  console.log(open)
+
   let lowestProposal = getLowestCompare(proposals)
   let avgRoomCost: string | undefined =
     lowestProposal && lowestProposal.compare_room_rate
@@ -148,7 +167,10 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           lowestProposal.currency
         )
       : undefined
-
+  console.log(
+    proposals[0],
+    proposals[0] && proposals[0].dates.split(/\r?\n/).length
+  )
   return (
     <Paper elevation={0} className={classes.card}>
       <div className={classes.imgAndBodyContainer}>
@@ -164,6 +186,60 @@ export default function ProposalListRow(props: ProposalListRowProps) {
               {DestinationUtils.getLocationName(destination, true, hotel)}
             </AppTypography>
             <AppTypography variant="h4">{hotel.name}</AppTypography>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}>
+              <AppTypography variant="h5" style={{fontSize: "0.9rem"}}>
+                {proposals && proposals[0] !== undefined && proposals[0]?.dates
+                  ? proposals[0].dates.split(/\r?\n/)[0]
+                  : ""}
+              </AppTypography>
+              {(proposals.length > 1 ||
+                (proposals[0] &&
+                  proposals[0].dates.split(/\r?\n/).length > 1)) && (
+                <Typography
+                  aria-owns={open ? "mouse-over-popover" : undefined}
+                  aria-haspopup="true"
+                  onMouseEnter={handlePopoverOpen}
+                  onMouseLeave={handlePopoverClose}>
+                  <strong>
+                    &nbsp; +
+                    {proposals.length - 1 > 0 ? proposals.length - 1 : ""}
+                  </strong>
+                </Typography>
+              )}
+              <Popover
+                id="mouse-over-popover"
+                open={open}
+                anchorEl={anchorEl}
+                anchorOrigin={{
+                  vertical: "bottom",
+                  horizontal: "left",
+                }}
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "left",
+                }}>
+                <div
+                  style={{
+                    padding: theme.spacing(2),
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: theme.spacing(2),
+                  }}>
+                  {proposals.map((proposal) => {
+                    if (proposal.dates.trim()) {
+                      return (
+                        <li style={{whiteSpace: "pre"}}>{proposal.dates}</li>
+                      )
+                    }
+                  })}
+                </div>
+              </Popover>
+            </div>
           </div>
           {!unavailable && (
             <div className={classes.attributesContainer}>

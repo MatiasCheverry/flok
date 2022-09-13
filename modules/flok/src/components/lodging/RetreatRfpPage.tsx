@@ -1,4 +1,10 @@
-import {Button, FormHelperText, makeStyles, TextField} from "@material-ui/core"
+import {
+  Button,
+  FormHelperText,
+  makeStyles,
+  Paper,
+  TextField,
+} from "@material-ui/core"
 import {ToggleButton, ToggleButtonGroup} from "@material-ui/lab"
 import clsx from "clsx"
 import {push} from "connected-react-router"
@@ -12,6 +18,7 @@ import {useRetreat} from "../../pages/misc/RetreatProvider"
 import {RootState} from "../../store"
 import {ApiAction} from "../../store/actions/api"
 import {getRFP, patchRetreat, postRFP} from "../../store/actions/retreat"
+import {theme} from "../../theme"
 import {getTextFieldErrorProps, useQuery} from "../../utils"
 import AppTypography from "../base/AppTypography"
 import PageBody from "../page/PageBody"
@@ -302,6 +309,27 @@ function RetreatRfpPage() {
                 className={classes.agendaNotesTextField}
               />
             </div>
+            <Paper
+              style={{
+                marginTop: theme.spacing(3),
+                padding: theme.spacing(1.5),
+              }}>
+              <AppTypography fontWeight="bold">
+                4. What is your corporate address?
+              </AppTypography>
+              <AppTypography
+                className={classes.agendaSubtext}
+                fontWeight="light">
+                Venues need to get a sense of how much meeting space you will
+                need
+              </AppTypography>
+              <TextField
+                className={classes.agendaSubtext}
+                style={{minWidth: 375}}
+                onChange={formik.handleChange}
+                placeholder="123 Flok St. New York, New York 10013"
+                variant="outlined"></TextField>
+            </Paper>
           </div>
           <Button
             variant="contained"
