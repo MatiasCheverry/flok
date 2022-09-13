@@ -326,6 +326,13 @@ export default function ProposalsListPageBody(
                   let destination = destinations[hotel.destination_id]
                   return (
                     <ProposalListRow
+                      hotelsToCompare={hotelsToCompare}
+                      updateHotelsToCompare={(guid: string, value: boolean) => {
+                        setHotelsToCompare((hotelsToCompare) => {
+                          return {...hotelsToCompare, [guid]: value}
+                        })
+                      }}
+                      comparing={comparing}
                       hotel={hotel}
                       destination={destination}
                       isLiked={selectedHotel.is_liked ?? false}

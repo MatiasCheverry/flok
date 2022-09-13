@@ -112,6 +112,10 @@ let useStyles = makeStyles((theme) => ({
     height: 50,
     width: 50,
   },
+  nameContainer: {
+    display: "flex",
+    alignItems: "center",
+  },
 }))
 
 type ProposalListRowProps = {
@@ -174,7 +178,7 @@ export default function ProposalListRow(props: ProposalListRowProps) {
               {destination &&
                 DestinationUtils.getLocationName(destination, true, hotel)}
             </AppTypography>
-            <div style={{display: "flex"}}>
+            <div className={classes.nameContainer}>
               <AppTypography variant="h4">{hotel.name}</AppTypography>
               &nbsp;
               {props.isLiked ? (
