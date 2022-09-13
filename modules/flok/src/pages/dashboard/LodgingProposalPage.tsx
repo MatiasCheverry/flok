@@ -75,9 +75,6 @@ let useStyles = makeStyles((theme) => ({
     },
   },
   details: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
     marginLeft: -theme.spacing(2),
     marginTop: -theme.spacing(2),
     "& > $detailsSection": {
