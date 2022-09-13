@@ -13,7 +13,6 @@ import {useState} from "react"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
 import {HotelLodgingProposal} from "../../models/retreat"
-import {theme} from "../../theme"
 import {formatCurrency} from "../../utils"
 import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
 import AppMoreInfoIcon from "../base/AppMoreInfoIcon"
@@ -109,6 +108,26 @@ let useStyles = makeStyles((theme) => ({
     height: 50,
     width: 50,
   },
+  proposalsDatesContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  datesText: {
+    fontSize: "0.9rem",
+  },
+  popover: {
+    pointerEvents: "none",
+  },
+  popoverInnerDiv: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2),
+  },
+  popoverLi: {
+    whiteSpace: "pre",
+  },
 }))
 
 type ProposalListRowProps = {
@@ -137,7 +156,7 @@ export default function ProposalListRow(props: ProposalListRowProps) {
     }
   }
 
-  // For popover
+  // For dates popover
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
 
   const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
@@ -145,12 +164,10 @@ export default function ProposalListRow(props: ProposalListRowProps) {
   }
 
   const handlePopoverClose = () => {
-    // setAnchorEl(null)
-    console.log("mouse leave")
+    setAnchorEl(null)
   }
 
-  const open = Boolean(anchorEl)
-  console.log(open)
+  const datesPopoverOpen = Boolean(anchorEl)
 
   let lowestProposal = getLowestCompare(proposals)
   let avgRoomCost: string | undefined =
@@ -167,10 +184,6 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           lowestProposal.currency
         )
       : undefined
-  console.log(
-    proposals[0],
-    proposals[0] && proposals[0].dates.split(/\r?\n/).length
-  )
   return (
     <Paper elevation={0} className={classes.card}>
       <div className={classes.imgAndBodyContainer}>
@@ -186,13 +199,8 @@ export default function ProposalListRow(props: ProposalListRowProps) {
               {DestinationUtils.getLocationName(destination, true, hotel)}
             </AppTypography>
             <AppTypography variant="h4">{hotel.name}</AppTypography>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "row",
-                alignItems: "center",
-              }}>
-              <AppTypography variant="h5" style={{fontSize: "0.9rem"}}>
+            <div className={classes.proposalsDatesContainer}>
+              <AppTypography variant="h5" className={classes.datesText}>
                 {proposals && proposals[0] !== undefined && proposals[0]?.dates
                   ? proposals[0].dates.split(/\r?\n/)[0]
                   : ""}
@@ -201,7 +209,9 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                 (proposals[0] &&
                   proposals[0].dates.split(/\r?\n/).length > 1)) && (
                 <Typography
-                  aria-owns={open ? "mouse-over-popover" : undefined}
+                  aria-owns={
+                    datesPopoverOpen ? "mouse-over-popover" : undefined
+                  }
                   aria-haspopup="true"
                   onMouseEnter={handlePopoverOpen}
                   onMouseLeave={handlePopoverClose}>
@@ -213,8 +223,9 @@ export default function ProposalListRow(props: ProposalListRowProps) {
               )}
               <Popover
                 id="mouse-over-popover"
-                open={open}
+                open={datesPopoverOpen}
                 anchorEl={anchorEl}
+                className={classes.popover}
                 anchorOrigin={{
                   vertical: "bottom",
                   horizontal: "left",
@@ -223,17 +234,11 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                   vertical: "top",
                   horizontal: "left",
                 }}>
-                <div
-                  style={{
-                    padding: theme.spacing(2),
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: theme.spacing(2),
-                  }}>
+                <div className={classes.popoverInnerDiv}>
                   {proposals.map((proposal) => {
                     if (proposal.dates.trim()) {
                       return (
-                        <li style={{whiteSpace: "pre"}}>{proposal.dates}</li>
+                        <li className={classes.popoverLi}>{proposal.dates}</li>
                       )
                     }
                   })}
