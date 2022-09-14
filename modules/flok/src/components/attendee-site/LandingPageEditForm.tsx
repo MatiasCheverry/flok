@@ -1,9 +1,20 @@
-import {Button} from "@material-ui/core"
-import {useDispatch} from "react-redux"
+import {Box} from "@material-ui/core"
 import NotFound404Page from "../../pages/misc/NotFound404Page"
-import {postBlock} from "../../store/actions/retreat"
 import {useAttendeeLandingPage} from "../../utils/retreatUtils"
-import WYSIWYGBlockEditor from "./WYSIWYGBlockEditor"
+import {AddNewBlockButton, BlockEditor} from "./blocks/Blocks"
+
+import {makeStyles} from "@material-ui/core"
+
+let useStyles = makeStyles((theme) => ({
+  blocks: {
+    marginLeft: "auto",
+    marginRight: "auto",
+    maxWidth: 800,
+    "& > *:not(:first-child)": {
+      marginTop: theme.spacing(2),
+    },
+  },
+}))
 
 type LandingPageEditFormProps = {
   pageId: number
@@ -12,32 +23,20 @@ type LandingPageEditFormProps = {
 
 function LandingPageEditForm(props: LandingPageEditFormProps) {
   let page = useAttendeeLandingPage(props.pageId)
-  let dispatch = useDispatch()
+  let classes = useStyles()
 
   if (!page) {
     return <NotFound404Page />
   }
 
   return (
-    <div>
-      {!page.block_ids.length && (
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={() =>
-            dispatch(
-              postBlock({
-                page_id: props.pageId,
-                type: "WYSIWYG",
-              })
-            )
-          }>
-          Add Block
-        </Button>
-      )}
+    <div className={classes.blocks}>
       {page.block_ids.map((blockId) => {
-        return <WYSIWYGBlockEditor blockId={blockId} config={props.config} />
+        return <BlockEditor blockId={blockId} />
       })}
+      <Box display="flex" justifyContent="center">
+        <AddNewBlockButton pageId={props.pageId} />
+      </Box>
     </div>
   )
 }

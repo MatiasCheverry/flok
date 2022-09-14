@@ -510,6 +510,22 @@ export function postBlock(values: Partial<AttendeeLandingWebsiteBlockModel>) {
   })
 }
 
+export const DELETE_BLOCK_REQUEST = "DELETE_BLOCK_REQUEST"
+export const DELETE_BLOCK_SUCCESS = "DELETE_BLOCK_SUCCESS"
+export const DELETE_BLOCK_FAILURE = "DELETE_BLOCK_FAILURE"
+export function deleteBlock(blockId: number) {
+  let endpoint = `/v1.0/website-page-blocks/${blockId}`
+  return createApiAction({
+    method: "DELETE",
+    endpoint,
+    types: [
+      {type: DELETE_BLOCK_REQUEST},
+      {type: DELETE_BLOCK_SUCCESS},
+      {type: DELETE_BLOCK_FAILURE},
+    ],
+  })
+}
+
 export const POST_PAGE_REQUEST = "POST_PAGE_REQUEST"
 export const POST_PAGE_SUCCESS = "POST_PAGE_SUCCESS"
 export const POST_PAGE_FAILURE = "POST_PAGE_FAILURE"

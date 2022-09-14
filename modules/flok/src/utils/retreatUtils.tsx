@@ -114,13 +114,19 @@ export function useAttendeeLandingPageBlock(blockId: number) {
   let block = useSelector((state: RootState) => {
     return state.retreat.blocks[blockId]
   })
+  let [loading, setLoading] = useState(!block)
   useEffect(() => {
+    async function loadBlock() {
+      setLoading(false)
+      await dispatch(getBlock(blockId))
+      setLoading(true)
+    }
     if (!block) {
-      dispatch(getBlock(blockId))
+      loadBlock()
     }
   }, [block, dispatch, blockId])
 
-  return block
+  return [block, loading] as const
 }
 
 export function useAttendeeLandingPageName(

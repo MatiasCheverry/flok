@@ -1,4 +1,4 @@
-import {Box, Button, makeStyles, TextField} from "@material-ui/core"
+import {Button, makeStyles, TextField} from "@material-ui/core"
 import {push} from "connected-react-router"
 import {useFormik} from "formik"
 import _ from "lodash"
@@ -65,7 +65,7 @@ function EditPageForm(props: EditPageFormProps) {
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <Box className={classes.body}>
+      <div className={classes.body}>
         <TextField
           required
           value={formik.values.title}
@@ -87,7 +87,7 @@ function EditPageForm(props: EditPageFormProps) {
             Save
           </Button>
         )}
-      </Box>
+      </div>
     </form>
   )
 }

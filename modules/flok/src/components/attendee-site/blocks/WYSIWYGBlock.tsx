@@ -1,4 +1,6 @@
-import {Button, makeStyles} from "@material-ui/core"
+import {Button, makeStyles, Tooltip} from "@material-ui/core"
+import {Save} from "@material-ui/icons"
+import clsx from "clsx"
 import {
   convertFromRaw,
   convertToRaw,
@@ -10,37 +12,36 @@ import _ from "lodash"
 import {useEffect} from "react"
 import {Editor} from "react-draft-wysiwyg"
 import {useDispatch} from "react-redux"
-import {patchBlock} from "../../store/actions/retreat"
-import {useAttendeeLandingPageBlock} from "../../utils/retreatUtils"
-import BeforeUnload from "../base/BeforeUnload"
+import {
+  AttendeeLandingWebsiteBlockModel,
+  WYSIWYGBlockContentModel,
+} from "../../../models/retreat"
+import {patchBlock} from "../../../store/actions/retreat"
+import BeforeUnload from "../../base/BeforeUnload"
 
 let useStyles = makeStyles((theme) => ({
   wrapper: {
-    marginLeft: theme.spacing(2),
-    marginRight: theme.spacing(2),
-    marginBottom: theme.spacing(2),
     display: "flex",
     justifyContent: "center",
   },
   toolbar: {
     display: "flex",
     position: "absolute",
+    marginLeft: "auto",
+    marginRight: "auto",
     zIndex: 1000,
     paddingLeft: theme.spacing(2),
     paddingRight: theme.spacing(2),
     borderRadius: 20,
     marginTop: -30,
-    [theme.breakpoints.down("sm")]: {
-      marginTop: -20,
-    },
+    [theme.breakpoints.down("sm")]: {},
     maxWidth: "70%",
     boxShadow: theme.shadows[2],
   },
   editor: {
     boxShadow: theme.shadows[1],
-
     autofocus: "true",
-    width: "90%",
+    width: "100%",
     padding: theme.spacing(1),
     borderRadius: theme.shape.borderRadius,
     [theme.breakpoints.down("sm")]: {
@@ -65,25 +66,23 @@ let useStyles = makeStyles((theme) => ({
   },
 }))
 type WYSIWYGBlockEditorProps = {
-  blockId: number
-  config: boolean
+  block: AttendeeLandingWebsiteBlockModel
 }
 
 function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   let dispatch = useDispatch()
-  let block = useAttendeeLandingPageBlock(props.blockId)
   let formik = useFormik({
     initialValues: {
-      content: block?.content
+      content: props.block.content
         ? EditorState.createWithContent(
-            convertFromRaw(block.content as unknown as RawDraftContentState)
+            convertFromRaw((props.block.content as WYSIWYGBlockContentModel)!)
           )
         : EditorState.createEmpty(),
       type: "WYSIWYG",
     },
     onSubmit: (values) => {
       dispatch(
-        patchBlock(props.blockId, {
+        patchBlock(props.block.id, {
           content: convertToRaw(values.content.getCurrentContent()),
         })
       )
@@ -93,15 +92,17 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   useEffect(() => {
     resetForm({
       values: {
-        content: block?.content
+        content: props.block.content
           ? EditorState.createWithContent(
-              convertFromRaw(block.content as unknown as RawDraftContentState)
+              convertFromRaw(
+                props.block.content as unknown as RawDraftContentState
+              )
             )
           : EditorState.createEmpty(),
         type: "WYSIWYG",
       },
     })
-  }, [block, resetForm])
+  }, [props.block, resetForm])
   let classes = useStyles(formik)
   return (
     <div>
@@ -110,7 +111,7 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
           !_.isEqual(
             convertToRaw(formik.values.content.getCurrentContent()),
             convertToRaw(formik.initialValues.content.getCurrentContent())
-          ) && !props.config
+          )
         }
         message="Are you sure you wish to leave without saving your changes?"
       />
@@ -125,6 +126,14 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
           stripPastedStyles={true}
           toolbarOnFocus
           placeholder="Start typing here to create your page"
+          toolbarCustomButtons={[
+            <SaveOption
+              disabled={_.isEqual(
+                convertToRaw(formik.values.content.getCurrentContent()),
+                convertToRaw(formik.initialValues.content.getCurrentContent())
+              )}
+            />,
+          ]}
           toolbar={{
             options: [
               "blockType",
@@ -200,3 +209,29 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
   )
 }
 export default WYSIWYGBlockEditor
+
+let useSaveOptionStyles = makeStyles(() => ({
+  disabled: {
+    cursor: "not-allowed",
+    color: "grey",
+  },
+}))
+
+function SaveOption(props: {disabled?: boolean}) {
+  let classes = useSaveOptionStyles()
+  return (
+    <Tooltip title={props.disabled ? "No changes to save" : "Save changes"}>
+      <div>
+        <button
+          type="submit"
+          disabled={props.disabled}
+          className={clsx(
+            "rdw-option-wrapper",
+            props.disabled ? classes.disabled : undefined
+          )}>
+          <Save fontSize="small" color="primary" />
+        </button>
+      </div>
+    </Tooltip>
+  )
+}

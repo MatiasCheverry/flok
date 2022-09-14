@@ -1,3 +1,4 @@
+import {RawDraftContentState} from "draft-js"
 import {ImageModel} from "."
 import config from "../config"
 
@@ -207,12 +208,33 @@ export type AttendeeLandingWebsitePageModel = {
   block_ids: number[]
 }
 
+export enum FormBlockTypeEnum {
+  WYSIWYG = "WYSIWYG",
+  ACCORDION = "ACCORDION",
+}
+export const FormBlockTypeName = {
+  [FormBlockTypeEnum.WYSIWYG]: "Text section",
+  [FormBlockTypeEnum.ACCORDION]: "Accordion section",
+}
+export type FormBlockType = `${FormBlockTypeEnum}`
+export const FormBlockTypeValues: FormBlockType[] =
+  Object.values(FormBlockTypeEnum)
+
 export type AttendeeLandingWebsiteBlockModel = {
-  content: any
-  type: "WYSIWYG" | "img"
+  content: WYSIWYGBlockContentModel | AccordionBlockContentModel
+  type: FormBlockType
   page_id: number
   id: number
 }
+
+export type WYSIWYGBlockContentModel = RawDraftContentState | null
+
+export type AccordionBlockContentModel = {
+  items: {
+    header: string
+    body: RawDraftContentState
+  }[]
+} | null
 
 export type AttendeeLandingWebsiteModel = {
   banner_image?: ImageModel

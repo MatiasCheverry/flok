@@ -5,7 +5,6 @@ import {useDispatch, useSelector} from "react-redux"
 import {useRouteMatch} from "react-router-dom"
 import {ResourceNotFound} from "../../models"
 import {SampleLockedAttendees} from "../../models/retreat"
-import {WYSIWYGBlockRenderer} from "../../pages/attendee-site/AttendeeSitePage"
 import LoadingPage from "../../pages/misc/LoadingPage"
 import NotFound404Page from "../../pages/misc/NotFound404Page"
 import {AppRoutes} from "../../Stack"
@@ -26,6 +25,7 @@ import PageBody from "../page/PageBody"
 import PageContainer from "../page/PageContainer"
 import AttendeeFlightsDataGrid from "./AttendeeFlightsDataGrid"
 import AttendeeSiteFooter from "./AttendeeSiteFooter"
+import {BlockRenderer} from "./blocks/Blocks"
 import RetreatWebsiteHeader from "./RetreatWebsiteHeader"
 
 let useStyles = makeStyles((theme) => ({
@@ -256,8 +256,10 @@ export default function AttendeeSiteFlightsPage() {
           )}
           <AppTabPanel show={tabValue === "instructions"}>
             <div className={classes.overallPage}>
-              {page?.block_ids[0] ? (
-                <WYSIWYGBlockRenderer blockId={page.block_ids[0]} />
+              {page?.block_ids ? (
+                page.block_ids.map((blockId) => (
+                  <BlockRenderer blockId={blockId} />
+                ))
               ) : (
                 <div>
                   Your flight booking instructions will be rendered here once
