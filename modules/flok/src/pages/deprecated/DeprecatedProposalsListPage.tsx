@@ -331,6 +331,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                           return (
                             destination && (
                               <ProposalListRow
+                                topPick={selectedHotel.is_top_pick}
                                 hotelsToCompare={hotelsToCompare}
                                 updateHotelsToCompare={(
                                   guid: string,
@@ -384,6 +385,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                     return (
                       destination && (
                         <ProposalListRow
+                          topPick={selectedHotel.is_top_pick}
                           hotelsToCompare={hotelsToCompare}
                           updateHotelsToCompare={(
                             guid: string,
@@ -428,6 +430,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                         let proposals = selectedHotel.hotel_proposals || []
                         return (
                           <ProposalListRow
+                            topPick={selectedHotel.is_top_pick}
                             hotelsToCompare={hotelsToCompare}
                             updateHotelsToCompare={(
                               guid: string,
@@ -471,6 +474,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                 let destination = destinations[hotel.destination_id]
                 return destination ? (
                   <ProposalListRow
+                    topPick={selectedHotel.is_top_pick}
                     unavailable
                     hotel={hotel}
                     proposals={[]}

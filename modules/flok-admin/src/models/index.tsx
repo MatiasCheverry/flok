@@ -123,6 +123,7 @@ export type AdminSelectedHotelProposalModel = {
   hotel_proposals?: AdminLodgingProposalModel[]
   rfp_id?: number
   group_id?: number
+  is_top_pick: boolean
 }
 
 export type AdminLodgingProposalModel = {

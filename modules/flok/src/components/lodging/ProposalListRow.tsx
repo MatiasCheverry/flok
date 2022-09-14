@@ -108,6 +108,9 @@ let useStyles = makeStyles((theme) => ({
     height: 50,
     width: 50,
   },
+  topPickChip: {
+    backgroundColor: "#800080",
+  },
   proposalsDatesContainer: {
     display: "flex",
     flexDirection: "row",
@@ -142,6 +145,7 @@ type ProposalListRowProps = {
   hotelsToCompare?: {
     [guid: string]: boolean
   }
+  topPick: boolean
   updateHotelsToCompare?: (guid: string, value: boolean) => void
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
@@ -310,6 +314,20 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                     label={
                       <div>
                         All inclusive <Info fontSize="inherit" />
+                      </div>
+                    }
+                  />
+                </Tooltip>
+              )}
+              {props.topPick && (
+                <Tooltip title="Flok recommends this proposal">
+                  <Chip
+                    size="small"
+                    color="primary"
+                    className={classes.topPickChip}
+                    label={
+                      <div>
+                        Top Pick <Info fontSize="inherit" />
                       </div>
                     }
                   />

@@ -4,7 +4,9 @@ import {
   AccordionSummary,
   Box,
   Button,
+  Checkbox,
   Chip,
+  FormControlLabel,
   Link,
   makeStyles,
   Modal,
@@ -200,6 +202,25 @@ function HotelAccordionItem(props: {
               )}
             </Box>
           </form>
+          <FormControlLabel
+            control={
+              <Checkbox
+                color="primary"
+                checked={props.selectedHotel.is_top_pick}
+                id="is_pareto_task_complete"
+                onChange={(e, checked) => {
+                  dispatch(
+                    putSelectedHotel(
+                      props.selectedHotel.retreat_id,
+                      props.selectedHotel.hotel_id,
+                      {is_top_pick: checked}
+                    )
+                  )
+                }}
+              />
+            }
+            label="Is Flok Top Pick?"
+          />
           <Box display="flex" alignItems="center">
             <AppTypography variant="h3" fontWeight="bold">
               Proposals (

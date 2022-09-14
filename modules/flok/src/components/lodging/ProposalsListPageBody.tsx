@@ -330,6 +330,7 @@ export default function ProposalsListPageBody(
                       return (
                         destination && (
                           <ProposalListRow
+                            topPick={selectedHotel.is_top_pick}
                             hotelsToCompare={hotelsToCompare}
                             updateHotelsToCompare={(
                               guid: string,
@@ -382,6 +383,7 @@ export default function ProposalsListPageBody(
                 return (
                   destination && (
                     <ProposalListRow
+                      topPick={selectedHotel.is_top_pick}
                       hotelsToCompare={hotelsToCompare}
                       updateHotelsToCompare={(guid: string, value: boolean) => {
                         setHotelsToCompare((hotelsToCompare) => {
@@ -423,6 +425,7 @@ export default function ProposalsListPageBody(
                     let proposals = selectedHotel.hotel_proposals || []
                     return (
                       <ProposalListRow
+                        topPick={selectedHotel.is_top_pick}
                         hotelsToCompare={hotelsToCompare}
                         updateHotelsToCompare={(
                           guid: string,
@@ -465,6 +468,7 @@ export default function ProposalsListPageBody(
             let destination = destinations[hotel.destination_id]
             return destination ? (
               <ProposalListRow
+                topPick={selectedHotel.is_top_pick}
                 comparing={comparing}
                 unavailable
                 hotel={hotel}

@@ -52,6 +52,7 @@ export type RetreatSelectedHotelProposal = {
   hotel_proposals?: HotelLodgingProposal[]
   created_by: "USER" | "ADMIN"
   group_id?: number
+  is_top_pick: boolean
 }
 
 export type PresetImageModel = {
