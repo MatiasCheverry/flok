@@ -42,6 +42,7 @@ export type HotelLodgingProposal = {
   avg_dinner_price: string
   cost_saving_notes: string
   additional_links: HotelLodgingProposalLink[]
+  final_concessions?: string
 }
 
 export type RetreatSelectedHotelProposal = {

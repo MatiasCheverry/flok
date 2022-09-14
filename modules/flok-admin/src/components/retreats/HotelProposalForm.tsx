@@ -12,7 +12,6 @@ import {Add, Remove} from "@material-ui/icons"
 import clsx from "clsx"
 import {FormikErrors, useFormik} from "formik"
 import _ from "lodash"
-import React from "react"
 import NumberFormat from "react-number-format"
 import * as yup from "yup"
 import {
@@ -172,6 +171,18 @@ export default function HotelProposalForm(props: HotelProposalFormProps) {
           <option value={"USD"}>USD</option>
           <option value={"EUR"}>EUR</option>
         </TextField>
+      </Paper>
+      <Paper elevation={0} className={classes.formGroup}>
+        <AppTypography variant="h4">Final Concessions</AppTypography>
+        <TextField
+          {...textFieldProps}
+          id="final_concessions"
+          label="Rates"
+          multiline
+          value={formik.values.final_concessions ?? ""}
+          disabled={props.isProposalTemplate}
+          minRows={5}
+        />
       </Paper>
       <Paper elevation={0} className={classes.formGroup}>
         <AppTypography variant="h4">Guest rooms</AppTypography>

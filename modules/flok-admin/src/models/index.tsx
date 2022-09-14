@@ -155,6 +155,7 @@ export type AdminLodgingProposalModel = {
     link_text: string
     affinity: "GUESTROOMS" | "MEETING_ROOMS" | "FOOD_BEV" | null
   }[]
+  final_concessions: string | null
 }
 
 export type AdminLodgingProposalUpdateModel = Partial<
