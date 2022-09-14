@@ -326,6 +326,7 @@ export default function ProposalsListPageBody(
                   let destination = destinations[hotel.destination_id]
                   return (
                     <ProposalListRow
+                      retreatId={retreat.id}
                       hotelsToCompare={hotelsToCompare}
                       updateHotelsToCompare={(guid: string, value: boolean) => {
                         setHotelsToCompare((hotelsToCompare) => {
@@ -375,6 +376,7 @@ export default function ProposalsListPageBody(
                       return (
                         destination && (
                           <ProposalListRow
+                            retreatId={retreat.id}
                             isLiked={selectedHotel.is_liked ?? false}
                             topPick={selectedHotel.is_top_pick}
                             hotelsToCompare={hotelsToCompare}
@@ -429,6 +431,7 @@ export default function ProposalsListPageBody(
                 return (
                   destination && (
                     <ProposalListRow
+                      retreatId={retreat.id}
                       isLiked={selectedHotel.is_liked ?? false}
                       topPick={selectedHotel.is_top_pick}
                       hotelsToCompare={hotelsToCompare}
@@ -472,6 +475,7 @@ export default function ProposalsListPageBody(
                     let proposals = selectedHotel.hotel_proposals || []
                     return (
                       <ProposalListRow
+                        retreatId={retreat.id}
                         isLiked={selectedHotel.is_liked ?? false}
                         topPick={selectedHotel.is_top_pick}
                         hotelsToCompare={hotelsToCompare}
@@ -516,6 +520,7 @@ export default function ProposalsListPageBody(
             let destination = destinations[hotel.destination_id]
             return destination ? (
               <ProposalListRow
+                retreatId={retreat.id}
                 isLiked={selectedHotel.is_liked ?? false}
                 topPick={selectedHotel.is_top_pick}
                 comparing={comparing}

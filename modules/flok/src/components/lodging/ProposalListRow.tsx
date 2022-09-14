@@ -14,7 +14,6 @@ import {useDispatch} from "react-redux"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
 import {HotelLodgingProposal} from "../../models/retreat"
-import {useRetreat} from "../../pages/misc/RetreatProvider"
 import {patchSelectedHotel} from "../../store/actions/retreat"
 import {formatCurrency} from "../../utils"
 import {DestinationUtils, HotelUtils} from "../../utils/lodgingUtils"
@@ -117,7 +116,7 @@ let useStyles = makeStyles((theme) => ({
   },
   nameContainer: {
     display: "flex",
-    alignItems: "center",
+    flexDirection: "column",
   },
   topPickChip: {
     backgroundColor: "#800080",
@@ -142,6 +141,11 @@ let useStyles = makeStyles((theme) => ({
   popoverLi: {
     whiteSpace: "pre",
   },
+  nameAndHeartContainer: {
+    display: "flex",
+    alignItems: "center",
+    flexDirection: "row",
+  },
 }))
 
 type ProposalListRowProps = {
@@ -157,6 +161,7 @@ type ProposalListRowProps = {
   hotelsToCompare?: {
     [guid: string]: boolean
   }
+  retreatId?: number
   topPick: boolean
   updateHotelsToCompare?: (guid: string, value: boolean) => void
 }
@@ -166,7 +171,6 @@ export default function ProposalListRow(props: ProposalListRowProps) {
   let {hotel, proposals, destination, openInTab, proposalUrl, unavailable} = {
     ...props,
   }
-  let [retreat] = useRetreat()
 
   function getLowestCompare(vals: HotelLodgingProposal[]) {
     if (vals.length > 0) {
@@ -218,30 +222,38 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                 DestinationUtils.getLocationName(destination, true, hotel)}
             </AppTypography>
             <div className={classes.nameContainer}>
-              <AppTypography variant="h4">{hotel.name}</AppTypography>
-              &nbsp;
-              {props.isLiked ? (
-                <Favorite
-                  className={classes.heart}
-                  onClick={() => {
-                    dispatch(
-                      patchSelectedHotel(retreat.id, hotel.id, {
-                        is_liked: false,
-                      })
-                    )
-                  }}
-                />
-              ) : (
-                <FavoriteBorder
-                  className={classes.heart}
-                  onClick={() => {
-                    dispatch(
-                      patchSelectedHotel(retreat.id, hotel.id, {is_liked: true})
-                    )
-                  }}
-                />
-              )}
-              <AppTypography variant="h4">{hotel.name}</AppTypography>
+              <div className={classes.nameAndHeartContainer}>
+                <AppTypography variant="h4">{hotel.name}</AppTypography>
+                &nbsp;
+                {props.retreatId &&
+                  (props.isLiked ? (
+                    <Favorite
+                      className={classes.heart}
+                      onClick={() => {
+                        if (props.retreatId) {
+                          dispatch(
+                            patchSelectedHotel(props.retreatId, hotel.id, {
+                              is_liked: false,
+                            })
+                          )
+                        }
+                      }}
+                    />
+                  ) : (
+                    <FavoriteBorder
+                      className={classes.heart}
+                      onClick={() => {
+                        if (props.retreatId) {
+                          dispatch(
+                            patchSelectedHotel(props.retreatId, hotel.id, {
+                              is_liked: true,
+                            })
+                          )
+                        }
+                      }}
+                    />
+                  ))}
+              </div>
               <div className={classes.proposalsDatesContainer}>
                 <AppTypography variant="h5" className={classes.datesText}>
                   {proposals &&
