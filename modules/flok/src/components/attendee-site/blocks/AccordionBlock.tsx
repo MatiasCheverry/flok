@@ -16,6 +16,7 @@ import {
 import draftToHtml from "draftjs-to-html"
 import {useFormik} from "formik"
 import _ from "lodash"
+import {useEffect} from "react"
 import {Editor} from "react-draft-wysiwyg"
 import {useDispatch} from "react-redux"
 import {
@@ -89,7 +90,6 @@ export function AccordionBlockEditor(props: AccordionBlockEditorProps) {
         patchBlock(props.block.id, {content: convertFormikToRaw(values)})
       )
     },
-    enableReinitialize: true,
   })
 
   // TODO fix this "any"
@@ -118,6 +118,15 @@ export function AccordionBlockEditor(props: AccordionBlockEditorProps) {
       }
     }
   }
+
+  let {resetForm} = formik
+  useEffect(() => {
+    resetForm({
+      values: convertContentFromRaw(
+        props.block.content as AccordionBlockContentModel
+      ),
+    })
+  }, [props.block.content, resetForm])
 
   return (
     <form className={classes.root} onSubmit={formik.handleSubmit}>
@@ -153,6 +162,7 @@ export function AccordionBlockEditor(props: AccordionBlockEditorProps) {
                     "list",
                     "textAlign",
                     "colorPicker",
+                    "link",
                   ],
                   inline: {
                     inDropdown: true,
