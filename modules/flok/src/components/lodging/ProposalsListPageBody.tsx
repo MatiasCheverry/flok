@@ -336,6 +336,7 @@ export default function ProposalsListPageBody(
                       hotel={hotel}
                       destination={destination}
                       isLiked={selectedHotel.is_liked ?? false}
+                      topPick={selectedHotel.is_top_pick}
                       proposals={proposals}
                       proposalUrl={AppRoutes.getPath(
                         "RetreatLodgingProposalPage"
@@ -375,6 +376,7 @@ export default function ProposalsListPageBody(
                         destination && (
                           <ProposalListRow
                             isLiked={selectedHotel.is_liked ?? false}
+                            topPick={selectedHotel.is_top_pick}
                             hotelsToCompare={hotelsToCompare}
                             updateHotelsToCompare={(
                               guid: string,
@@ -428,6 +430,7 @@ export default function ProposalsListPageBody(
                   destination && (
                     <ProposalListRow
                       isLiked={selectedHotel.is_liked ?? false}
+                      topPick={selectedHotel.is_top_pick}
                       hotelsToCompare={hotelsToCompare}
                       updateHotelsToCompare={(guid: string, value: boolean) => {
                         setHotelsToCompare((hotelsToCompare) => {
@@ -470,6 +473,7 @@ export default function ProposalsListPageBody(
                     return (
                       <ProposalListRow
                         isLiked={selectedHotel.is_liked ?? false}
+                        topPick={selectedHotel.is_top_pick}
                         hotelsToCompare={hotelsToCompare}
                         updateHotelsToCompare={(
                           guid: string,
@@ -513,6 +517,7 @@ export default function ProposalsListPageBody(
             return destination ? (
               <ProposalListRow
                 isLiked={selectedHotel.is_liked ?? false}
+                topPick={selectedHotel.is_top_pick}
                 comparing={comparing}
                 unavailable
                 hotel={hotel}

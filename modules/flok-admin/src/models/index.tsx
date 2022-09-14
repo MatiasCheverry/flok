@@ -124,6 +124,7 @@ export type AdminSelectedHotelProposalModel = {
   is_liked?: boolean
   rfp_id?: number
   group_id?: number
+  is_top_pick: boolean
 }
 
 export type AdminLodgingProposalModel = {
@@ -156,6 +157,7 @@ export type AdminLodgingProposalModel = {
     link_text: string
     affinity: "GUESTROOMS" | "MEETING_ROOMS" | "FOOD_BEV" | null
   }[]
+  final_concessions: string | null
 }
 
 export type AdminLodgingProposalUpdateModel = Partial<

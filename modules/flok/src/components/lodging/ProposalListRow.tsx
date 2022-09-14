@@ -4,9 +4,12 @@ import {
   Chip,
   makeStyles,
   Paper,
+  Popover,
   Tooltip,
+  Typography,
 } from "@material-ui/core"
 import {Favorite, FavoriteBorder, Info} from "@material-ui/icons"
+import {useState} from "react"
 import {useDispatch} from "react-redux"
 import {Link as ReactRouterLink} from "react-router-dom"
 import {DestinationModel, HotelModel} from "../../models/lodging"
@@ -116,6 +119,29 @@ let useStyles = makeStyles((theme) => ({
     display: "flex",
     alignItems: "center",
   },
+  topPickChip: {
+    backgroundColor: "#800080",
+  },
+  proposalsDatesContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  datesText: {
+    fontSize: "0.9rem",
+  },
+  popover: {
+    pointerEvents: "none",
+  },
+  popoverInnerDiv: {
+    padding: theme.spacing(2),
+    display: "flex",
+    flexDirection: "column",
+    gap: theme.spacing(2),
+  },
+  popoverLi: {
+    whiteSpace: "pre",
+  },
 }))
 
 type ProposalListRowProps = {
@@ -131,6 +157,7 @@ type ProposalListRowProps = {
   hotelsToCompare?: {
     [guid: string]: boolean
   }
+  topPick: boolean
   updateHotelsToCompare?: (guid: string, value: boolean) => void
 }
 export default function ProposalListRow(props: ProposalListRowProps) {
@@ -147,6 +174,19 @@ export default function ProposalListRow(props: ProposalListRowProps) {
     }
   }
 
+  // For dates popover
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+
+  const handlePopoverOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget)
+  }
+
+  const handlePopoverClose = () => {
+    setAnchorEl(null)
+  }
+
+  const datesPopoverOpen = Boolean(anchorEl)
+
   let lowestProposal = getLowestCompare(proposals)
   let avgRoomCost: string | undefined =
     lowestProposal && lowestProposal.compare_room_rate
@@ -162,7 +202,6 @@ export default function ProposalListRow(props: ProposalListRowProps) {
           lowestProposal.currency
         )
       : undefined
-
   return (
     <Paper elevation={0} className={classes.card}>
       <div className={classes.imgAndBodyContainer}>
@@ -202,6 +241,57 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                   }}
                 />
               )}
+              <AppTypography variant="h4">{hotel.name}</AppTypography>
+              <div className={classes.proposalsDatesContainer}>
+                <AppTypography variant="h5" className={classes.datesText}>
+                  {proposals &&
+                  proposals[0] !== undefined &&
+                  proposals[0]?.dates
+                    ? proposals[0].dates.split(/\r?\n/)[0]
+                    : ""}
+                </AppTypography>
+                {(proposals.length > 1 ||
+                  (proposals[0] &&
+                    proposals[0].dates.split(/\r?\n/).length > 1)) && (
+                  <Typography
+                    aria-owns={
+                      datesPopoverOpen ? "mouse-over-popover" : undefined
+                    }
+                    aria-haspopup="true"
+                    onMouseEnter={handlePopoverOpen}
+                    onMouseLeave={handlePopoverClose}>
+                    <strong>
+                      &nbsp; +
+                      {proposals.length - 1 > 0 ? proposals.length - 1 : ""}
+                    </strong>
+                  </Typography>
+                )}
+                <Popover
+                  id="mouse-over-popover"
+                  open={datesPopoverOpen}
+                  anchorEl={anchorEl}
+                  className={classes.popover}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}>
+                  <div className={classes.popoverInnerDiv}>
+                    {proposals.map((proposal) => {
+                      if (proposal.dates.trim()) {
+                        return (
+                          <li className={classes.popoverLi}>
+                            {proposal.dates}
+                          </li>
+                        )
+                      }
+                    })}
+                  </div>
+                </Popover>
+              </div>
             </div>
           </div>
           {!unavailable && (
@@ -268,6 +358,20 @@ export default function ProposalListRow(props: ProposalListRowProps) {
                     label={
                       <div>
                         All inclusive <Info fontSize="inherit" />
+                      </div>
+                    }
+                  />
+                </Tooltip>
+              )}
+              {props.topPick && (
+                <Tooltip title="Flok recommends this proposal">
+                  <Chip
+                    size="small"
+                    color="primary"
+                    className={classes.topPickChip}
+                    label={
+                      <div>
+                        Top Pick <Info fontSize="inherit" />
                       </div>
                     }
                   />

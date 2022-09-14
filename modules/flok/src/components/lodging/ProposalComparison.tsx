@@ -5,6 +5,7 @@ import {RetreatModel} from "../../models/retreat"
 import AppTypography from "../base/AppTypography"
 import {
   AdditionalInfo,
+  FinalConcessions,
   FoodAndBeverage,
   GeneralInfo,
   MeetingSpace,
@@ -47,6 +48,20 @@ export default function ProposalComparision(props: {
   let [proposalsIndex, setProposalsIndex] = useState<{[index: number]: number}>(
     {}
   )
+  function showFinalConcessions(retreat: RetreatModel) {
+    let show = false
+    retreat.selected_hotels.forEach((hotel) => {
+      if (
+        props.hotels.map((pHotel) => pHotel.id).indexOf(hotel.hotel_id) !== -1
+      )
+        hotel.hotel_proposals?.forEach((proposal) => {
+          if (proposal.final_concessions) {
+            show = true
+          }
+        })
+    })
+    return show
+  }
   return (
     <table className={classes.table}>
       <tr className={classes.tr}>
@@ -95,6 +110,29 @@ export default function ProposalComparision(props: {
           )
         })}
       </tr>
+      {showFinalConcessions(retreat) && (
+        <tr className={classes.tr}>
+          {props.hotels.map((hotel, idx) => {
+            let proposals =
+              retreat.selected_hotels.find(
+                (selectedHotel) => selectedHotel.hotel_id === hotel.id
+              )?.hotel_proposals ?? []
+            return (
+              <td valign="top" className={classes.td}>
+                {hotel && (
+                  <FinalConcessions
+                    proposal={
+                      proposalsIndex[idx]
+                        ? proposals[proposalsIndex[idx]]
+                        : proposals[0]
+                    }
+                  />
+                )}
+              </td>
+            )
+          })}
+        </tr>
+      )}
       <tr className={classes.tr}>
         {props.hotels.map((hotel, idx) => {
           let proposals =

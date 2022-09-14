@@ -42,6 +42,7 @@ export type HotelLodgingProposal = {
   avg_dinner_price: string
   cost_saving_notes: string
   additional_links: HotelLodgingProposalLink[]
+  final_concessions?: string
 }
 
 export type RetreatSelectedHotelProposal = {
@@ -52,6 +53,7 @@ export type RetreatSelectedHotelProposal = {
   is_liked?: boolean
   created_by: "USER" | "ADMIN"
   group_id?: number
+  is_top_pick: boolean
 }
 
 export type PresetImageModel = {

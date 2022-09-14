@@ -332,6 +332,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                             destination && (
                               <ProposalListRow
                                 isLiked={selectedHotel.is_liked ?? false}
+                                topPick={selectedHotel.is_top_pick}
                                 hotelsToCompare={hotelsToCompare}
                                 updateHotelsToCompare={(
                                   guid: string,
@@ -386,6 +387,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                       destination && (
                         <ProposalListRow
                           isLiked={selectedHotel.is_liked ?? false}
+                          topPick={selectedHotel.is_top_pick}
                           hotelsToCompare={hotelsToCompare}
                           updateHotelsToCompare={(
                             guid: string,
@@ -431,6 +433,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                         return (
                           <ProposalListRow
                             isLiked={selectedHotel.is_liked ?? false}
+                            topPick={selectedHotel.is_top_pick}
                             hotelsToCompare={hotelsToCompare}
                             updateHotelsToCompare={(
                               guid: string,
@@ -475,6 +478,7 @@ function ProposalsListPage(props: ProposalsListPageProps) {
                 return destination ? (
                   <ProposalListRow
                     isLiked={selectedHotel.is_liked ?? false}
+                    topPick={selectedHotel.is_top_pick}
                     unavailable
                     hotel={hotel}
                     proposals={[]}

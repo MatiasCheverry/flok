@@ -112,6 +112,9 @@ let useStyles = makeStyles((theme) => ({
   endGroup: {
     width: "100%",
   },
+  finalConcessions: {
+    whiteSpace: "pre",
+  },
 }))
 
 export function GeneralInfo(props: {
@@ -182,6 +185,25 @@ export function GeneralInfo(props: {
         </div>
       )}
     </Paper>
+  )
+}
+
+export function FinalConcessions(props: {proposal: HotelLodgingProposal}) {
+  let classes = useStyles()
+  let {proposal} = props
+
+  return proposal.final_concessions ? (
+    <Paper className={classes.detailsSection}>
+      <AppTypography variant="h3" fontWeight="bold">
+        Final Concessions
+      </AppTypography>
+
+      <AppTypography variant="body1" className={classes.finalConcessions}>
+        {proposal.final_concessions}
+      </AppTypography>
+    </Paper>
+  ) : (
+    <></>
   )
 }
 export function RoomRates(props: {proposal: HotelLodgingProposal}) {
@@ -506,6 +528,9 @@ export function Proposal(props: {
           retreat={retreat}
           updateProposalIndex={props.updateProposalIndex}
         />
+      </div>
+      <div className={classes.proposalGroup}>
+        <FinalConcessions proposal={proposal} />
       </div>
       <div className={classes.proposalGroup}>
         <RoomRates proposal={proposal} />
