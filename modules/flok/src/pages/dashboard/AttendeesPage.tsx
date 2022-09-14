@@ -77,7 +77,6 @@ function datetimeFormat(date: Date | undefined) {
   let dateFormatter = Intl.DateTimeFormat("en-US", {
     dateStyle: "short",
     timeStyle: "short",
-    timeZone: "UTC",
   })
   return dateFormatter.format(date)
 }
