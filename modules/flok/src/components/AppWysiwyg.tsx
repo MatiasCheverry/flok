@@ -1,10 +1,12 @@
-import {makeStyles} from "@material-ui/core"
+// @ts-nocheck
+import {makeStyles, Tooltip} from "@material-ui/core"
+import {Save} from "@material-ui/icons"
+import clsx from "clsx"
 import {convertFromRaw, EditorState, RawDraftContentState} from "draft-js"
 import draftToHtml from "draftjs-to-html"
 import {useEffect, useState} from "react"
 import {Editor} from "react-draft-wysiwyg"
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
-import {SaveOption} from "./attendee-site/block/WYSIWYGBlock"
 
 let useEditorStyles = makeStyles((theme) => ({
   wrapper: {
@@ -22,8 +24,15 @@ let useEditorStyles = makeStyles((theme) => ({
     zIndex: 1000,
     backgroundColor: theme.palette.grey[200],
     boxShadow: theme.shadows[1],
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "fit-content",
+    height: "fit-content",
+    marginBottom: "auto",
+    marginLeft: "auto",
+    marginRight: "auto",
   },
 }))
 
@@ -64,8 +73,6 @@ export function AppWysiwygEditor(props: AppWysiwygEditorProps) {
     }
   }, [props.editorState, activeAnchorKey])
 
-  console.log(props.editorState.getSelection().getStartOffset())
-
   return (
     <Editor
       spellCheck
@@ -75,7 +82,7 @@ export function AppWysiwygEditor(props: AppWysiwygEditorProps) {
       wrapperClassName={classes.wrapper}
       editorClassName={classes.editor}
       toolbarClassName={classes.toolbar}
-      toolbarStyle={{top: offsetToolbar ? offsetToolbar : undefined}}
+      toolbarStyle={{...(offsetToolbar ? {top: offsetToolbar - 20} : {})}}
       toolbarOnFocus
       placeholder={props.placeholder || "Start typing here"}
       toolbarCustomButtons={[<SaveOption />]}
@@ -184,4 +191,30 @@ export function createEditorState(raw?: RawDraftContentState | null) {
     ? EditorState.createWithContent(convertFromRaw(raw))
     : EditorState.createEmpty()
   return EditorState.forceSelection(editorState, editorState.getSelection())
+}
+
+let useSaveOptionStyles = makeStyles(() => ({
+  disabled: {
+    cursor: "not-allowed",
+    color: "grey",
+  },
+}))
+
+function SaveOption(props: {disabled?: boolean}) {
+  let classes = useSaveOptionStyles()
+  return (
+    <Tooltip title={props.disabled ? "No changes to save" : "Save changes"}>
+      <div>
+        <button
+          type="submit"
+          disabled={props.disabled}
+          className={clsx(
+            "rdw-option-wrapper",
+            props.disabled ? classes.disabled : undefined
+          )}>
+          <Save fontSize="small" color="primary" />
+        </button>
+      </div>
+    </Tooltip>
+  )
 }

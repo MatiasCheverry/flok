@@ -1,6 +1,4 @@
-import {makeStyles, Paper, Tooltip} from "@material-ui/core"
-import {Save} from "@material-ui/icons"
-import clsx from "clsx"
+import {Paper} from "@material-ui/core"
 import {convertFromRaw, convertToRaw, EditorState} from "draft-js"
 import {useFormik} from "formik"
 import _ from "lodash"
@@ -18,9 +16,6 @@ import {
 } from "../../AppWysiwyg"
 import BeforeUnload from "../../base/BeforeUnload"
 
-let useStyles = makeStyles((theme) => ({
-  editorContainer: {},
-}))
 type WYSIWYGBlockEditorProps = {
   block: AttendeeLandingWebsiteBlockModel<WYSIWYGBlockContentModel>
 }
@@ -53,7 +48,6 @@ function WYSIWYGBlockEditor(props: WYSIWYGBlockEditorProps) {
       },
     })
   }, [props.block, resetForm])
-  let classes = useStyles(formik)
   return (
     <div>
       <BeforeUnload
@@ -93,31 +87,5 @@ export function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
     />
   ) : (
     <></>
-  )
-}
-
-let useSaveOptionStyles = makeStyles(() => ({
-  disabled: {
-    cursor: "not-allowed",
-    color: "grey",
-  },
-}))
-
-export function SaveOption(props: {disabled?: boolean}) {
-  let classes = useSaveOptionStyles()
-  return (
-    <Tooltip title={props.disabled ? "No changes to save" : "Save changes"}>
-      <div>
-        <button
-          type="submit"
-          disabled={props.disabled}
-          className={clsx(
-            "rdw-option-wrapper",
-            props.disabled ? classes.disabled : undefined
-          )}>
-          <Save fontSize="small" color="primary" />
-        </button>
-      </div>
-    </Tooltip>
   )
 }
