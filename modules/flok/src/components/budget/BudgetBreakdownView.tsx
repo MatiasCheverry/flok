@@ -271,7 +271,7 @@ export default function BudgetBreakdownView(props: {
               }
               cost={props.breakdown.meals
                 .map((obj) => obj.cost * obj.num)
-                .reduce((p, v) => p + v)}
+                .reduce((p, v) => p + v, 0)}
               subRows={props.breakdown.meals.map((obj) => ({
                 name: obj.name,
                 middle: `${currencyFormatter.format(obj.cost)} x ${obj.num}`,
@@ -289,7 +289,7 @@ export default function BudgetBreakdownView(props: {
               }
               cost={props.breakdown.misc
                 .map((obj) => obj.cost)
-                .reduce((p, v) => p + v)}
+                .reduce((p, v) => p + v, 0)}
               subRows={props.breakdown.misc.map((obj) => ({
                 name: obj.name,
                 end: currencyFormatter.format(obj.cost) + " per person",
