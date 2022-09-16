@@ -31,7 +31,7 @@ type PageWebsiteLinkProps = {
 function PageWebsiteLink(props: PageWebsiteLinkProps) {
   let classes = useStyles()
   let dispatch = useDispatch()
-  let page = useAttendeeLandingPage(props.pageId)
+  let [page, loadingPage] = useAttendeeLandingPage(props.pageId)
   return (
     <div className={classes.pageNav}>
       <Link

@@ -101,13 +101,19 @@ export function useAttendeeLandingPage(pageId: number) {
   let page = useSelector((state: RootState) => {
     return state.retreat.pages[pageId]
   })
+  let [loading, setLoading] = useState(!page)
   useEffect(() => {
+    async function loadPage() {
+      setLoading(true)
+      await dispatch(getPage(pageId))
+      setLoading(false)
+    }
     if (!page) {
-      dispatch(getPage(pageId))
+      loadPage()
     }
   }, [page, dispatch, pageId])
 
-  return page
+  return [page, loading] as const
 }
 export function useAttendeeLandingPageBlock(blockId: number) {
   let dispatch = useDispatch()
@@ -117,9 +123,9 @@ export function useAttendeeLandingPageBlock(blockId: number) {
   let [loading, setLoading] = useState(!block)
   useEffect(() => {
     async function loadBlock() {
-      setLoading(false)
-      await dispatch(getBlock(blockId))
       setLoading(true)
+      await dispatch(getBlock(blockId))
+      setLoading(false)
     }
     if (!block) {
       loadBlock()

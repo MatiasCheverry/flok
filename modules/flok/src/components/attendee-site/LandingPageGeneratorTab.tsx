@@ -23,7 +23,7 @@ type LandingPageGeneratorTabProps = {
 }
 
 function LandingPageGeneratorTab(props: LandingPageGeneratorTabProps) {
-  let page = useAttendeeLandingPage(props.pageId)
+  let [page, loadingPage] = useAttendeeLandingPage(props.pageId)
   let classes = useStyles()
 
   return (

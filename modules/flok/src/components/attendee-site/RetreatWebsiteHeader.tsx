@@ -357,7 +357,7 @@ type RetreatWebsiteHeaderLinkProps = {
 }
 function RetreatWebsiteHeaderLink(props: RetreatWebsiteHeaderLinkProps) {
   let classes = useLinkStyles()
-  let page = useAttendeeLandingPage(props.pageId)
+  let [page, loadingPage] = useAttendeeLandingPage(props.pageId)
 
   return (
     <Link

@@ -12,7 +12,7 @@ import {push} from "connected-react-router"
 import {useDispatch} from "react-redux"
 import {useRouteMatch} from "react-router-dom"
 import {FlightsGoLiveButton} from "../../components/attendee-site/GoLiveButtons"
-import LandingPageEditForm from "../../components/attendee-site/LandingPageEditForm"
+import SitePage from "../../components/attendee-site/page/SitePage"
 import AppHeaderWithSettings from "../../components/base/AppHeaderWithSettings"
 import AppMoreInfoIcon from "../../components/base/AppMoreInfoIcon"
 import PageBody from "../../components/page/PageBody"
@@ -192,10 +192,7 @@ export default function FlightsOptionsPage() {
           />
         </div>
         {retreat.flights_page_id ? (
-          <LandingPageEditForm
-            pageId={retreat.flights_page_id}
-            config={config}
-          />
+          <SitePage pageId={retreat.flights_page_id} editable />
         ) : (
           <div style={{display: "flex", alignItems: "center"}}>
             <Button

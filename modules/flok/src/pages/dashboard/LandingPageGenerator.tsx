@@ -21,8 +21,8 @@ import {
 import AddPageForm from "../../components/attendee-site/AddPageForm"
 import EditPageForm from "../../components/attendee-site/EditPageForm"
 import EditWebsiteForm from "../../components/attendee-site/EditWebsiteForm"
-import LandingPageEditForm from "../../components/attendee-site/LandingPageEditForm"
 import LandingPageGeneratorNavTool from "../../components/attendee-site/LandingPageGeneratorNavTool"
+import SitePage from "../../components/attendee-site/page/SitePage"
 import PageWebsiteLink from "../../components/attendee-site/PageWebsiteLink"
 import AppHeaderWithSettings from "../../components/base/AppHeaderWithSettings"
 import AppConfirmationModal from "../../components/base/ConfirmationModal"
@@ -122,7 +122,7 @@ export default function LandingPageGenerator() {
   const classes = useStyles()
   let dispatch = useDispatch()
   let website = useAttendeeLandingWebsite(retreat.attendees_website_id ?? -1)
-  let page = useAttendeeLandingPage(parseInt(currentPageId))
+  let [page, loadingPage] = useAttendeeLandingPage(parseInt(currentPageId))
 
   if (!website || !website.page_ids[0]) {
     return <CreateRetreatWebsite />
@@ -271,7 +271,7 @@ export default function LandingPageGenerator() {
             )}
           </div>
 
-          {page && <LandingPageEditForm pageId={page?.id} config={config} />}
+          {page && <SitePage pageId={page?.id} editable />}
         </div>
       </Box>
     </PageBody>
@@ -312,7 +312,7 @@ function EditPageToolBar(props: EditPageToolBarProps) {
   let classes = useEditPageStyles()
   let [retreat, retreatIdx] = useRetreat()
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
-  let page = useAttendeeLandingPage(pageId)
+  let [page, loadingPage] = useAttendeeLandingPage(pageId)
   let website = useAttendeeLandingWebsite(retreat.attendees_website_id ?? -1)
   async function handleDeletePage() {
     let deleteResult = (await dispatch(

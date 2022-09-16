@@ -220,8 +220,12 @@ export type FormBlockType = `${FormBlockTypeEnum}`
 export const FormBlockTypeValues: FormBlockType[] =
   Object.values(FormBlockTypeEnum)
 
-export type AttendeeLandingWebsiteBlockModel = {
-  content: WYSIWYGBlockContentModel | AccordionBlockContentModel
+export type AttendeeLandingWebsiteBlockModel<
+  T extends WYSIWYGBlockContentModel | AccordionBlockContentModel =
+    | WYSIWYGBlockContentModel
+    | AccordionBlockContentModel
+> = {
+  content: T
   type: FormBlockType
   page_id: number
   id: number

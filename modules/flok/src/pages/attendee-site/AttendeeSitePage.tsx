@@ -1,14 +1,11 @@
 import {makeStyles} from "@material-ui/core"
-import {RawDraftContentState} from "draft-js"
-import draftToHtml from "draftjs-to-html"
 import {useRouteMatch} from "react-router-dom"
 import AttendeeSiteFooter from "../../components/attendee-site/AttendeeSiteFooter"
-import {BlockRenderer} from "../../components/attendee-site/blocks/Blocks"
+import SitePage from "../../components/attendee-site/page/SitePage"
 import RetreatWebsiteHeader from "../../components/attendee-site/RetreatWebsiteHeader"
 import PageBody from "../../components/page/PageBody"
 import PageContainer from "../../components/page/PageContainer"
 import {ResourceNotFound} from "../../models"
-import {AttendeeLandingWebsiteBlockModel} from "../../models/retreat"
 import {AppRoutes} from "../../Stack"
 import {replaceDashes} from "../../utils"
 import {ImageUtils} from "../../utils/imageUtils"
@@ -89,41 +86,10 @@ export default function AttendeeSite() {
             alt="Banner"></img>
         )}
         <div className={classes.overallPage}>
-          {page?.block_ids.map((blockId) => (
-            <BlockRenderer blockId={blockId} />
-          ))}
+          <SitePage pageId={page.id} />
         </div>
         <AttendeeSiteFooter />
       </PageBody>
     </PageContainer>
-  )
-}
-
-let useBlockRendererStyles = makeStyles((theme) => ({
-  websiteBody: {
-    "& > *:not(:first-child)": {
-      margin: "1em 0",
-    },
-    "& > *:not(:first-child) > *:not(:first-child)": {
-      margin: "1em 0",
-    },
-  },
-}))
-
-type WYSIWYGBlockRendererProps = {
-  block: AttendeeLandingWebsiteBlockModel
-}
-export function WYSIWYGBlockRenderer(props: WYSIWYGBlockRendererProps) {
-  let classes = useBlockRendererStyles()
-  return props.block.content ? (
-    <div
-      dangerouslySetInnerHTML={{
-        __html: draftToHtml(
-          props.block.content as unknown as RawDraftContentState
-        ),
-      }}
-      className={classes.websiteBody}></div>
-  ) : (
-    <></>
   )
 }

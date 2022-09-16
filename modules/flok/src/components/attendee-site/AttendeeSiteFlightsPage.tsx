@@ -25,7 +25,7 @@ import PageBody from "../page/PageBody"
 import PageContainer from "../page/PageContainer"
 import AttendeeFlightsDataGrid from "./AttendeeFlightsDataGrid"
 import AttendeeSiteFooter from "./AttendeeSiteFooter"
-import {BlockRenderer} from "./blocks/Blocks"
+import {PageBlock} from "./block/PageBlock"
 import RetreatWebsiteHeader from "./RetreatWebsiteHeader"
 
 let useStyles = makeStyles((theme) => ({
@@ -84,7 +84,7 @@ export default function AttendeeSiteFlightsPage() {
   )
   let [tabQuery, setTabQuery] = useQuery("tab")
   let [tabValue, setTabValue] = useState<string | undefined>(undefined)
-  let page = useAttendeeLandingPage(
+  let [page, loadingPage] = useAttendeeLandingPage(
     retreat !== ResourceNotFound && retreat && retreat.flights_page_id
       ? retreat?.flights_page_id
       : -1
@@ -257,9 +257,7 @@ export default function AttendeeSiteFlightsPage() {
           <AppTabPanel show={tabValue === "instructions"}>
             <div className={classes.overallPage}>
               {page?.block_ids ? (
-                page.block_ids.map((blockId) => (
-                  <BlockRenderer blockId={blockId} />
-                ))
+                page.block_ids.map((blockId) => <PageBlock blockId={blockId} />)
               ) : (
                 <div>
                   Your flight booking instructions will be rendered here once
